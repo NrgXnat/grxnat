@@ -1,0 +1,138 @@
+def groupName = 'org.nrg'
+def artifactName = 'grxnat'
+def pluginVersion = '1.0-SNAPSHOT'
+
+group groupName
+version pluginVersion
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'io.spring.dependency-management'
+
+def vBom = '1.5'
+def vJackson = '2.8.2'
+def vJodaTime = '2.9.9'
+def vGroovy = '2.4.4'
+def vTestUtils = '1.1'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+            name 'XNAT Release Repository'
+        }
+        maven {
+            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
+            name 'XNAT Snapshot Repository'
+        }
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.nrg:test_dependencies:${vBom}"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+        name 'XNAT Release Repository'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
+        name 'XNAT Snapshot Repository'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/ext-release'
+        name 'XNAT External Release Repository'
+    }
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+    compile("org.codehaus.groovy:groovy-all:${vGroovy}")
+    compile('org.apache.commons:commons-lang3')
+    compile('commons-io:commons-io')
+    compile("com.fasterxml.jackson.core:jackson-annotations:${vJackson}")
+    compile("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    compile("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
+    compile("joda-time:joda-time:${vJodaTime}")
+    compile('org.reflections:reflections')
+    compile('com.jayway.restassured:rest-assured')
+    compile('org.slf4j:slf4j-log4j12')
+    compile("org.nrg:test_utils:${vTestUtils}")
+
+    testCompile 'org.testng:testng'
+}
+
+test {
+    useTestNG {}
+}
+
+publishing.publications {
+    mavenJava(MavenPublication) {
+        groupId groupName
+        artifactId artifactName
+        version pluginVersion
+
+        from components.java
+
+        pom.withXml {
+            def root = asNode()
+            root.appendNode('name', 'grxnat')
+            root.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
+            root.appendNode('inceptionYear', '2017')
+
+            def scm = root.appendNode('scm')
+            scm.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
+            scm.appendNode('connection', 'https://bitbucket.org/xnatdev/grxnat')
+            scm.appendNode('developerConnection', 'scm:git://bitbucket.org/xnatdev/grxnat.git')
+
+            def developers = root.appendNode('developers')
+
+            def charlie = developers.appendNode('developer')
+            charlie.appendNode('id', 'grepStar')
+            charlie.appendNode('name', 'Charlie Moore')
+            charlie.appendNode('email', 'moore.c@wustl.edu')
+        }
+    }
+}
+
+publishing.repositories {
+    maven {
+        credentials {
+            // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
+            // line in the form -PrepoUsername=foo -PrepoPassword=bar.
+            username propertyWithDefault('repoUsername', 'username')
+            password propertyWithDefault('repoPassword', 'password')
+        }
+        if (project.version.endsWith('-SNAPSHOT')) {
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local"
+        } else {
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
+        }
+    }
+}
+
+def propertyWithDefault(def String property, def Object value) {
+    hasProperty(property) ? getProperty(property) : value
+}
+
+defaultTasks 'clean', 'jar', 'test', 'publishMavenJavaPublicationToMavenRepository', 'publishToMavenLocal'

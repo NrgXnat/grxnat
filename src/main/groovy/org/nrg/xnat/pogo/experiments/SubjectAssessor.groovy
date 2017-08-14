@@ -1,0 +1,34 @@
+package org.nrg.xnat.pogo.experiments
+
+import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.Subject
+import org.nrg.xnat.pogo.extensions.subject_assessor.SubjectAssessorExtension
+import org.nrg.xnat.util.RandomUtils
+
+abstract class SubjectAssessor extends Experiment {
+
+    SubjectAssessor(Project project, Subject subject, String label) {
+        setPrimaryProject(project)
+        setSubject(subject)
+        this.label = (label != null) ? label : RandomUtils.randomID()
+    }
+
+    @Override
+    void setSubject(Subject subject) {
+        super.setSubject(subject)
+        if (subject != null) subject.addExperiment(this)
+    }
+
+    SubjectAssessorExtension getExtension() {
+        return (SubjectAssessorExtension)super.getExtension()
+    }
+
+    void setExtension(SubjectAssessorExtension extension) {
+        super.setExtension(extension)
+    }
+
+    def <T extends Experiment> T extension(SubjectAssessorExtension extension) {
+        return super.extension(extension)
+    }
+
+}

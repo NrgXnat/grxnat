@@ -1,0 +1,66 @@
+package org.nrg.xnat.rest
+
+import com.jayway.restassured.filter.Filter
+import com.jayway.restassured.filter.FilterContext
+import com.jayway.restassured.response.Response
+import com.jayway.restassured.specification.FilterableRequestSpecification
+import com.jayway.restassured.specification.FilterableResponseSpecification
+import org.apache.http.impl.client.SystemDefaultHttpClient
+import org.nrg.testing.CommonUtils
+import org.nrg.xnat.pogo.users.User
+
+class XnatSessionFilter implements Filter {
+
+    private final String xnatUrl
+    private final User user
+    private String sessionId
+    private final boolean allowInsecureSSL
+
+    XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL) {
+        this.user = user
+        this.xnatUrl = xnatUrl
+        this.allowInsecureSSL = allowInsecureSSL
+        extractSessionId()
+    }
+
+    @SuppressWarnings(["ChangeToOperator", "GrDeprecatedAPIUsage"])
+    @Override
+    Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
+        final FilterableRequestSpecification request = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
+
+        if (sessionId != null) request.sessionId(sessionId)
+        final Response response = request.relaxedHTTPSValidation().sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+
+        if (response.statusCode == 401 || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
+            extractSessionId()
+            request.httpClient.connectionManager.shutdown()
+            request.httpClient = new SystemDefaultHttpClient()
+            request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+        } else {
+            response
+        }
+    }
+
+    String getXnatUrl() {
+        return xnatUrl
+    }
+
+    User getUser() {
+        return user
+    }
+
+    String getSessionId() {
+        return sessionId
+    }
+
+    boolean getAllowInsecureSSL() {
+        return allowInsecureSSL
+    }
+
+    void extractSessionId() {
+        final Response response = Credentials.build(user).get(CommonUtils.formatUrl(xnatUrl, '/data/auth'))
+        if (response.statusCode != 200) throw new AssertionError('Provided username and password combination do not appear to be correct')
+        sessionId = response.getSessionId()
+    }
+
+}
