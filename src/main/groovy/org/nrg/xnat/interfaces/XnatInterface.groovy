@@ -25,6 +25,7 @@ import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
+import org.nrg.xnat.pogo.experiments.NonimagingAssessor
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.experiments.SessionAssessor
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
@@ -33,8 +34,13 @@ import org.nrg.xnat.pogo.extensions.project.ProjectQueryPutExtension
 import org.nrg.xnat.pogo.extensions.session_assessor.SessionAssessorQueryPutExtension
 import org.nrg.xnat.pogo.extensions.subject.SubjectQueryPutExtension
 import org.nrg.xnat.pogo.extensions.subject_assessor.SubjectAssessorQueryPutExtension
+import org.nrg.xnat.pogo.resources.ProjectResource
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.resources.ResourceFile
+import org.nrg.xnat.pogo.resources.ScanResource
+import org.nrg.xnat.pogo.resources.SessionAssessorResource
+import org.nrg.xnat.pogo.resources.SubjectAssessorResource
+import org.nrg.xnat.pogo.resources.SubjectResource
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.rest.SerializationUtils
@@ -73,11 +79,11 @@ abstract class XnatInterface {
             final XnatSessionFilter sessionFilter = new XnatSessionFilter(user, xnatUrl, allowInsecureSSL)
             if (given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/data/auth')).statusCode == 200) {
                 final Response oldResponse = given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/data/version'))
-                if (oldResponse.statusCode == 200) {
+                if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
                     new XnatInterface_1_6(sessionFilter)
                 } else {
                     final Response newResponse = given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
-                    if (newResponse.statusCode == 200) {
+                    if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
                         final String version = newResponse.jsonPath().getString("version")
                         if (version.startsWith('1.7.0')) {
                             new XnatInterface_1_7_0(sessionFilter)
@@ -130,6 +136,10 @@ abstract class XnatInterface {
         given().filter(sessionFilter)
     }
 
+    RequestSpecification jsonQuery() {
+        queryBase().queryParam('format', 'json')
+    }
+
     protected void prohibitNonadmin() {
         if (!userIsAdmin()) throw new UnsupportedOperationException('You must be an admin to perform this operation.')
     }
@@ -150,6 +160,20 @@ abstract class XnatInterface {
         isAdmin
     }
 
+    List<User> readSiteUsers() {
+        final Response response = jsonQuery().get(formatRestUrl('users'))
+
+        if (response.statusCode == 403) {
+            throw new AssertionError('This XNAT requires administrator privileges to read the list of site users.')
+        }
+
+        response.jsonPath().getObject('ResultSet.Result', User[]) as List
+    }
+
+    String jsessionId() {
+        sessionFilter.sessionId
+    }
+
     String issueAliasTokenUrl() {
         formatRestUrl('/services/tokens/issue')
     }
@@ -162,20 +186,26 @@ abstract class XnatInterface {
         formatRestUrl("projects/${project.id}/experiments")
     }
 
+    String getAccessionNumber(Subject subject) {
+        if (subject.project == null) throw new IllegalArgumentException('subject must have project specified')
+
+        subject.accessionNumber ?: subject.accessionNumber(jsonQuery().get(projectSubjectsUrl(subject.project)).jsonPath().getString("ResultSet.Result.find { it.label == '${subject.label}' }.ID")).accessionNumber
+    }
+
     String getAccessionNumber(SubjectAssessor subjectAssessor) {
         if (subjectAssessor.primaryProject == null) throw new IllegalArgumentException("subjectAssessor object must have project specified.")
 
-        queryBase().get(projectExperimentsUrl(subjectAssessor.primaryProject)).then().extract().jsonPath().getString("ResultSet.Result.find {it.label == '${subjectAssessor}' }.ID")
+        subjectAssessor.accessionNumber ?: subjectAssessor.accessionNumber(queryBase().get(projectExperimentsUrl(subjectAssessor.primaryProject)).then().extract().jsonPath().getString("ResultSet.Result.find {it.label == '${subjectAssessor}' }.ID")).accessionNumber
     }
 
     Subject readSubject(String accessionNumber) {
-        final Response response = queryBase().queryParam('format', 'json').get(formatRestUrl('subjects', accessionNumber))
+        final Response response = jsonQuery().get(formatRestUrl('subjects', accessionNumber))
         final Subject subject = response.jsonPath().getObject("items.get(0).children.find { it.field == 'demographics' }.items.get(0).data_fields", Subject.class)
         subject.label(response.jsonPath().getString('items.get(0).data_fields.label'))
     }
 
     def <T extends Experiment> T readExperiment(String accessionNumber, Class<T> experimentClass) {
-        final Response response = queryBase().queryParam('format", "json').get(formatRestUrl('experiments', accessionNumber))
+        final Response response = jsonQuery().get(formatRestUrl('experiments', accessionNumber))
         final T experiment = response.jsonPath().getObject('items.get(0).data_fields', experimentClass)
         experiment.dataType(DataType.lookup(response.jsonPath().getString("items.get(0).meta.'xsi:type'")))
     }
@@ -300,7 +330,7 @@ abstract class XnatInterface {
     }
 
     AnonScript readSiteAnonScript() {
-        readAnonScript(queryBase().queryParam('format', 'json').get(siteAnonScriptUrl()))
+        readAnonScript(jsonQuery().get(siteAnonScriptUrl()))
     }
 
     void setSiteAnonScriptStatus(boolean status) {
@@ -316,12 +346,16 @@ abstract class XnatInterface {
         setSiteAnonScriptStatus(true)
     }
 
+    void setSiteAnonScript(AnonScript script) {
+        queryBase().body(script.getContents()).put(siteAnonScriptUrl()).then().assertThat().statusCode(200)
+    }
+
     String projectAnonScriptUrl(Project project) {
         formatRestUrl("config/edit/projects/${project.id}/image/dicom/script")
     }
 
     AnonScript readProjectAnonScript(Project project) {
-        readAnonScript(queryBase().queryParam('format', 'json').get(projectAnonScriptUrl(project)))
+        readAnonScript(jsonQuery().get(projectAnonScriptUrl(project)))
     }
 
     void setProjectAnonScript(Project project, AnonScript script) {
@@ -405,6 +439,21 @@ abstract class XnatInterface {
         CommonUtils.formatUrl(resourceFilesUrl(resource), file.name)
     }
 
+    /**
+     * Reads the list of Resource objects at the XNAT-level specified in the dummyResource
+     * @param dummyResource
+     * @return
+     */
+    List<Resource> readResources(Resource dummyResource) {
+        final List resources = jsonQuery().get(formatXnatUrl(dummyResource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
+            and().extract().response().jsonPath().getList('ResultSet.Result')
+        SerializationUtils.deserializeList(resources, dummyResource.class)
+    }
+
+    void deleteResource(Resource resource) {
+        queryBase().queryParam('removeFiles', true).delete(formatXnatUrl(resource.resourceUrl(), "resources/${resource.folder}")).then().assertThat().statusCode(200)
+    }
+
     String accessibilityRestUrl(Project project) {
         formatRestUrl("/projects/${project.id}/accessibility")
     }
@@ -426,6 +475,129 @@ abstract class XnatInterface {
         queryBase().put(formatRestUrl("/projects/${project.id}/prearchive_code/${code.code}")).then().assertThat().statusCode(200)
     }
 
+    Project readProject(String projectID) {
+        final JsonPath projectCall = jsonQuery().get(projectUrl(new Project(projectID))).then().
+                assertThat().statusCode(200).and().extract().jsonPath().setRoot('items')
+
+        final Project project = projectCall.getObject('data_fields.get(0)', Project).id(projectID)
+
+        if (projectCall.get("children.get(0).find { it.field == 'aliases/alias' }") != null) {
+            project.setAliases(
+                    projectCall.getList("children.get(0).find { it.field == 'aliases/alias' }.items.data_fields.alias")
+            )
+        }
+
+        if (projectCall.get("children.get(0).find { it.field == 'investigators/investigator' }.") != null) {
+            project.setInvestigators(projectCall.getObject("children.get(0).find { it.field == 'investigators/investigator' }.items.data_fields", Investigator[]) as List)
+        }
+
+        if (projectCall.get("children.get(0).find { it.field == 'PI' }") != null) {
+            project.setPi(projectCall.getObject("children.get(0).find { it.field == 'PI' }.items.get(0).data_fields", Investigator))
+        }
+
+        project.setAccessibility(
+                queryBase().get(formatRestUrl("projects/${project}/accessibility")).then().assertThat().statusCode(200).and().extract().response().asString().trim()
+        )
+
+        try {
+            final List<User> existingUsers = readSiteUsers()
+
+            jsonQuery().get(formatRestUrl("/projects/${project}/users")).then().assertThat().statusCode(200).and().extract().jsonPath().getList('ResultSet.Result').each { userMap ->
+                final User user = existingUsers.find { it.username == userMap['login'] }
+                switch (userMap['GROUP_ID']) {
+                    case "${project}_owner":
+                        project.owners << user
+                        break
+                    case "${project}_member":
+                        project.members << user
+                        break
+                    case "${project}_collaborator":
+                        project.collaborators << user
+                        break
+                    default:
+                        println "Unknown group name: ${userMap['GROUP_ID']}"
+                }
+            }
+        } catch (Error ignored) {} // if we can't access user list, oh well
+
+        project.resources(
+                readResources(new ProjectResource().project(project)).each { resource ->
+                    resource.project(project)
+                }
+        )
+
+        project.subjects(readSubjects(project))
+        // TODO: anon scripts
+    }
+
+    protected List<Subject> readSubjects(Project project) {
+        final List<Subject> subjects = jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
+            get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project == '${project.id}' }", Subject[])
+
+        subjects.each { subject ->
+            subject.resources(
+                    readResources(new SubjectResource().project(project).subject(subject)).each { resource ->
+                        resource.project(project).subject(subject)
+                    }
+            )
+            subject.experiments(
+                readSubjectAssessors(project, subject)
+            )
+        }
+        subjects
+        // TODO: shares, secondary subjects
+    }
+
+    protected List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject) {
+        List imagingMaps, nonimagingMaps
+
+        (imagingMaps, nonimagingMaps) = jsonQuery().get(formatRestUrl("/projects/${project}/subjects/${subject}/experiments")).then().assertThat().statusCode(200).
+                and().extract().response().jsonPath().getList('ResultSet.Result').split { it.xsiType.matches('xnat:.+SessionData') }
+
+        final List<SubjectAssessor> nonimagingSubjectAssessors = SerializationUtils.deserializeList(nonimagingMaps, NonimagingAssessor)
+        final List<ImagingSession> imagingSessions = SerializationUtils.deserializeList(imagingMaps, ImagingSession)
+
+        subject.experiments(nonimagingSubjectAssessors + imagingSessions)
+
+        subject.experiments.each { assessor ->
+            assessor.resources(
+                    readResources(new SubjectAssessorResource().project(project).subject(subject).subjectAssessor(assessor)).each { resource ->
+                        resource.project(project).subject(subject).subjectAssessor(assessor)
+                    }
+            )
+        }
+
+        imagingSessions.each { session ->
+            session.scans(readScans(project, subject, session))
+            session.assessors(readSessionAssessors(project, subject, session))
+        }
+    }
+
+    protected List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
+        jsonQuery().get(sessionScansUrl(project, subject, session)).jsonPath().getList('ResultSet.Result.ID').collect { scanId ->
+            final JsonPath scanPath = jsonQuery().get(CommonUtils.formatUrl(sessionScansUrl(project, subject, session), scanId)).jsonPath().setRoot('items.get(0)')
+            final Map scanMap = scanPath.getMap('data_fields')
+            scanMap['xsiType'] = scanPath.getString("meta.'xsi:type'")
+            final Scan scan = SerializationUtils.deserializeObject(scanMap, Scan)
+
+            scan.scanResources(
+                    readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)).each { resource ->
+                        resource.project(project).subject(subject).subjectAssessor(session).scan(scan)
+                    }
+            )
+        }
+    }
+
+    protected List<SessionAssessor> readSessionAssessors(Project project, Subject subject, ImagingSession session) {
+        jsonQuery().get(assessorsUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', SessionAssessor[]).collect { assessor ->
+            assessor.resources(
+                    readResources(new SessionAssessorResource().project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)).each { resource ->
+                        resource.project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)
+                    }
+            ) as SessionAssessor
+        }
+    }
+
     void createProject(Project project) {
         if (project == null) {
             throw new UnsupportedOperationException("project cannot be null")
@@ -435,11 +607,11 @@ abstract class XnatInterface {
             project.extension(new ProjectQueryPutExtension(this, project))
         }
 
+        createInvestigators((project.pi != null) ? project.investigators + project.pi : project.investigators)
+
         project.extension.create()
 
         if (project.prearchiveCode != null) setPrearchiveSetting(project, project.prearchiveCode)
-
-        createInvestigators((project.pi != null) ? project.investigators + project.pi : project.investigators)
 
         addListedUsersToProject(project)
 
@@ -698,6 +870,23 @@ abstract class XnatInterface {
 
     void deleteProject(Project project) {
         queryBase().queryParam('removeFiles', true).delete(projectUrl(project)).then().assertThat().statusCode(200)
+    }
+
+    void deleteAllProjectData(Project project) {
+        jsonQuery().queryParam('columns', 'ID,subject_ID').get(formatRestUrl("/projects/${project.id}/experiments")).jsonPath().getList('ResultSet.Result').each { experiment ->
+            queryBase().queryParam('removeFiles', true).
+                    delete(formatRestUrl("projects/${project.id}/subjects/${experiment.subject_ID}/experiments/${experiment.ID}")).
+                    then().assertThat().statusCode(200)
+        }
+
+        jsonQuery().queryParam('columns', 'ID').get(formatRestUrl("projects/${project.id}/subjects")).jsonPath().getList('ResultSet.Result.ID').each { subject ->
+            queryBase().queryParam('removeFiles', true).delete(formatRestUrl("projects/${project.id}/subjects/${subject}")).then().assertThat().statusCode(200)
+        }
+
+        final Project shadowProject = new Project(project.id)
+        readResources(new ProjectResource().project(shadowProject)).each { resource ->
+            deleteResource(resource.project(shadowProject))
+        }
     }
 
     String assessorsUrlByAccessionNumber(ImagingSession session) {

@@ -22,6 +22,8 @@ class ScanResource extends Resource {
         this(project, subject, session, scan, null)
     }
 
+    ScanResource() {}
+
     @Override
     String resourceUrl() {
         "data/projects/${project}/subjects/${subject}/experiments/${subjectAssessor}/scans/${scan}"

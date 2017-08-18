@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.apache.commons.lang3.StringUtils
 import org.nrg.xnat.pogo.resources.Resource
 
+@SuppressWarnings("GrMethodMayBeStatic")
 abstract class CustomDeserializer<T> extends StdDeserializer<T> {
 
     protected static final TypeReference NESTED_STRING_MAP = new TypeReference<Map<String, Map<String, String>>>() {}
@@ -35,7 +37,7 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
     }
 
     protected void setIntIfNonzero(JsonNode parentNode, String field, Closure method) {
-        if (fieldNonnull(parentNode, field) && parentNode.get(field).intValue() != 0) method(parentNode.get(field).intValue())
+        if (fieldNonnull(parentNode, field) && parentNode.get(field).asInt() != 0) method(parentNode.get(field).asInt())
     }
 
     protected void setBoolean(JsonNode parentNode, String field, Closure method) {
@@ -84,6 +86,10 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
 
     protected boolean fieldNonnull(JsonNode parentNode, String field) {
         parentNode.has(field) && !parentNode.get(field).isNull()
+    }
+
+    protected boolean fieldNonempty(JsonNode parentNode, String field) {
+        fieldNonnull(parentNode, field) && !StringUtils.isEmpty(parentNode.get(field).asText())
     }
 
     protected <X> X readObject(JsonNode node, ObjectCodec codec, Class<X> objectClass) {

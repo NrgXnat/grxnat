@@ -1,9 +1,9 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def pluginVersion = '1.0-SNAPSHOT'
+def buildVersion = '1.0'
 
 group groupName
-version pluginVersion
+version buildVersion
 
 apply plugin: 'groovy'
 apply plugin: 'java'
@@ -70,11 +70,12 @@ dependencies {
     compile('org.apache.commons:commons-lang3')
     compile('commons-io:commons-io')
     compile("com.fasterxml.jackson.core:jackson-annotations:${vJackson}")
+    compile("com.fasterxml.jackson.core:jackson-core:${vJackson}")
     compile("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
     compile("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
     compile("joda-time:joda-time:${vJodaTime}")
-    compile('org.reflections:reflections')
+    compile('org.reflections:reflections:0.9.10')
     compile('com.jayway.restassured:rest-assured')
     compile('org.slf4j:slf4j-log4j12')
     compile("org.nrg:test_utils:${vTestUtils}")
@@ -90,7 +91,7 @@ publishing.publications {
     mavenJava(MavenPublication) {
         groupId groupName
         artifactId artifactName
-        version pluginVersion
+        version buildVersion
 
         from components.java
 

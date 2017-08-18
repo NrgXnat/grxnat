@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.experiments
 
+import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.resources.Resource
@@ -22,9 +23,13 @@ class Scan extends Extensible<Scan> {
         if (session != null) {
             session.addScan(this)
         }
+        final DataType dataType = DataType.lookupDataTypeByAssociatedClass(this.class)
+        if (dataType != null) setXsiType(dataType.xsiType)
     }
 
-    Scan() {}
+    Scan() {
+        this(null, null)
+    }
 
     ImagingSession getSession() {
         return session

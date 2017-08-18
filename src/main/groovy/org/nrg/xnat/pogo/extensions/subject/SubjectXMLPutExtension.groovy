@@ -28,6 +28,7 @@ class SubjectXMLPutExtension extends SubjectExtension {
                 body(FileIOUtils.readFile(xmlFile)).post(xnatInterface.projectSubjectsUrl(project)).then().assertThat().statusCode(200).and().extract().response().asString()
 
         final Subject createdSubject = xnatInterface.readSubject(CommonUtils.last(subjectResponse.split('/')))
+        if (parentObject == null) setParentObject(new Subject())
         parentObject.accessionNumber(createdSubject.accessionNumber).label(createdSubject.label)
     }
 

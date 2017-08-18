@@ -22,6 +22,8 @@ class SessionAssessorResource extends Resource {
         this(project, subject, session, assessor, null)
     }
 
+    SessionAssessorResource() {}
+
     @Override
     String resourceUrl() {
         "data/projects/${project}/subjects/${subject}/experiments/${subjectAssessor}/assessors/${sessionAssessor}"

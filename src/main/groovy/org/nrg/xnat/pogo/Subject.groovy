@@ -33,8 +33,8 @@ class Subject extends CustomVariableContainer<Subject> {
     private final List<SubjectAssessor> experiments = []
 
     Subject(Project project, String label) {
-        setProject(project)
         this.label = label
+        setProject(project)
     }
 
     Subject(Project project) {

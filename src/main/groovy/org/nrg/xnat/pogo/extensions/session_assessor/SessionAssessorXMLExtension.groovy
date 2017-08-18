@@ -11,8 +11,8 @@ import org.nrg.xnat.util.FileIOUtils
 
 class SessionAssessorXMLExtension extends SessionAssessorExtension {
 
-    private XnatInterface xnatInterface
-    private File assessorXML
+    XnatInterface xnatInterface
+    File assessorXML
 
     SessionAssessorXMLExtension(XnatInterface xnatInterface, SessionAssessor assessor, File assessorXML) {
         super(assessor)
@@ -33,8 +33,7 @@ class SessionAssessorXMLExtension extends SessionAssessorExtension {
                                 assertThat().statusCode(200).and().extract().response().asString().split('/')
                 )
         )
-        final SessionAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, parentObject.getClass()) as SessionAssessor
-        session.removeAssessor(createdAssessor)
+        final SessionAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, SessionAssessor) as SessionAssessor
         parentObject.label(createdAssessor.getLabel())
     }
 

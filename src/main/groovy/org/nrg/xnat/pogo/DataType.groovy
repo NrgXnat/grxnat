@@ -1,26 +1,40 @@
 package org.nrg.xnat.pogo
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import org.nrg.xnat.pogo.experiments.Experiment
+import org.nrg.xnat.pogo.experiments.Scan
+import org.nrg.xnat.pogo.experiments.assessors.ManualQC
+import org.nrg.xnat.pogo.experiments.scans.CTScan
+import org.nrg.xnat.pogo.experiments.scans.MRScan
+import org.nrg.xnat.pogo.experiments.scans.PETScan
+import org.nrg.xnat.pogo.experiments.sessions.CTSession
+import org.nrg.xnat.pogo.experiments.sessions.MRSession
+import org.nrg.xnat.pogo.experiments.sessions.PETMRSession
+import org.nrg.xnat.pogo.experiments.sessions.PETSession
+
 class DataType {
 
     static final List<DataType> KNOWN_TYPES = []
 
     static final DataType PROJECT = new DataType("xnat:projectData", null, "Project", "Projects")
     static final DataType SUBJECT = new DataType("xnat:subjectData", null, "Subject", "Subjects")
-    static final DataType MR_SESSION = makeSessionDataType("mr")
-    static final DataType PET_SESSION = makeSessionDataType("pet")
-    static final DataType CT_SESSION = makeSessionDataType("ct")
+    static final DataType MR_SESSION = makeSessionDataType("mr").associatedClass(MRSession)
+    static final DataType PET_SESSION = makeSessionDataType("pet").associatedClass(PETSession)
+    static final DataType CT_SESSION = makeSessionDataType("ct").associatedClass(CTSession)
     static final DataType CR_SESSION = makeSessionDataType("cr")
-    static final DataType PET_MR_SESSION = new DataType("xnat:petmrSessionData", "PETMR", "PET MR Session", "PET MR Sessions")
-    static final DataType MANUAL_QC = new DataType("xnat:qcManualAssessorData", "MQC", "Manual QC", "Manual QCs")
-    static final DataType QC = new DataType("xnat:qcAssessmentData", "QC", "Auto QC", "Auto QCs")
-    static final DataType MR_SCAN = makeScanDataType("mr")
-    static final DataType PET_SCAN = makeScanDataType("pet")
-    static final DataType CT_SCAN = makeScanDataType("ct")
+    static final DataType PET_MR_SESSION = new DataType("xnat:petmrSessionData", "PETMR", "PET MR Session", "PET MR Sessions").associatedClass(PETMRSession)
+    static final DataType MANUAL_QC = new DataType("xnat:qcManualAssessorData", "MQC", "Manual QC", "Manual QCs").associatedClass(ManualQC)
+    static final DataType QC = new DataType("xnat:qcAssessmentData", "QC", "Auto QC", "Auto QCs").associatedClass(org.nrg.xnat.pogo.experiments.assessors.QC)
+    static final DataType MR_SCAN = makeScanDataType("mr").associatedScanClass(MRScan)
+    static final DataType PET_SCAN = makeScanDataType("pet").associatedScanClass(PETScan)
+    static final DataType CT_SCAN = makeScanDataType("ct").associatedScanClass(CTScan)
 
     String xsiType
     String code
     String singularName
     private String pluralName
+    @JsonIgnore Class<? extends Experiment> associatedExperimentClass
+    @JsonIgnore Class<? extends Scan> associatedScanClass
 
     DataType(String xsiType, String code, String singularName, String pluralName) {
         this.xsiType = xsiType
@@ -47,6 +61,10 @@ class DataType {
         new DataType().xsiType(xsiType)
     }
 
+    static DataType lookupDataTypeByAssociatedClass(Class aClass) {
+        KNOWN_TYPES.find { it.associatedExperimentClass == aClass || it.associatedScanClass == aClass }
+    }
+
     String getPluralName() {
         return (pluralName == null) ? singularName + "s" : pluralName
     }
@@ -57,22 +75,32 @@ class DataType {
 
     DataType xsiType(String xsiType) {
         setXsiType(xsiType)
-        return this
+        this
     }
 
     DataType code(String code) {
         setCode(code)
-        return this
+        this
     }
 
     DataType singularName(String singularName) {
         setSingularName(singularName)
-        return this
+        this
     }
 
     DataType pluralName(String pluralName) {
         setPluralName(pluralName)
-        return this
+        this
+    }
+
+    DataType associatedClass(Class<? extends Experiment> aClass) {
+        setAssociatedExperimentClass(aClass)
+        this
+    }
+
+    DataType associatedScanClass(Class<? extends Scan> aClass) {
+        setAssociatedScanClass(aClass)
+        this
     }
 
     boolean equals(o) {

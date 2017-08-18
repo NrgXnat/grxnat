@@ -9,13 +9,16 @@ class SessionAssessor extends Experiment {
     private ImagingSession parentSession
 
     SessionAssessor(Project project, Subject subject, ImagingSession parentSession, String label) {
+        super()
         this.primaryProject = project
         this.subject = subject
         setParentSession(parentSession)
         this.label = label
     }
 
-    SessionAssessor() {}
+    SessionAssessor() {
+        super()
+    }
 
     ImagingSession getParentSession() {
         return parentSession

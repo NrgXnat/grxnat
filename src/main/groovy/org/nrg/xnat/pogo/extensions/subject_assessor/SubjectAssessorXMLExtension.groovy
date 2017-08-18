@@ -10,8 +10,8 @@ import org.nrg.xnat.util.FileIOUtils
 
 class SubjectAssessorXMLExtension extends SubjectAssessorExtension {
 
-    private File assessorXML
-    private XnatInterface xnatInterface
+    File assessorXML
+    XnatInterface xnatInterface
 
     SubjectAssessorXMLExtension(XnatInterface xnatInterface, SubjectAssessor assessor, File assessorXML) {
         super(assessor)
@@ -33,7 +33,6 @@ class SubjectAssessorXMLExtension extends SubjectAssessorExtension {
                 )
         )
         final SubjectAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, parentObject.getClass()) as SubjectAssessor
-        subject.removeExperiment(createdAssessor)
         parentObject.label(createdAssessor.label)
     }
 

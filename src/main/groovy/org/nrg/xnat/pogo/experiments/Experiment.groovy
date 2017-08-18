@@ -21,6 +21,11 @@ abstract class Experiment extends CustomVariableContainer<Experiment> {
     protected final List<Resource> resources = []
     protected final List<Share> shares = []
 
+    Experiment() {
+        final DataType potentialMatch = DataType.lookupDataTypeByAssociatedClass(this.class)
+        if (potentialMatch != null) setDataType(potentialMatch)
+    }
+
     List<Resource> getResources() {
         return resources
     }

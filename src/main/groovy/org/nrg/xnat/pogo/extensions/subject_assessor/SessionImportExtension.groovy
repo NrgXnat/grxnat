@@ -7,8 +7,8 @@ import org.nrg.xnat.pogo.experiments.ImagingSession
 
 class SessionImportExtension extends SubjectAssessorExtension {
 
-    private XnatInterface xnatInterface
-    private File sessionZip
+    XnatInterface xnatInterface
+    File sessionZip
 
     SessionImportExtension(XnatInterface xnatInterface, ImagingSession session, File sessionZip) {
         super(session)

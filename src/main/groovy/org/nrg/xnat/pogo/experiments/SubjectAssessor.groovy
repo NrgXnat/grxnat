@@ -8,9 +8,14 @@ import org.nrg.xnat.util.RandomUtils
 abstract class SubjectAssessor extends Experiment {
 
     SubjectAssessor(Project project, Subject subject, String label) {
+        super()
         setPrimaryProject(project)
         setSubject(subject)
         this.label = (label != null) ? label : RandomUtils.randomID()
+    }
+
+    SubjectAssessor() {
+        super()
     }
 
     @Override
