@@ -32,7 +32,7 @@ class Scan extends Extensible<Scan> {
     }
 
     ImagingSession getSession() {
-        return session
+        session
     }
 
     void setSession(ImagingSession session) {
@@ -41,7 +41,7 @@ class Scan extends Extensible<Scan> {
     }
 
     List<Resource> getScanResources() {
-        return scanResources
+        scanResources
     }
 
     void setScanResources(List<Resource> scanResources) {
@@ -58,57 +58,57 @@ class Scan extends Extensible<Scan> {
 
     Scan session(ImagingSession session) {
         setSession(session)
-        return this
+        this
     }
 
     Scan id(String id) {
         setId(id)
-        return this
+        this
     }
 
     Scan xsiType(String xsiType) {
         setXsiType(xsiType)
-        return this
+        this
     }
 
     Scan seriesDescription(String seriesDescription) {
         setSeriesDescription(seriesDescription)
-        return this
+        this
     }
 
     Scan type(String type) {
         setType(type)
-        return this
+        this
     }
 
     Scan note(String note) {
         setNote(note)
-        return this
+        this
     }
 
     Scan quality(String quality) {
         setQuality(quality)
-        return this
+        this
     }
 
     Scan scanResources(List<Resource> scanResources) {
         setScanResources(scanResources)
-        return this
+        this
     }
 
     Scan addResource(Resource resource) {
         if (!scanResources.contains(resource)) scanResources.add(resource)
-        return this
+        this
     }
 
     Scan extension(Extension<Scan> extension) {
         setExtension(extension)
-        return this
+        this
     }
 
     @Override
     String toString() {
-        return id
+        id
     }
 
     boolean equals(o) {

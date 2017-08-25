@@ -17,6 +17,8 @@ abstract class Resource extends Extensible<Resource> {
     SessionAssessor sessionAssessor
     String folder
     String format
+    int fileCount
+    long fileSize
     protected final List<ResourceFile> resourceFiles = []
     protected Extension<Resource> extension
 
@@ -25,7 +27,7 @@ abstract class Resource extends Extensible<Resource> {
     abstract String resourceUrl()
 
     List<ResourceFile> getResourceFiles() {
-        return resourceFiles
+        resourceFiles
     }
 
     void setResourceFiles(List<ResourceFile> resourceFiles) {
@@ -33,7 +35,7 @@ abstract class Resource extends Extensible<Resource> {
     }
 
     Extension<Resource> getExtension() {
-        return extension
+        extension
     }
 
     void setExtension(Extension<Resource> extension) {
@@ -42,52 +44,62 @@ abstract class Resource extends Extensible<Resource> {
 
     Resource project(Project project) {
         setProject(project)
-        return this
+        this
     }
 
     Resource subject(Subject subject) {
         setSubject(subject)
-        return this
+        this
     }
 
     Resource subjectAssessor(SubjectAssessor subjectAssessor) {
         setSubjectAssessor(subjectAssessor)
-        return this
+        this
     }
 
     Resource scan(Scan scan) {
         setScan(scan)
-        return this
+        this
     }
 
     Resource sessionAssessor(SessionAssessor sessionAssessor) {
         setSessionAssessor(sessionAssessor)
-        return this
+        this
     }
 
     Resource folder(String label) {
         setFolder(label)
-        return this
+        this
     }
 
     Resource format(String format) {
         setFormat(format)
-        return this
+        this
+    }
+
+    Resource fileCount(int count) {
+        setFileCount(count)
+        this
+    }
+
+    Resource fileSize(long size) {
+        setFileSize(size)
+        this
     }
 
     Resource resourceFiles(List<ResourceFile> resourceFiles) {
         setResourceFiles(resourceFiles)
-        return this
+        this
     }
 
     Resource addResourceFile(ResourceFile resourceFile) {
         resourceFiles.add(resourceFile)
-        return this
+        this
     }
 
     Resource extension(Extension<Resource> extension) {
         setExtension(extension)
-        return this
+        this
     }
 
 }

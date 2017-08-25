@@ -63,7 +63,7 @@ class Subject extends CustomVariableContainer<Subject> {
     }
 
     void setGender(String gender) {
-        setGender(Gender.get(gender))
+        if (gender != null) setGender(Gender.get(gender))
     }
 
     Handedness getHandedness() {
@@ -75,7 +75,7 @@ class Subject extends CustomVariableContainer<Subject> {
     }
 
     void setHandedness(String handedness) {
-        setHandedness(Handedness.get(handedness))
+        if (handedness != null) setHandedness(Handedness.get(handedness))
     }
 
     List<Share> getShares() {

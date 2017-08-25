@@ -26,9 +26,9 @@ class ScanDeserializer extends CustomDeserializer<Scan> {
         }
 
         setStringIfNonnull(node, 'ID', scan.&setId)
-        setStringIfNonnull(node, 'series_description', scan.&setSeriesDescription)
-        setStringIfNonnull(node, 'type', scan.&setType)
-        setStringIfNonnull(node, 'note', scan.&setNote)
+        setStringIfNonempty(node, 'series_description', scan.&setSeriesDescription)
+        setStringIfNonempty(node, 'type', scan.&setType)
+        setStringIfNonempty(node, 'note', scan.&setNote)
         setStringIfNonnull(node, 'quality', scan.&setQuality)
 
         scan

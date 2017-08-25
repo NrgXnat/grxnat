@@ -17,6 +17,8 @@ class ResourceDeserializer<T extends Resource> extends CustomDeserializer<Resour
 
         setStringIfNonnull(node, 'label', resource.&setFolder)
         setStringIfNonnull(node, 'format', resource.&setFormat)
+        resource.setFileCount(node.get('file_count').asInt())
+        resource.setFileSize(node.get('file_size').asLong())
 
         resource
     }

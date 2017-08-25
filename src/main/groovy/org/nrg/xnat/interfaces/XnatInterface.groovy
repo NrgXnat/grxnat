@@ -74,6 +74,7 @@ abstract class XnatInterface {
                     }
                 }
         ))
+        if (allowInsecureSSL) RestAssured.useRelaxedHTTPSValidation()
 
         if (given().get(CommonUtils.formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode == 200) {
             final XnatSessionFilter sessionFilter = new XnatSessionFilter(user, xnatUrl, allowInsecureSSL)
@@ -429,6 +430,11 @@ abstract class XnatInterface {
             }
             queryBase().queryParams(SerializationUtils.serializeToMap(file)).multiPart(file.extension.getJavaFile()).put(resourceFileUrl(resource, file)).then().assertThat().statusCode(200)
         }
+
+        final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
+                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", resource.class)
+
+        resource.fileCount(responseResource.fileCount).fileSize(responseResource.fileSize)
     }
 
     String resourceFilesUrl(Resource resource) {
@@ -530,7 +536,7 @@ abstract class XnatInterface {
         // TODO: anon scripts
     }
 
-    protected List<Subject> readSubjects(Project project) {
+    List<Subject> readSubjects(Project project) {
         final List<Subject> subjects = jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
             get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project == '${project.id}' }", Subject[])
 
@@ -548,10 +554,11 @@ abstract class XnatInterface {
         // TODO: shares, secondary subjects
     }
 
-    protected List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject) {
+    List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject) {
         List imagingMaps, nonimagingMaps
 
-        (imagingMaps, nonimagingMaps) = jsonQuery().get(formatRestUrl("/projects/${project}/subjects/${subject}/experiments")).then().assertThat().statusCode(200).
+        (imagingMaps, nonimagingMaps) = jsonQuery().queryParam("columns", "note,date,label,ID").
+                get(formatRestUrl("/projects/${project}/subjects/${subject}/experiments")).then().assertThat().statusCode(200).
                 and().extract().response().jsonPath().getList('ResultSet.Result').split { it.xsiType.matches('xnat:.+SessionData') }
 
         final List<SubjectAssessor> nonimagingSubjectAssessors = SerializationUtils.deserializeList(nonimagingMaps, NonimagingAssessor)
@@ -573,22 +580,17 @@ abstract class XnatInterface {
         }
     }
 
-    protected List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
-        jsonQuery().get(sessionScansUrl(project, subject, session)).jsonPath().getList('ResultSet.Result.ID').collect { scanId ->
-            final JsonPath scanPath = jsonQuery().get(CommonUtils.formatUrl(sessionScansUrl(project, subject, session), scanId)).jsonPath().setRoot('items.get(0)')
-            final Map scanMap = scanPath.getMap('data_fields')
-            scanMap['xsiType'] = scanPath.getString("meta.'xsi:type'")
-            final Scan scan = SerializationUtils.deserializeObject(scanMap, Scan)
-
+    List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
+        jsonQuery().get(sessionScansUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', Scan[]).collect { scan ->
             scan.scanResources(
                     readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)).each { resource ->
                         resource.project(project).subject(subject).subjectAssessor(session).scan(scan)
                     }
-            )
+            ).session(session)
         }
     }
 
-    protected List<SessionAssessor> readSessionAssessors(Project project, Subject subject, ImagingSession session) {
+    List<SessionAssessor> readSessionAssessors(Project project, Subject subject, ImagingSession session) {
         jsonQuery().get(assessorsUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', SessionAssessor[]).collect { assessor ->
             assessor.resources(
                     readResources(new SessionAssessorResource().project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)).each { resource ->
@@ -596,6 +598,34 @@ abstract class XnatInterface {
                     }
             ) as SessionAssessor
         }
+    }
+
+    Subject findSubject(Project project, String label) {
+        project.subjects.find { it.label == label }
+    }
+
+    SubjectAssessor findSubjectAssessor(Subject subject, String label) {
+        subject.experiments.find { it.label == label }
+    }
+
+    SessionAssessor findSessionAssessor(ImagingSession session, String label) {
+        session.assessors.find { it.label == label }
+    }
+
+    Scan findScan(ImagingSession session, String scanId) {
+        session.scans.find { it.id == scanId }
+    }
+
+    List<Scan> filterScansByType(List<Scan> scans, String type) {
+        filterScansByType(scans, [type])
+    }
+
+    List<Scan> filterScansByType(List<Scan> scans, List<String> acceptableTypes) {
+        scans.findAll { it.type in acceptableTypes }
+    }
+
+    Resource findResource(List<Resource> resources, String resourceLabel) {
+        resources.find { it.folder == resourceLabel }
     }
 
     void createProject(Project project) {
@@ -803,6 +833,22 @@ abstract class XnatInterface {
 
     String scanUrl(Scan scan) {
         scanUrl(scan.getSession().getPrimaryProject(), scan.getSession().getSubject(), scan.getSession(), scan)
+    }
+
+    void updateScan(Project project, Subject subject, ImagingSession session, Scan scan) {
+        queryBase().queryParams(SerializationUtils.serializeToMap(scan)).put(scanUrl(project, subject, session, scan)).then().assertThat().statusCode(200)
+    }
+
+    void updateScan(Scan scan) {
+        updateScan(scan.session.primaryProject, scan.session.subject, scan.session, scan)
+    }
+
+    void deleteScan(Project project, Subject subject, ImagingSession session, Scan scan) {
+        queryBase().queryParam("removeFiles", true).delete(scanUrl(project, subject, session, scan)).then().assertThat().statusCode(200)
+    }
+
+    void deleteScan(Scan scan) {
+        queryBase().queryParam("removeFiles", true).delete(scanUrl(scan)).then().assertThat().statusCode(200)
     }
 
     String assessorsUrl(Project project, Subject subject, ImagingSession session) {

@@ -12,6 +12,7 @@ class ExperimentSerializer extends CustomSerializer<Experiment> {
 
         writeStringFieldIfNonnull(gen, 'xsiType', value.dataType.xsiType)
         if (value.date != null) writeStringFieldIfNonnull(gen, 'date', value.date.toString("MM/dd/yyyy"))
+        writeStringFieldIfNonnull(gen, 'note', value.notes)
 
         gen.writeEndObject()
     }

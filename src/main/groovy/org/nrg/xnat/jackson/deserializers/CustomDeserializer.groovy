@@ -36,6 +36,10 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
         if (fieldNonnull(parentNode, field)) method(parentNode.get(field).asText())
     }
 
+    protected void setStringIfNonempty(JsonNode parentNode, String field, Closure method) {
+        if (fieldNonempty(parentNode, field)) method(parentNode.get(field).asText())
+    }
+
     protected void setIntIfNonzero(JsonNode parentNode, String field, Closure method) {
         if (fieldNonnull(parentNode, field) && parentNode.get(field).asInt() != 0) method(parentNode.get(field).asInt())
     }

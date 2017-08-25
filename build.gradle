@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.1-SNAPSHOT'
+def buildVersion = '1.1'
 
 group groupName
 version buildVersion
@@ -18,6 +18,7 @@ def vJackson = '2.8.2'
 def vJodaTime = '2.9.9'
 def vGroovy = '2.4.4'
 def vTestUtils = '1.1'
+def vReflections = '0.9.10'
 
 buildscript {
     repositories {
@@ -75,7 +76,7 @@ dependencies {
     compile("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
     compile("joda-time:joda-time:${vJodaTime}")
-    compile('org.reflections:reflections:0.9.10')
+    compile("org.reflections:reflections:${vReflections}")
     compile('com.jayway.restassured:rest-assured')
     compile('org.slf4j:slf4j-log4j12')
     compile("org.nrg:test_utils:${vTestUtils}")

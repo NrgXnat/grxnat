@@ -42,6 +42,7 @@ class ExperimentDeserializer<T extends Experiment> extends CustomDeserializer<T>
         }
         
         setStringIfNonnull(node, 'ID', experiment.&setAccessionNumber)
+        setStringIfNonempty(node, 'note', experiment.&setNotes)
 
         experiment
     }
