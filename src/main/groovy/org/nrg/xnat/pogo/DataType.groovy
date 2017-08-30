@@ -16,18 +16,18 @@ class DataType {
 
     static final List<DataType> KNOWN_TYPES = []
 
-    static final DataType PROJECT = new DataType("xnat:projectData", null, "Project", "Projects")
-    static final DataType SUBJECT = new DataType("xnat:subjectData", null, "Subject", "Subjects")
-    static final DataType MR_SESSION = makeSessionDataType("mr").associatedClass(MRSession)
-    static final DataType PET_SESSION = makeSessionDataType("pet").associatedClass(PETSession)
-    static final DataType CT_SESSION = makeSessionDataType("ct").associatedClass(CTSession)
-    static final DataType CR_SESSION = makeSessionDataType("cr")
-    static final DataType PET_MR_SESSION = new DataType("xnat:petmrSessionData", "PETMR", "PET MR Session", "PET MR Sessions").associatedClass(PETMRSession)
-    static final DataType MANUAL_QC = new DataType("xnat:qcManualAssessorData", "MQC", "Manual QC", "Manual QCs").associatedClass(ManualQC)
-    static final DataType QC = new DataType("xnat:qcAssessmentData", "QC", "Auto QC", "Auto QCs").associatedClass(org.nrg.xnat.pogo.experiments.assessors.QC)
-    static final DataType MR_SCAN = makeScanDataType("mr").associatedScanClass(MRScan)
-    static final DataType PET_SCAN = makeScanDataType("pet").associatedScanClass(PETScan)
-    static final DataType CT_SCAN = makeScanDataType("ct").associatedScanClass(CTScan)
+    public static final DataType PROJECT = new DataType("xnat:projectData", null, "Project", "Projects")
+    public static final DataType SUBJECT = new DataType("xnat:subjectData", null, "Subject", "Subjects")
+    public static final DataType MR_SESSION = makeSessionDataType("mr").associatedClass(MRSession)
+    public static final DataType PET_SESSION = makeSessionDataType("pet").associatedClass(PETSession)
+    public static final DataType CT_SESSION = makeSessionDataType("ct").associatedClass(CTSession)
+    public static final DataType CR_SESSION = makeSessionDataType("cr")
+    public static final DataType PET_MR_SESSION = new DataType("xnat:petmrSessionData", "PETMR", "PET MR Session", "PET MR Sessions").associatedClass(PETMRSession)
+    public static final DataType MANUAL_QC = new DataType("xnat:qcManualAssessorData", "MQC", "Manual QC", "Manual QCs").associatedClass(ManualQC)
+    public static final DataType QC = new DataType("xnat:qcAssessmentData", "QC", "Auto QC", "Auto QCs").associatedClass(org.nrg.xnat.pogo.experiments.assessors.QC)
+    public static final DataType MR_SCAN = makeScanDataType("mr").associatedScanClass(MRScan)
+    public static final DataType PET_SCAN = makeScanDataType("pet").associatedScanClass(PETScan)
+    public static final DataType CT_SCAN = makeScanDataType("ct").associatedScanClass(CTScan)
 
     String xsiType
     String code

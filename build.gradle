@@ -117,6 +117,10 @@ publishing.publications {
     }
 }
 
+jar {
+    from sourceSets.main.allSource
+}
+
 publishing.repositories {
     maven {
         credentials {

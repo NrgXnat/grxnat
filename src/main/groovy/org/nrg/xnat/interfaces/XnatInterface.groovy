@@ -193,10 +193,13 @@ abstract class XnatInterface {
         subject.accessionNumber ?: subject.accessionNumber(jsonQuery().get(projectSubjectsUrl(subject.project)).jsonPath().getString("ResultSet.Result.find { it.label == '${subject.label}' }.ID")).accessionNumber
     }
 
+    String getAccessionNumber(Project project, SubjectAssessor subjectAssessor) {
+        subjectAssessor.accessionNumber ?: subjectAssessor.accessionNumber(queryBase().get(projectExperimentsUrl(project)).then().extract().jsonPath().getString("ResultSet.Result.find {it.label == '${subjectAssessor}' }.ID")).accessionNumber
+    }
+
     String getAccessionNumber(SubjectAssessor subjectAssessor) {
         if (subjectAssessor.primaryProject == null) throw new IllegalArgumentException("subjectAssessor object must have project specified.")
-
-        subjectAssessor.accessionNumber ?: subjectAssessor.accessionNumber(queryBase().get(projectExperimentsUrl(subjectAssessor.primaryProject)).then().extract().jsonPath().getString("ResultSet.Result.find {it.label == '${subjectAssessor}' }.ID")).accessionNumber
+        getAccessionNumber(subjectAssessor.primaryProject, subjectAssessor)
     }
 
     Subject readSubject(String accessionNumber) {
@@ -248,6 +251,7 @@ abstract class XnatInterface {
         if (session != null) queryPararms.put('EXPT_LABEL', session.label)
 
         queryBase().multiPart(sessionZip).queryParameters(queryPararms).when().post(formatRestUrl('/services/import')).then().assertThat().statusCode(200)
+        getAccessionNumber(project, session)
     }
 
     void uploadToSessionZipImporter(File sessionZip, Project project) {

@@ -2,8 +2,8 @@ package org.nrg.xnat.pogo.users
 
 class UserGroups {
 
-    static final UserGroup OWNER = new OwnerGroup()
-    static final UserGroup MEMBER = new MemberGroup()
-    static final UserGroup COLLABORATOR = new CollaboratorGroup()
+    public static final UserGroup OWNER = new OwnerGroup()
+    public static final UserGroup MEMBER = new MemberGroup()
+    public static final UserGroup COLLABORATOR = new CollaboratorGroup()
 
 }
