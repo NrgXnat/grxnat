@@ -66,20 +66,26 @@ repositories {
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+configurations {
+     compile.extendsFrom(compileAndInclude)
+}
+
 dependencies {
     compile("org.codehaus.groovy:groovy-all:${vGroovy}")
-    compile('org.apache.commons:commons-lang3')
-    compile('commons-io:commons-io')
-    compile("com.fasterxml.jackson.core:jackson-annotations:${vJackson}")
-    compile("com.fasterxml.jackson.core:jackson-core:${vJackson}")
-    compile("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
-    compile("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
-    compile("joda-time:joda-time:${vJodaTime}")
-    compile("org.reflections:reflections:${vReflections}")
-    compile('com.jayway.restassured:rest-assured')
-    compile('org.slf4j:slf4j-log4j12')
-    compile("org.nrg:test_utils:${vTestUtils}")
+    compileAndInclude('org.apache.commons:commons-lang3')
+    compileAndInclude('commons-io:commons-io')
+    compileAndInclude("com.fasterxml.jackson.core:jackson-annotations:${vJackson}")
+    compileAndInclude("com.fasterxml.jackson.core:jackson-core:${vJackson}")
+    compileAndInclude("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    compileAndInclude("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
+    compileAndInclude("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
+    compileAndInclude("joda-time:joda-time:${vJodaTime}")
+    compileAndInclude("org.reflections:reflections:${vReflections}")
+    compileAndInclude('com.jayway.restassured:rest-assured') {
+        exclude group: 'org.codehaus.groovy', module: '*'
+    }
+    compileAndInclude('org.slf4j:slf4j-log4j12')
+    compileAndInclude("org.nrg:test_utils:${vTestUtils}")
 
     testCompile 'org.testng:testng'
 }
@@ -135,6 +141,19 @@ publishing.repositories {
             url "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
         }
     }
+}
+
+task fatJar(type: Jar) {
+    zip64 true
+    classifier = "fat"
+    from {
+        configurations.compileAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
 }
 
 def propertyWithDefault(def String property, def Object value) {
