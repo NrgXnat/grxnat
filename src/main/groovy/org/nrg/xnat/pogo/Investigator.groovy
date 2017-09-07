@@ -100,4 +100,9 @@ class Investigator extends Extensible<Investigator> {
         return result
     }
 
+    @Override
+    String toString() {
+        getFullName()
+    }
+
 }

@@ -4,6 +4,7 @@ import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.pogo.extensions.project.ProjectExtension
 import org.nrg.xnat.pogo.resources.Resource
+import org.nrg.xnat.pogo.users.CustomUserGroup
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.pogo.users.UserGroups
@@ -26,6 +27,7 @@ class Project extends Extensible<Project> {
     private final List<Subject> subjects = []
     private final List<Subject> secondarySubjects = []
     private final List<Resource> projectResources = []
+    private final List<CustomUserGroup> customUserGroups = []
 
     Project(String id) {
         super()
@@ -142,6 +144,14 @@ class Project extends Extensible<Project> {
 
     void setProjectResources(List<Resource> projectResources) {
         ListUtils.copyInto(projectResources, this.projectResources)
+    }
+
+    List<CustomUserGroup> getCustomUserGroups() {
+        return customUserGroups
+    }
+
+    void setCustomUserGroups(List<CustomUserGroup> userGroups) {
+        ListUtils.copyInto(userGroups, customUserGroups)
     }
 
     ProjectExtension getExtension() {
@@ -269,6 +279,11 @@ class Project extends Extensible<Project> {
 
     Project addResource(Resource resource) {
         if (!projectResources.contains(resource)) projectResources.add(resource)
+        this
+    }
+
+    Project customUserGroups(List<CustomUserGroup> userGroups) {
+        setCustomUserGroups(userGroups)
         this
     }
 

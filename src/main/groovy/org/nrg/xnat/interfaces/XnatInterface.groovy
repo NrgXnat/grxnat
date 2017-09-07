@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.RestAssuredConfig
-import com.jayway.restassured.http.ContentType
-import com.jayway.restassured.internal.RestAssuredResponseImpl
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.response.Response
-import com.jayway.restassured.specification.RequestSender
 import com.jayway.restassured.specification.RequestSpecification
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.time.StopWatch
@@ -41,15 +38,19 @@ import org.nrg.xnat.pogo.resources.ScanResource
 import org.nrg.xnat.pogo.resources.SessionAssessorResource
 import org.nrg.xnat.pogo.resources.SubjectAssessorResource
 import org.nrg.xnat.pogo.resources.SubjectResource
+import org.nrg.xnat.pogo.users.CustomUserGroup
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAliasToken
 import org.nrg.xnat.rest.XnatSessionFilter
 
+import static com.jayway.restassured.RestAssured.form
 import static com.jayway.restassured.RestAssured.given
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
 import static com.jayway.restassured.http.ContentType.JSON
+import static com.jayway.restassured.http.ContentType.URLENC
+import static org.nrg.xnat.enums.DataAccessLevel.*
 
 abstract class XnatInterface {
 
@@ -414,6 +415,26 @@ abstract class XnatInterface {
         addUserToGroups(addedUser, "${project.id}_${userGroup.singularName().toLowerCase()}")
     }
 
+    void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
+        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', (customUserGroupPermissionString(project, DataType.PROJECT, 'R')) : '1']
+        userGroup.accessLevelMap.each { dataType, level ->
+            if (level in [READ_ONLY, CREATE_AND_EDIT, DELETE, ALL]) {
+                formData.put(customUserGroupPermissionString(project, dataType, 'R'), 1)
+            }
+            if (level in [CREATE_AND_EDIT, ALL]) {
+                formData.put(customUserGroupPermissionString(project, dataType, 'E'), 1)
+            }
+            if (level in [DELETE, ALL]) {
+                formData.put(customUserGroupPermissionString(project, dataType, 'D'), 1)
+            }
+        }
+        queryBase().contentType(URLENC).formParams(formData).post(formatRestUrl("projects/${project}/groups")).then().assertThat().statusCode(303)
+    }
+
+    private String customUserGroupPermissionString(Project project, DataType dataType, String permission) {
+        "${dataType.xsiType}_${dataType.xsiType}/project_${project}_${permission}"
+    }
+
     void uploadResources(List<Resource> resources) {
         resources.each { resource ->
             uploadResource(resource)
@@ -644,6 +665,10 @@ abstract class XnatInterface {
         createInvestigators((project.pi != null) ? project.investigators + project.pi : project.investigators)
 
         project.extension.create()
+
+        project.customUserGroups.each { group ->
+            createCustomUserGroup(project, group)
+        }
 
         if (project.prearchiveCode != null) setPrearchiveSetting(project, project.prearchiveCode)
 

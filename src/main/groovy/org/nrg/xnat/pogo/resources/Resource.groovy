@@ -102,4 +102,9 @@ abstract class Resource extends Extensible<Resource> {
         this
     }
 
+    @Override
+    String toString() {
+        folder
+    }
+
 }

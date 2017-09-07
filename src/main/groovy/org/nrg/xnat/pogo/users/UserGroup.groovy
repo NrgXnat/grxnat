@@ -8,10 +8,14 @@ abstract class UserGroup {
     abstract String singularName()
     abstract String pluralName()
 
-    protected final Map<DataType, DataAccessLevel> accessLevelMap = [:]
+    final Map<DataType, DataAccessLevel> accessLevelMap = [:]
+
+    Map<DataType, DataAccessLevel> getAccessLevelMap() {
+        accessLevelMap
+    }
 
     DataAccessLevel getAccessLevel(DataType dataType) {
-        return accessLevelMap.get(dataType)
+        accessLevelMap.get(dataType) ?: DataAccessLevel.NONE
     }
 
 }
