@@ -153,7 +153,12 @@ abstract class XnatInterface {
 
 
     boolean queryUserAdmin() {
-        'Administrator' in queryBase().get(formatXapiUrl("/users/${authUser.username}/roles")).jsonPath().getList("")
+        final Response response = queryBase().get(formatXapiUrl("/users/${authUser.username}/roles"))
+        if (response.statusCode == 200 && 'Administrator' in response.jsonPath().getList('')) {
+            true
+        } else {
+            false
+        }
     }
 
     final boolean userIsAdmin() {
@@ -161,6 +166,10 @@ abstract class XnatInterface {
             isAdmin = Optional.of(queryUserAdmin())
         }
         isAdmin
+    }
+
+    void disableAdminCheck() {
+        isAdmin = Optional.of(true)
     }
 
     List<User> readSiteUsers() {
