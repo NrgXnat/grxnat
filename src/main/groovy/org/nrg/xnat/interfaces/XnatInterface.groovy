@@ -30,6 +30,7 @@ import org.nrg.xnat.pogo.extensions.SimpleResourceFileExtension
 import org.nrg.xnat.pogo.extensions.project.ProjectQueryPutExtension
 import org.nrg.xnat.pogo.extensions.session_assessor.SessionAssessorQueryPutExtension
 import org.nrg.xnat.pogo.extensions.subject.SubjectQueryPutExtension
+import org.nrg.xnat.pogo.extensions.subject_assessor.SessionImportExtension
 import org.nrg.xnat.pogo.extensions.subject_assessor.SubjectAssessorQueryPutExtension
 import org.nrg.xnat.pogo.resources.ProjectResource
 import org.nrg.xnat.pogo.resources.Resource
@@ -786,7 +787,7 @@ abstract class XnatInterface {
 
         if (subjectAssessor instanceof ImagingSession) {
             final ImagingSession session = subjectAssessor as ImagingSession
-            if (session.scans.size() + session.assessors.size() > 0) waitForAutoRun(session, 600)
+            if (session.scans.size() + session.assessors.size() > 0 && session.extension instanceof SessionImportExtension) waitForAutoRun(session, 600)
 
             session.scans.each { scan ->
                 createScan(project, subject, session, scan)
