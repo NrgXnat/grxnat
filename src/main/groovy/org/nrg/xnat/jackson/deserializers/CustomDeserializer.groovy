@@ -108,4 +108,20 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
         }
     }
 
+    protected <X extends Enum> X readEnumByName(String representation, Class<X> enumClass) {
+        final X value = EnumSet.allOf(enumClass).find { it.name() == representation }
+        if (value == null) {
+            throw new RuntimeException("Enum not found of class ${enumClass} with name() == ${representation}")
+        }
+        value
+    }
+
+    protected <X extends Enum> X readEnumByToString(String representation, Class<X> enumClass) {
+        final X value = EnumSet.allOf(enumClass).find { it.toString() == representation }
+        if (value == null) {
+            throw new RuntimeException("Enum not found of class ${enumClass} with toString() == ${representation}")
+        }
+        value
+    }
+
 }

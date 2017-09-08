@@ -4,6 +4,8 @@ class CustomUserGroup extends UserGroup {
 
     String name
 
+    CustomUserGroup() {}
+
     CustomUserGroup(String name) {
         setName(name)
     }
@@ -15,6 +17,11 @@ class CustomUserGroup extends UserGroup {
 
     @Override
     String pluralName() {
+        name
+    }
+
+    @Override
+    String toString() {
         name
     }
 

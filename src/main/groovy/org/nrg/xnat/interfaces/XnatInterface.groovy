@@ -399,7 +399,7 @@ abstract class XnatInterface {
 
     void createInvestigator(Investigator investigator) {
         investigator.setXnatInvestigatordataId(
-                queryBase().contentType(JSON).body(investigator).post(formatXapiUrl('investigators')).jsonPath().getInt("xnatInvestigatordataId")
+                queryBase().contentType(JSON).body(investigator).post(formatXapiUrl('investigators')).jsonPath().getInt('xnatInvestigatordataId')
         )
     }
 
@@ -411,12 +411,12 @@ abstract class XnatInterface {
         }
     }
 
-    void addUserToProject(User addedUser, Project project, UserGroup userGroup) { // TODO: does this work for Custom User groups?
-        addUserToGroups(addedUser, "${project.id}_${userGroup.singularName().toLowerCase()}")
+    void addUserToProject(User addedUser, Project project, UserGroup userGroup) {
+        addUserToGroups(addedUser, "${project.id}_${(userGroup instanceof CustomUserGroup) ? userGroup.name : userGroup.singularName().toLowerCase()}")
     }
 
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
-        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', (customUserGroupPermissionString(project, DataType.PROJECT, 'R')) : '1']
+        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', (customUserGroupPermissionString(project, DataType.PROJECT, 'R')) : 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')) : 1]
         userGroup.accessLevelMap.each { dataType, level ->
             if (level in [READ_ONLY, CREATE_AND_EDIT, DELETE, ALL]) {
                 formData.put(customUserGroupPermissionString(project, dataType, 'R'), 1)
@@ -428,10 +428,10 @@ abstract class XnatInterface {
                 formData.put(customUserGroupPermissionString(project, dataType, 'D'), 1)
             }
         }
-        queryBase().contentType(URLENC).formParams(formData).post(formatRestUrl("projects/${project}/groups")).then().assertThat().statusCode(303)
+        queryBase().contentType(URLENC).formParams(formData).post(formatRestUrl("projects/${project}/groups")).then().assertThat().statusCode(200)
     }
 
-    private String customUserGroupPermissionString(Project project, DataType dataType, String permission) {
+    String customUserGroupPermissionString(Project project, DataType dataType, String permission) {
         "${dataType.xsiType}_${dataType.xsiType}/project_${project}_${permission}"
     }
 
@@ -786,6 +786,7 @@ abstract class XnatInterface {
 
         if (subjectAssessor instanceof ImagingSession) {
             final ImagingSession session = subjectAssessor as ImagingSession
+            if (session.scans.size() + session.assessors.size() > 0) waitForAutoRun(session, 600)
 
             session.scans.each { scan ->
                 createScan(project, subject, session, scan)
