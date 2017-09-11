@@ -426,7 +426,7 @@ abstract class XnatInterface {
     }
 
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
-        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', (customUserGroupPermissionString(project, DataType.PROJECT, 'R')) : 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')) : 1]
+        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', "xnat:projectData_xnat:projectData/ID_${project.id}_R" : 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')) : 1]
         userGroup.accessLevelMap.each { dataType, level ->
             if (level in [READ_ONLY, CREATE_AND_EDIT, DELETE, ALL]) {
                 formData.put(customUserGroupPermissionString(project, dataType, 'R'), 1)
