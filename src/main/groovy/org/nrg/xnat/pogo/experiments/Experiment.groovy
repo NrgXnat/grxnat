@@ -129,13 +129,13 @@ abstract class Experiment extends CustomVariableContainer<Experiment> {
     }
 
     boolean equals(o) {
-        if (this.is(o)) true
-        if (getClass() != o.class) false
+        if (this.is(o)) return true
+        if (!(o instanceof Experiment)) return false
 
         Experiment that = (Experiment) o
 
-        if (label != that.label) false
-        if (primaryProject != that.primaryProject) false
+        if (label != that.label) return false
+        if (primaryProject != that.primaryProject) return false
 
         true
     }
