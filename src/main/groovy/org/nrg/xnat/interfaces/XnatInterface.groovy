@@ -275,7 +275,7 @@ abstract class XnatInterface {
     }
 
     String userSessionsRestUrl(User user) {
-        formatRestUrl("authUser/${user.username}/sessions")
+        formatRestUrl("user/${user.username}/sessions")
     }
 
     void expireAllActiveSessions(User targetUser) {
@@ -458,12 +458,12 @@ abstract class XnatInterface {
             if (file.extension == null) {
                 final File possibleFile = new File(file.getName())
                 if (possibleFile != null && possibleFile.exists() && possibleFile.isFile()) {
-                    file.extension(new SimpleResourceFileExtension(file, possibleFile))
+                    file.extension(new SimpleResourceFileExtension(this, file, possibleFile))
                 } else {
                     throw new UnsupportedOperationException('ResourceFile must have extension set in order to locate file for upload.')
                 }
             }
-            queryBase().queryParams(SerializationUtils.serializeToMap(file)).multiPart(file.extension.getJavaFile()).put(resourceFileUrl(resource, file)).then().assertThat().statusCode(200)
+            file.extension.uploadTo(resource)
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
