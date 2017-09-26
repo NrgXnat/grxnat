@@ -366,8 +366,12 @@ abstract class XnatInterface {
         queryBase().body(script.getContents()).put(siteAnonScriptUrl()).then().assertThat().statusCode(200)
     }
 
-    String projectAnonScriptUrl(Project project) {
+    String projectAnonScriptUrlBase(Project project) {
         formatRestUrl("config/edit/projects/${project.id}/image/dicom/script")
+    }
+
+    String projectAnonScriptUrl(Project project) {
+        formatRestUrl("${projectAnonScriptUrlBase(project)}/script")
     }
 
     AnonScript readProjectAnonScript(Project project) {
@@ -379,7 +383,7 @@ abstract class XnatInterface {
     }
 
     void setProjectAnonScriptStatus(Project project, boolean status) {
-        queryBase().queryParam('activate', status).put(projectAnonScriptUrl(project)).then().assertThat().statusCode(200)
+        queryBase().queryParam('activate', status).put("${projectAnonScriptUrlBase(project)}/status").then().assertThat().statusCode(200)
     }
 
     void disableProjectAnonScript(Project project) {
