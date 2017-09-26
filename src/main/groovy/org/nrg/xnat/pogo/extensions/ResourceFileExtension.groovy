@@ -6,15 +6,17 @@ import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.resources.ResourceFile
 import org.nrg.xnat.rest.SerializationUtils
 
-import java.io.File
-
 abstract class ResourceFileExtension extends Extension<ResourceFile> {
 
-    protected XnatInterface xnatInterface
+    XnatInterface xnatInterface
 
-    ResourceFileExtension(XnatInterface xnatInterface, ResourceFile resourceFile) {
+    ResourceFileExtension(ResourceFile resourceFile) {
         super(resourceFile)
-        this.xnatInterface = xnatInterface
+    }
+
+    ResourceFileExtension xnatInterface(XnatInterface xnatInterface) {
+        setXnatInterface(xnatInterface)
+        this
     }
 
     abstract File getJavaFile()

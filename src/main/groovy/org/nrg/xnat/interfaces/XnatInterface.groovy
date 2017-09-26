@@ -462,12 +462,12 @@ abstract class XnatInterface {
             if (file.extension == null) {
                 final File possibleFile = new File(file.getName())
                 if (possibleFile != null && possibleFile.exists() && possibleFile.isFile()) {
-                    file.extension(new SimpleResourceFileExtension(this, file, possibleFile))
+                    file.extension(new SimpleResourceFileExtension(file, possibleFile))
                 } else {
                     throw new UnsupportedOperationException('ResourceFile must have extension set in order to locate file for upload.')
                 }
             }
-            file.extension.uploadTo(resource)
+            file.extension.xnatInterface(this).uploadTo(resource)
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
