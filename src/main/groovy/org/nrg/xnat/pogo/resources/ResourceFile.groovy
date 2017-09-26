@@ -25,6 +25,15 @@ class ResourceFile extends Extensible<ResourceFile> {
         super.setExtension(extension)
     }
 
+    String getName() {
+        if (name != null) {
+            return name
+        } else if (extension != null && extension.javaFile != null) {
+            return extension.javaFile.name
+        }
+        null
+    }
+
     ResourceFile name(String name) {
         setName(name)
         return this
