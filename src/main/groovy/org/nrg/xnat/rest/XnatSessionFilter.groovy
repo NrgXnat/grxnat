@@ -29,9 +29,9 @@ class XnatSessionFilter implements Filter {
         final FilterableRequestSpecification request = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
 
         if (sessionId != null) request.sessionId(sessionId)
-        final Response response = request.relaxedHTTPSValidation().sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+        final Response response = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
 
-        if (response.statusCode == 401 || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
+        if (response.statusCode in [302, 401] || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
             request.httpClient.connectionManager.shutdown()
             request.httpClient = new SystemDefaultHttpClient()
