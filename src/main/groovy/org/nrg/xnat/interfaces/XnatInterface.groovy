@@ -371,7 +371,7 @@ abstract class XnatInterface {
     }
 
     String projectAnonScriptUrl(Project project) {
-        formatRestUrl("${projectAnonScriptUrlBase(project)}/script")
+        "${projectAnonScriptUrlBase(project)}/script"
     }
 
     AnonScript readProjectAnonScript(Project project) {
