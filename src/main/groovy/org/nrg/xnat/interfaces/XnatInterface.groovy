@@ -113,6 +113,10 @@ abstract class XnatInterface {
         authenticate(xnatUrl, new User(username).password(password), allowInsecureSSL)
     }
 
+    void setServerIssueRetryCount(int count) {
+        sessionFilter.setServerIssueRetryCount(count)
+    }
+
     String formatXnatUrl(String... components) {
         CommonUtils.formatUrl(xnatUrl, CommonUtils.formatUrl((Object[]) components))
     }

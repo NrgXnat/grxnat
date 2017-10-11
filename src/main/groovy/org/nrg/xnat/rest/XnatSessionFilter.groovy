@@ -5,6 +5,7 @@ import com.jayway.restassured.filter.FilterContext
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.FilterableRequestSpecification
 import com.jayway.restassured.specification.FilterableResponseSpecification
+import com.jayway.restassured.specification.RequestSpecification
 import org.apache.http.impl.client.SystemDefaultHttpClient
 import org.nrg.testing.CommonUtils
 import org.nrg.xnat.pogo.users.User
@@ -37,11 +38,12 @@ class XnatSessionFilter implements Filter {
 
         if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
-            request.httpClient.connectionManager.shutdown()
-            request.httpClient = new SystemDefaultHttpClient()
+            resetClient(request)
             request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
         } else if (response.statusCode in serverIssueCodes) {
+            println "Received an HTTP status code ${response.statusCode} from the XNAT server, indicating an issue with the server itself. The request will be repeated ${serverIssueRetryCount} more time${serverIssueRetryCount == 1 ? '' : 's'}."
             for (int i = 0; i < serverIssueRetryCount; i++) {
+                resetClient(request)
                 final Response repeatedResponse = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
                 if (!(repeatedResponse.statusCode in serverIssueCodes)) {
                     return repeatedResponse
@@ -77,6 +79,12 @@ class XnatSessionFilter implements Filter {
         final Response response = Credentials.build(user).get(CommonUtils.formatUrl(xnatUrl, '/data/auth'))
         if (response.statusCode != 200) throw new AssertionError('Provided username and password combination do not appear to be correct')
         sessionId = response.getSessionId()
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    private void resetClient(RequestSpecification request) {
+        request.httpClient.connectionManager.shutdown()
+        request.httpClient = new SystemDefaultHttpClient()
     }
 
 }

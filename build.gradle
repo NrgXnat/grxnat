@@ -13,12 +13,10 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 
-def vBom = '1.5'
-def vJackson = '2.8.2'
+def vBom = '1.7'
 def vJodaTime = '2.9.9'
 def vGroovy = '2.4.4'
 def vTestUtils = '1.1'
-def vReflections = '0.9.10'
 
 buildscript {
     repositories {
@@ -74,13 +72,13 @@ dependencies {
     compile("org.codehaus.groovy:groovy-all:${vGroovy}")
     compileAndInclude('org.apache.commons:commons-lang3')
     compileAndInclude('commons-io:commons-io')
-    compileAndInclude("com.fasterxml.jackson.core:jackson-annotations:${vJackson}")
-    compileAndInclude("com.fasterxml.jackson.core:jackson-core:${vJackson}")
-    compileAndInclude("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
-    compileAndInclude("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
-    compileAndInclude("com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:${vJackson}")
+    compileAndInclude('com.fasterxml.jackson.core:jackson-annotations')
+    compileAndInclude('com.fasterxml.jackson.core:jackson-core')
+    compileAndInclude('com.fasterxml.jackson.core:jackson-databind')
+    compileAndInclude('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
+    compileAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
     compileAndInclude("joda-time:joda-time:${vJodaTime}")
-    compileAndInclude("org.reflections:reflections:${vReflections}")
+    compileAndInclude('org.reflections:reflections')
     compileAndInclude('com.jayway.restassured:rest-assured') {
         exclude group: 'org.codehaus.groovy', module: '*'
     }
