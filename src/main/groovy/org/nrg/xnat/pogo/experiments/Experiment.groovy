@@ -9,6 +9,7 @@ import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
+import org.nrg.xnat.util.MapUtils
 
 abstract class Experiment extends CustomVariableContainer<Experiment> {
 
@@ -19,12 +20,21 @@ abstract class Experiment extends CustomVariableContainer<Experiment> {
     LocalDate date
     String accessionNumber
     String notes
+    protected final Map<String, String> specificFields = [:]
     protected final List<Resource> resources = []
     protected final List<Share> shares = []
 
     Experiment() {
         final DataType potentialMatch = DataType.lookupDataTypeByAssociatedClass(this.class)
         if (potentialMatch != null) setDataType(potentialMatch)
+    }
+
+    Map<String, String> getSpecificFields() {
+        specificFields
+    }
+
+    void setSpecificFields(Map<String, String> values) {
+        MapUtils.copyInto(values, specificFields)
     }
 
     List<Resource> getResources() {
@@ -90,6 +100,12 @@ abstract class Experiment extends CustomVariableContainer<Experiment> {
     @SuppressWarnings("unchecked")
     <T extends Experiment> T notes(String notes) {
         setNotes(notes)
+        (T)this
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends Experiment> T specificFields(Map<String, String> fields) {
+        setSpecificFields(fields)
         (T)this
     }
 

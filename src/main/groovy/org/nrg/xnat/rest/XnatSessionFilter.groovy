@@ -15,6 +15,10 @@ class XnatSessionFilter implements Filter {
     private final User user
     private String sessionId
     private final boolean allowInsecureSSL
+    private final int[] authIssueCodes = [302, 401]
+    private final int[] serverIssueCodes = [502, 503, 504]
+    private final int waitTime = 10000
+    private int serverIssueRetryCount = 1
 
     XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL) {
         this.user = user
@@ -28,17 +32,25 @@ class XnatSessionFilter implements Filter {
     Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
         final FilterableRequestSpecification request = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
 
-        if (sessionId != null) request.sessionId(sessionId)
+        if (sessionId != null) request = request.sessionId(sessionId)
         final Response response = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
 
-        if (response.statusCode in [302, 401] || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
+        if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
             request.httpClient.connectionManager.shutdown()
             request.httpClient = new SystemDefaultHttpClient()
             request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
-        } else {
-            response
+        } else if (response.statusCode in serverIssueCodes) {
+            for (int i = 0; i < serverIssueRetryCount; i++) {
+                final Response repeatedResponse = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+                if (!(repeatedResponse.statusCode in serverIssueCodes)) {
+                    return repeatedResponse
+                } else {
+                    sleep(waitTime)
+                }
+            }
         }
+        response
     }
 
     String getXnatUrl() {
@@ -55,6 +67,10 @@ class XnatSessionFilter implements Filter {
 
     boolean getAllowInsecureSSL() {
         return allowInsecureSSL
+    }
+
+    void setServerIssueRetryCount(int count) {
+        serverIssueRetryCount = count
     }
 
     void extractSessionId() {

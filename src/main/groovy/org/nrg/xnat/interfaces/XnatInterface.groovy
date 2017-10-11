@@ -165,7 +165,7 @@ abstract class XnatInterface {
         if (!isAdmin.isPresent()) {
             isAdmin = Optional.of(queryUserAdmin())
         }
-        isAdmin
+        isAdmin.get()
     }
 
     void disableAdminCheck() {
