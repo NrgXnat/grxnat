@@ -28,6 +28,10 @@ class Project extends Extensible<Project> {
     private final List<Subject> secondarySubjects = []
     private final List<Resource> projectResources = []
     private final List<CustomUserGroup> customUserGroups = []
+    boolean subjectParallelization = false
+    boolean subjectAssessorParallelization = false
+    boolean sessionAssessorParallelization = false
+    boolean scanParallelization = false
 
     Project(String id) {
         super()
@@ -295,6 +299,26 @@ class Project extends Extensible<Project> {
     Project addUserGroup(UserGroup userGroup, List<User> userList) {
         final List<User> listCopy = ListUtils.copy(userList)
         users.put(userGroup, listCopy)
+        this
+    }
+
+    Project enableSubjectParallelization() {
+        setSubjectParallelization(true)
+        this
+    }
+
+    Project enableSubjectAssessorParallelization() {
+        setSubjectAssessorParallelization(true)
+        this
+    }
+
+    Project enableSessionAssessorParallelization() {
+        setSessionAssessorParallelization(true)
+        this
+    }
+
+    Project enableScanParallelization() {
+        setScanParallelization(true)
         this
     }
 

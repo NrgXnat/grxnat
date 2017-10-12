@@ -8,6 +8,7 @@ import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.RequestSpecification
+import groovyx.gpars.GParsPool
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.CommonUtils
@@ -46,7 +47,6 @@ import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAliasToken
 import org.nrg.xnat.rest.XnatSessionFilter
 
-import static com.jayway.restassured.RestAssured.form
 import static com.jayway.restassured.RestAssured.given
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
 import static com.jayway.restassured.http.ContentType.JSON
@@ -697,8 +697,17 @@ abstract class XnatInterface {
         }
         uploadResources(project.projectResources)
 
-        project.subjects.each { subject ->
-            createSubject(subject.project(project))
+        if (project.isSubjectParallelization()) {
+            GParsPool.withPool {
+                project.subjects.eachParallel { subject ->
+                    //noinspection GroovyAssignabilityCheck
+                    createSubject(subject.project(project))
+                }
+            }
+        } else {
+            project.subjects.each { subject ->
+                createSubject(subject.project(project))
+            }
         }
     }
 
@@ -725,8 +734,16 @@ abstract class XnatInterface {
             shareSubject(project, subject, share)
         }
 
-        subject.experiments.each { subjectAssessor ->
-            createSubjectAssessor(project, subject, subjectAssessor)
+        if (project.isSubjectAssessorParallelization()) {
+            GParsPool.withPool {
+                subject.experiments.eachParallel { subjectAssessor ->
+                    createSubjectAssessor(project, subject, subjectAssessor as SubjectAssessor)
+                }
+            }
+        } else {
+            subject.experiments.each { subjectAssessor ->
+                createSubjectAssessor(project, subject, subjectAssessor)
+            }
         }
     }
 
@@ -806,12 +823,28 @@ abstract class XnatInterface {
             final ImagingSession session = subjectAssessor as ImagingSession
             if (session.scans.size() + session.assessors.size() > 0 && session.extension instanceof SessionImportExtension) waitForAutoRun(session, 600)
 
-            session.scans.each { scan ->
-                createScan(project, subject, session, scan)
+            if (project.isScanParallelization()) {
+                GParsPool.withPool {
+                    session.scans.eachParallel { scan ->
+                        createScan(project, subject, session, scan as Scan)
+                    }
+                }
+            } else {
+                session.scans.each { scan ->
+                    createScan(project, subject, session, scan)
+                }
             }
 
-            session.assessors.each { assessor ->
-                createSessionAssessor(project, subject, session, assessor)
+            if (project.isSessionAssessorParallelization()) {
+                GParsPool.withPool {
+                    session.assessors.each { assessor ->
+                        createSessionAssessor(project, subject, session, assessor as SessionAssessor)
+                    }
+                }
+            } else {
+                session.assessors.each { assessor ->
+                    createSessionAssessor(project, subject, session, assessor)
+                }
             }
         }
     }

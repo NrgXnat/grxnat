@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.6-SNAPSHOT'
+def buildVersion = '1.7'
 
 group groupName
 version buildVersion
@@ -17,6 +17,7 @@ def vBom = '1.7'
 def vJodaTime = '2.9.9'
 def vGroovy = '2.4.4'
 def vTestUtils = '1.1'
+def vGPars = '1.2.0'
 
 buildscript {
     repositories {
@@ -84,6 +85,7 @@ dependencies {
     }
     compileAndInclude('org.slf4j:slf4j-log4j12')
     compileAndInclude("org.nrg:test_utils:${vTestUtils}")
+    compileAndInclude("org.codehaus.gpars:gpars:${vGPars}")
 
     testCompile 'org.testng:testng'
 }
