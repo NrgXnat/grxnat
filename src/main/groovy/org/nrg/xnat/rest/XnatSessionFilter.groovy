@@ -63,6 +63,10 @@ class XnatSessionFilter implements Filter {
         return user
     }
 
+    void deleteSessionId() {
+        sessionId = null
+    }
+
     String getSessionId() {
         return sessionId
     }

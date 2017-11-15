@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.extensions.subject
 
+import org.hamcrest.Matchers
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
@@ -16,7 +17,7 @@ class SubjectQueryPutExtension extends SubjectExtension {
 
     @Override
     void create(Project project) {
-        xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(xnatInterface.subjectUrl(project, parentObject)).then().assertThat().statusCode(201)
+        xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(xnatInterface.subjectUrl(project, parentObject)).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
 }

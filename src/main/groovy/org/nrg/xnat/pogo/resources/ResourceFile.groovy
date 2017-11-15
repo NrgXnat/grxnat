@@ -9,6 +9,8 @@ class ResourceFile extends Extensible<ResourceFile> {
     Resource resourceFolder
     boolean unzip = false
     String content
+    String format
+    String uri
 
     ResourceFile(Resource resourceFolder, String name) {
         this.resourceFolder = resourceFolder
@@ -18,7 +20,7 @@ class ResourceFile extends Extensible<ResourceFile> {
     ResourceFile() {}
 
     ResourceFileExtension getExtension() {
-        return (ResourceFileExtension) super.getExtension()
+        super.getExtension() as ResourceFileExtension
     }
 
     void setExtension(ResourceFileExtension extension) {
@@ -34,29 +36,43 @@ class ResourceFile extends Extensible<ResourceFile> {
         null
     }
 
+    String fullPath() {
+        (uri == null) ? name : uri.drop(uri.indexOf('/files/') + 7) // set path equal to what's after /files/ in the URI. TODO: make this not break in pathological case if a component in the URL (such as project) is equal to 'files' (I don't think this is really possible to do)
+    }
+
     ResourceFile name(String name) {
         setName(name)
-        return this
+        this
     }
 
     ResourceFile resourceFolder(Resource resourceFolder) {
         setResourceFolder(resourceFolder)
-        return this
+        this
     }
 
     ResourceFile unzip(boolean unzip) {
         setUnzip(unzip)
-        return this
+        this
     }
 
     ResourceFile content(String content) {
         setContent(content)
-        return this
+        this
+    }
+
+    ResourceFile fileFormat(String format) {
+        setFormat(format)
+        this
+    }
+
+    ResourceFile uri(String uri) {
+        setUri(uri)
+        this
     }
 
     ResourceFile extension(ResourceFileExtension extension) {
         setExtension(extension)
-        return this
+        this
     }
 
 }

@@ -25,4 +25,5 @@ class SubjectDeserializer extends CustomDeserializer<Subject> {
 
         subject
     }
+
 }

@@ -2,9 +2,9 @@ package org.nrg.xnat.interfaces
 
 import org.nrg.xnat.rest.XnatSessionFilter
 
-class XnatInterface_1_7_1 extends XnatInterface_1_7_2 {
+class XnatInterface_1_7_5 extends XnatInterface {
 
-    XnatInterface_1_7_1(XnatSessionFilter sessionFilter) {
+    XnatInterface_1_7_5(XnatSessionFilter sessionFilter) {
         super(sessionFilter)
     }
 

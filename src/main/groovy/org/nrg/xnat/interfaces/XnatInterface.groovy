@@ -60,6 +60,7 @@ abstract class XnatInterface {
     protected String xnatUrl
     protected User authUser
     protected Optional<Boolean> isAdmin = Optional.absent()
+    protected boolean readResources = true
 
     protected XnatInterface(XnatSessionFilter sessionFilter) {
         this.xnatUrl = sessionFilter.xnatUrl
@@ -87,18 +88,22 @@ abstract class XnatInterface {
                 } else {
                     final Response newResponse = given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
                     if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
-                        final String version = newResponse.jsonPath().getString("version")
+                        final String version = newResponse.jsonPath().getString('version')
                         if (version.startsWith('1.7.0')) {
                             new XnatInterface_1_7_0(sessionFilter)
                         } else if (version.startsWith('1.7.1')) {
                             new XnatInterface_1_7_1(sessionFilter)
                         } else if (version.startsWith('1.7.2')) {
                             new XnatInterface_1_7_2(sessionFilter)
-                        } else {
+                        } else if (version.startsWith('1.7.3')) {
                             new XnatInterface_1_7_3(sessionFilter)
+                        } else if (version.startsWith('1.7.4')) {
+                            new XnatInterface_1_7_4(sessionFilter)
+                        } else {
+                            new XnatInterface_1_7_5(sessionFilter)
                         }
                     } else {
-                        new XnatInterface_1_7_3(sessionFilter)
+                        new XnatInterface_1_7_5(sessionFilter)
                     }
                 }
             } else {
@@ -107,6 +112,28 @@ abstract class XnatInterface {
         } else {
             throw new AssertionError("There doesn't seem to be an XNAT reachable at that address.")
         }
+    }
+
+    void disableResourceReading() {
+        readResources = false
+    }
+
+    void enableResourceReading() {
+        readResources = true
+    }
+
+    void logout() {
+        queryBase().delete(formatRestUrl("/JSESSION/${sessionFilter.sessionId}")).then().assertThat().statusCode(200)
+        sessionFilter.deleteSessionId()
+    }
+
+    void reauthenticate() {
+        sessionFilter.extractSessionId()
+    }
+
+    void invalidateCachedUserSession() {
+        logout()
+        reauthenticate()
     }
 
     static XnatInterface authenticate(String xnatUrl, String username, String password, boolean allowInsecureSSL = false) {
@@ -329,7 +356,6 @@ abstract class XnatInterface {
     }
 
     void addUserToGroups(User user, String... groups) {
-        prohibitNonadmin()
         queryBase().contentType(JSON).body(groups).put(formatXapiUrl("/users/${user.username}/groups")).then().assertThat().statusCode(200)
     }
 
@@ -339,23 +365,27 @@ abstract class XnatInterface {
         user.admin(true)
     }
 
+    void postToSiteConfig(Map configSettings) {
+        prohibitNonadmin()
+        queryBase().contentType(JSON).body(configSettings).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
                 response.then().assertThat().statusCode(200).and().extract().jsonPath().getString("ResultSet.Result.get(0).script")
         )
     }
 
-    String siteAnonScriptUrl() {
+    String legacySiteAnonScriptUrl() {
         formatRestUrl('config/edit/image/dicom/script')
     }
 
     AnonScript readSiteAnonScript() {
-        readAnonScript(jsonQuery().get(siteAnonScriptUrl()))
+        readAnonScript(jsonQuery().get(legacySiteAnonScriptUrl()))
     }
 
     void setSiteAnonScriptStatus(boolean status) {
-        prohibitNonadmin()
-        queryBase().queryParam('activate', status).put(formatRestUrl('/config/edit/image/dicom/status')).then().assertThat().statusCode(200)
+        postToSiteConfig(Collections.singletonMap('enableSitewideAnonymizationScript', status))
     }
 
     void disableSiteAnonScript() {
@@ -367,7 +397,7 @@ abstract class XnatInterface {
     }
 
     void setSiteAnonScript(AnonScript script) {
-        queryBase().body(script.getContents()).put(siteAnonScriptUrl()).then().assertThat().statusCode(200)
+        postToSiteConfig(Collections.singletonMap('sitewideAnonymizationScript', script.getContents()))
     }
 
     String projectAnonScriptUrlBase(Project project) {
@@ -494,9 +524,18 @@ abstract class XnatInterface {
      * @return
      */
     List<Resource> readResources(Resource dummyResource) {
-        final List resources = jsonQuery().get(formatXnatUrl(dummyResource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
+        final List resourceResp = jsonQuery().get(formatXnatUrl(dummyResource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
             and().extract().response().jsonPath().getList('ResultSet.Result')
-        SerializationUtils.deserializeList(resources, dummyResource.class)
+        final List<Resource> resources = SerializationUtils.deserializeList(resourceResp, dummyResource.class)
+        resources.each { resource ->
+            if (dummyResource.project != null) resource.project(dummyResource.project)
+            if (dummyResource.subject != null) resource.subject(dummyResource.subject)
+            if (dummyResource.subjectAssessor != null) resource.subjectAssessor(dummyResource.subjectAssessor)
+            if (dummyResource.scan != null) resource.scan(dummyResource.scan)
+            if (dummyResource.sessionAssessor != null) resource.sessionAssessor(dummyResource.sessionAssessor)
+            resource.resourceFiles(jsonQuery().get(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}/files")).jsonPath().getObject('ResultSet.Result', ResourceFile[]) as List<ResourceFile>)
+        }
+        resources
     }
 
     void deleteResource(Resource resource) {
@@ -569,11 +608,9 @@ abstract class XnatInterface {
             }
         } catch (Error ignored) {} // if we can't access user list, oh well
 
-        project.resources(
-                readResources(new ProjectResource().project(project)).each { resource ->
-                    resource.project(project)
-                }
-        )
+        if (readResources) {
+            project.resources(readResources(new ProjectResource().project(project)))
+        }
 
         project.subjects(readSubjects(project))
         // TODO: anon scripts
@@ -584,11 +621,9 @@ abstract class XnatInterface {
             get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project == '${project.id}' }", Subject[])
 
         subjects.each { subject ->
-            subject.resources(
-                    readResources(new SubjectResource().project(project).subject(subject)).each { resource ->
-                        resource.project(project).subject(subject)
-                    }
-            )
+            if (readResources) {
+                subject.resources(readResources(new SubjectResource().project(project).subject(subject)))
+            }
             subject.experiments(
                 readSubjectAssessors(project, subject)
             )
@@ -610,11 +645,9 @@ abstract class XnatInterface {
         subject.experiments(nonimagingSubjectAssessors + imagingSessions)
 
         subject.experiments.each { assessor ->
-            assessor.resources(
-                    readResources(new SubjectAssessorResource().project(project).subject(subject).subjectAssessor(assessor)).each { resource ->
-                        resource.project(project).subject(subject).subjectAssessor(assessor)
-                    }
-            )
+            if (readResources) {
+                assessor.resources(readResources(new SubjectAssessorResource().project(project).subject(subject).subjectAssessor(assessor)))
+            }
         }
 
         imagingSessions.each { session ->
@@ -625,21 +658,19 @@ abstract class XnatInterface {
 
     List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
         jsonQuery().get(sessionScansUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', Scan[]).collect { scan ->
-            scan.scanResources(
-                    readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)).each { resource ->
-                        resource.project(project).subject(subject).subjectAssessor(session).scan(scan)
-                    }
-            ).session(session)
+            if (readResources) {
+                scan.scanResources(readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)))
+            }
+            scan.session(session)
         }
     }
 
     List<SessionAssessor> readSessionAssessors(Project project, Subject subject, ImagingSession session) {
         jsonQuery().get(assessorsUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', SessionAssessor[]).collect { assessor ->
-            assessor.resources(
-                    readResources(new SessionAssessorResource().project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)).each { resource ->
-                        resource.project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)
-                    }
-            ) as SessionAssessor
+            if (readResources) {
+                assessor.resources(readResources(new SessionAssessorResource().project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)))
+            }
+            assessor as SessionAssessor
         }
     }
 
@@ -779,6 +810,15 @@ abstract class XnatInterface {
                 then().assertThat().statusCode(200)
     }
 
+    void relabelSubject(Project project, Subject subject, String newLabel) {
+        queryBase().queryParam('label', newLabel).put(subjectUrl(project, subject)).then().assertThat().statusCode(200)
+        subject.setLabel(newLabel)
+    }
+
+    void relabelSubject(Subject subject, String newLabel) {
+        relabelSubject(subject.project, subject, newLabel)
+    }
+
     void deleteSubject(Project project, Subject subject) {
         if (project == null) {
             throw new UnsupportedOperationException('project cannot be null')
@@ -860,6 +900,22 @@ abstract class XnatInterface {
 
         queryBase().queryParam('label', share.destinationLabel ?: subjectAssessor.label).
                 put(CommonUtils.formatUrl(subjectAssessorUrl(project, subject, subjectAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(200)
+    }
+
+    void relabelSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, String newLabel) {
+        queryBase().queryParam('label', newLabel).put(subjectAssessorUrl(project, subject, subjectAssessor)).then().assertThat().statusCode(200)
+        subjectAssessor.setLabel(newLabel)
+    }
+
+    void relabelSubjectAssessor(SubjectAssessor subjectAssessor, String newLabel) {
+        relabelSubjectAssessor(subjectAssessor.primaryProject, subjectAssessor.subject, subjectAssessor, newLabel)
+    }
+
+    void reassignSubjectAssessor(SubjectAssessor experiment, Subject destinationSubject) {
+        final Subject originalSubject = experiment.subject
+        queryBase().put(formatRestUrl("/projects/${experiment.primaryProject}/subjects/${destinationSubject.label}/experiments/${getAccessionNumber(experiment)}")).then().assertThat().statusCode(200)
+        originalSubject.removeExperiment(experiment)
+        destinationSubject.addExperiment(experiment)
     }
 
     void deleteSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor) {
@@ -1012,7 +1068,7 @@ abstract class XnatInterface {
 
         final Project shadowProject = new Project(project.id)
         readResources(new ProjectResource().project(shadowProject)).each { resource ->
-            deleteResource(resource.project(shadowProject))
+            deleteResource(resource)
         }
     }
 
