@@ -156,6 +156,11 @@ abstract class XnatInterface {
         formatXnatUrl('xapi', CommonUtils.formatUrl((Object[]) components))
     }
 
+    String readXnatCsrfToken() {
+        final String csrfTokenLine = queryBase().get(formatXnatUrl('/app/Index.vm')).then().assertThat().statusCode(200).and().extract().response().asString().split('\n').find { it.contains('var csrfToken') }
+        csrfTokenLine.substring(csrfTokenLine.indexOf("'") + 1, csrfTokenLine.lastIndexOf("'"))
+    }
+
     void saveBinaryResponseToFile(Response response, File file) {
         response.then().assertThat().statusCode(200)
         final InputStream inputStream = response.asInputStream()
@@ -174,6 +179,10 @@ abstract class XnatInterface {
         queryBase().queryParam('format', 'json')
     }
 
+    RequestSpecification requestWithCsrfToken() {
+        queryBase().queryParam('XNAT_CSRF', readXnatCsrfToken())
+    }
+
     protected void prohibitNonadmin() {
         if (!userIsAdmin()) throw new UnsupportedOperationException('You must be an admin to perform this operation.')
     }
@@ -181,7 +190,6 @@ abstract class XnatInterface {
     protected void notSupported() {
         throw new UnsupportedOperationException('REST call not supported in this version of XNAT.')
     }
-
 
     boolean queryUserAdmin() {
         final Response response = queryBase().get(formatXapiUrl("/users/${authUser.username}/roles"))

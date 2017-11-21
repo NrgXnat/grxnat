@@ -93,6 +93,7 @@ class CStore {
         storeSCU.open()
         storeSCU.sendFiles()
         storeSCU.close()
+        println()
     }
 
 }
