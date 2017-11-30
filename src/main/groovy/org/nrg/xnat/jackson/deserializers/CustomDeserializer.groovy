@@ -15,7 +15,7 @@ import org.nrg.xnat.pogo.resources.Resource
 @SuppressWarnings("GrMethodMayBeStatic")
 abstract class CustomDeserializer<T> extends StdDeserializer<T> {
 
-    protected static final TypeReference NESTED_STRING_MAP = new TypeReference<Map<String, Map<String, String>>>() {}
+    public static final TypeReference NESTED_STRING_MAP = new TypeReference<Map<String, Map<String, String>>>() {}
 
     protected CustomDeserializer(Class<T> aClass) {
         super(aClass)
@@ -59,9 +59,7 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
     }
 
     protected void setObjectList(JsonNode parentNode, String field, ObjectCodec codec, Class objectClass, Closure method) {
-        if (fieldNonnull(parentNode, field)) {
-            method((codec as ObjectMapper).readerFor(objectClass).readValues(parentNode.get(field).toString()).readAll())
-        }
+        method(readObjectList(parentNode, field, codec, objectClass))
     }
 
     protected void setSimpleStringList(JsonNode parentNode, String field, Closure method) {
@@ -106,6 +104,10 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
             (objectNode as ObjectNode).put(injectKeyAs, entry.key)
             readObject(objectNode, codec, objectClass)
         }
+    }
+
+    protected <X> List<X> readObjectList(JsonNode parentNode, String field, ObjectCodec codec, Class<X> objectClass) {
+        fieldNonnull(parentNode, field) ? (codec as ObjectMapper).readerFor(objectClass).readValues(parentNode.get(field).toString()).readAll() : []
     }
 
     protected <X extends Enum> X readEnumByName(String representation, Class<X> enumClass) {

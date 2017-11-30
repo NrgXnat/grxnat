@@ -48,7 +48,7 @@ abstract class CustomSerializer<T> extends StdSerializer<T> {
         if (object != null) generator.writeObjectField(field, object)
     }
 
-    protected writeObjectListIfNonempty(JsonGenerator generator, String field, List objects) {
+    protected writeObjectListAsMap(JsonGenerator generator, String field, List objects) {
         if (objects != null && !objects.isEmpty()) {
             generator.writeObjectFieldStart(field)
             objects.each { object ->
@@ -59,7 +59,7 @@ abstract class CustomSerializer<T> extends StdSerializer<T> {
     }
 
     protected writeXnatResources(JsonGenerator generator, List<Resource> resources) {
-        writeObjectListIfNonempty(generator, 'resources', resources)
+        writeObjectListAsMap(generator, 'resources', resources)
     }
 
 }
