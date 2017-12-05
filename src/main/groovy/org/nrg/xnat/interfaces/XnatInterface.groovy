@@ -541,9 +541,13 @@ abstract class XnatInterface {
             if (dummyResource.subjectAssessor != null) resource.subjectAssessor(dummyResource.subjectAssessor)
             if (dummyResource.scan != null) resource.scan(dummyResource.scan)
             if (dummyResource.sessionAssessor != null) resource.sessionAssessor(dummyResource.sessionAssessor)
-            resource.resourceFiles(jsonQuery().get(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}/files")).jsonPath().getObject('ResultSet.Result', ResourceFile[]) as List<ResourceFile>)
+            readResourceFiles(resource)
         }
         resources
+    }
+
+    List<ResourceFile> readResourceFiles(Resource resource) {
+        resource.resourceFiles(jsonQuery().get(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}/files")).jsonPath().getObject('ResultSet.Result', ResourceFile[]) as List<ResourceFile>).resourceFiles
     }
 
     void deleteResource(Resource resource) {

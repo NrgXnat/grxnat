@@ -16,18 +16,19 @@ class DataType {
 
     static final List<DataType> KNOWN_TYPES = []
 
-    public static final DataType PROJECT = new DataType("xnat:projectData", null, "Project", "Projects")
-    public static final DataType SUBJECT = new DataType("xnat:subjectData", null, "Subject", "Subjects")
-    public static final DataType MR_SESSION = makeSessionDataType("mr").associatedClass(MRSession)
-    public static final DataType PET_SESSION = makeSessionDataType("pet").associatedClass(PETSession)
-    public static final DataType CT_SESSION = makeSessionDataType("ct").associatedClass(CTSession)
-    public static final DataType CR_SESSION = makeSessionDataType("cr")
-    public static final DataType PET_MR_SESSION = new DataType("xnat:petmrSessionData", "PETMR", "PET MR Session", "PET MR Sessions").associatedClass(PETMRSession)
-    public static final DataType MANUAL_QC = new DataType("xnat:qcManualAssessorData", "MQC", "Manual QC", "Manual QCs").associatedClass(ManualQC)
-    public static final DataType QC = new DataType("xnat:qcAssessmentData", "QC", "Auto QC", "Auto QCs").associatedClass(org.nrg.xnat.pogo.experiments.assessors.QC)
-    public static final DataType MR_SCAN = makeScanDataType("mr").associatedScanClass(MRScan)
-    public static final DataType PET_SCAN = makeScanDataType("pet").associatedScanClass(PETScan)
-    public static final DataType CT_SCAN = makeScanDataType("ct").associatedScanClass(CTScan)
+    public static final DataType PROJECT = new DataType('xnat:projectData', null, 'Project')
+    public static final DataType SUBJECT = new DataType('xnat:subjectData', null, 'Subject')
+    public static final DataType MR_SESSION = makeSessionDataType('mr').associatedClass(MRSession)
+    public static final DataType PET_SESSION = makeSessionDataType('pet').associatedClass(PETSession)
+    public static final DataType CT_SESSION = makeSessionDataType('ct').associatedClass(CTSession)
+    public static final DataType CR_SESSION = makeSessionDataType('cr')
+    public static final DataType PET_MR_SESSION = new DataType('xnat:petmrSessionData', 'PETMR', 'PET MR Session').associatedClass(PETMRSession)
+    public static final DataType MANUAL_QC = new DataType('xnat:qcManualAssessorData', 'MQC', 'Manual QC').associatedClass(ManualQC)
+    public static final DataType QC = new DataType('xnat:qcAssessmentData', 'QC', 'Auto QC').associatedClass(org.nrg.xnat.pogo.experiments.assessors.QC)
+    public static final DataType MR_SCAN = makeScanDataType('mr').associatedScanClass(MRScan)
+    public static final DataType PET_SCAN = makeScanDataType('pet').associatedScanClass(PETScan)
+    public static final DataType CT_SCAN = makeScanDataType('ct').associatedScanClass(CTScan)
+    public static final DataType FREESURFER = new DataType('fs:fsData', null, 'Freesurfer', 'Freesurfers')
 
     String xsiType
     String code
@@ -44,14 +45,18 @@ class DataType {
         KNOWN_TYPES.add(this)
     }
 
+    DataType(String xsiType, String code, String singularName) {
+        this(xsiType, code, singularName, "${singularName}s")
+    }
+
     DataType() {}
 
     static DataType makeSessionDataType(String sessionCode) {
-        new DataType(String.format("xnat:%sSessionData", sessionCode.toLowerCase()), sessionCode.toUpperCase(), String.format("%s Session", sessionCode.toUpperCase()), String.format("%s Sessions", sessionCode.toUpperCase()))
+        new DataType("xnat:${sessionCode.toLowerCase()}SessionData", sessionCode.toUpperCase(), "${sessionCode.toUpperCase()} Session")
     }
 
     static DataType makeScanDataType(String sessionCode) {
-        new DataType(String.format("xnat:%sScanData", sessionCode.toLowerCase()), null, null, null)
+        new DataType("xnat:${sessionCode.toLowerCase()}ScanData", null, null, null)
     }
 
     static DataType lookup(String xsiType) {
@@ -66,7 +71,7 @@ class DataType {
     }
 
     String getPluralName() {
-        return (pluralName == null) ? singularName + "s" : pluralName
+        return (pluralName == null) ? singularName + 's' : pluralName
     }
 
     void setPluralName(String pluralName) {

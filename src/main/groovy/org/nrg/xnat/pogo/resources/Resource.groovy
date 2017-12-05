@@ -102,6 +102,14 @@ abstract class Resource extends Extensible<Resource> {
         this
     }
 
+    ResourceFile findFile(String fullPath) {
+        resourceFiles.find { it.fullPath() == fullPath }
+    }
+
+    ResourceFile findFileMatch(String fullPathRegex) {
+        resourceFiles.find { it.fullPath().matches(fullPathRegex) }
+    }
+
     @Override
     String toString() {
         folder
