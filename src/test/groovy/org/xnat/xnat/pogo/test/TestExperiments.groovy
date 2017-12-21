@@ -29,4 +29,5 @@ class TestExperiments {
         assertEquals([scan], mrSession.scans)
         assertEquals(DataType.MR_SESSION, mrSession.dataType)
     }
+
 }

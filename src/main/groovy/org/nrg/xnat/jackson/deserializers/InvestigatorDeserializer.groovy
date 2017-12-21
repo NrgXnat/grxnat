@@ -14,7 +14,7 @@ class InvestigatorDeserializer extends CustomDeserializer<Investigator> {
         setStringIfNonnull(node, 'title', investigator.&setTitle)
         setStringIfNonnull(node, 'firstname', investigator.&setFirstname)
         setStringIfNonnull(node, 'lastname', investigator.&setLastname)
-        setStringIfNonnull(node, 'xnatInvestigatordataId', investigator.&setXnatInvestigatordataId)
+        setStringIfNonnull(node, 'xnatInvestigatordataId', investigator.&setId)
         setStringIfNonnull(node, 'email', investigator.&setEmail)
         setStringIfNonnull(node, 'phone', investigator.&setPhone)
         setStringIfNonnull(node, 'department', investigator.&setDepartment)

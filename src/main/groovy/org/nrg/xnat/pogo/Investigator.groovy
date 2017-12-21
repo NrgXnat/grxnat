@@ -8,7 +8,8 @@ class Investigator extends Extensible<Investigator> {
     String department
     String email
     String phone
-    private int xnatInvestigatordataId
+    List<String> primaryProjects = []
+    int xnatInvestigatordataId
 
     Investigator() {}
 
@@ -16,20 +17,12 @@ class Investigator extends Extensible<Investigator> {
         (firstname != null && lastname != null) ? "${lastname}, ${firstname}" : null
     }
 
-    int getXnatInvestigatordataId() {
-        return xnatInvestigatordataId
-    }
-
-    void setXnatInvestigatordataId(int xnatInvestigatordataId) {
-        this.xnatInvestigatordataId = xnatInvestigatordataId
-    }
-
-    void setXnatInvestigatordataId(String xnatInvestigatordataId) {
-        this.xnatInvestigatordataId = Integer.parseInt(xnatInvestigatordataId)
+    void setId(String xnatInvestigatordataId) {
+        setXnatInvestigatordataId(Integer.parseInt(xnatInvestigatordataId))
     }
 
     Extension<Investigator> getExtension() {
-        return super.getExtension()
+        super.getExtension()
     }
 
     void setExtension(Extension<Investigator> extension) {
@@ -38,47 +31,52 @@ class Investigator extends Extensible<Investigator> {
 
     Investigator title(String title) {
         setTitle(title)
-        return this
+        this
     }
 
     Investigator firstname(String firstname) {
         setFirstname(firstname)
-        return this
+        this
     }
 
     Investigator lastname(String lastname) {
         setLastname(lastname)
-        return this
+        this
     }
 
     Investigator institution(String institution) {
         setInstitution(institution)
-        return this
+        this
     }
 
     Investigator department(String department) {
         setDepartment(department)
-        return this
+        this
     }
 
     Investigator phone(String phone) {
         setPhone(phone)
-        return this
+        this
     }
 
     Investigator email(String email) {
         setEmail(email)
-        return this
+        this
     }
 
     Investigator id(int id) {
         setXnatInvestigatordataId(id)
-        return this
+        this
+    }
+
+    Investigator primaryProjects(List<String> projects) {
+        setPrimaryProjects(projects)
+        this
     }
 
     Investigator extension(Extension<Investigator> extension) {
         setExtension(extension)
-        return this
+        this
     }
 
     boolean equals(o) {
@@ -97,7 +95,7 @@ class Investigator extends Extensible<Investigator> {
         int result
         result = (firstname != null ? firstname.hashCode() : 0)
         result = 31 * result + (lastname != null ? lastname.hashCode() : 0)
-        return result
+        result
     }
 
     @Override
