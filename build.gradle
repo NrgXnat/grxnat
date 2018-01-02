@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.8.1'
+def buildVersion = '1.9-SNAPSHOT'
 
 group groupName
 version buildVersion
@@ -13,8 +13,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 
-def vBom = '1.7'
-def vJodaTime = '2.9.9'
+def vBom = '2.0'
 def vGroovy = '2.4.4'
 def vTestUtils = '1.1'
 def vGPars = '1.2.0'
@@ -62,8 +61,8 @@ repositories {
     }
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 configurations {
      compile.extendsFrom(compileAndInclude)
@@ -78,7 +77,6 @@ dependencies {
     compileAndInclude('com.fasterxml.jackson.core:jackson-databind')
     compileAndInclude('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
     compileAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
-    compileAndInclude("joda-time:joda-time:${vJodaTime}")
     compileAndInclude('org.reflections:reflections')
     compileAndInclude('com.jayway.restassured:rest-assured') {
         exclude group: 'org.codehaus.groovy', module: '*'

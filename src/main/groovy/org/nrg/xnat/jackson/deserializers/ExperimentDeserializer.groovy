@@ -3,9 +3,10 @@ package org.nrg.xnat.jackson.deserializers
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
-import org.joda.time.LocalDate
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.experiments.Experiment
+
+import java.time.LocalDate
 
 class ExperimentDeserializer<T extends Experiment> extends CustomDeserializer<T> {
 

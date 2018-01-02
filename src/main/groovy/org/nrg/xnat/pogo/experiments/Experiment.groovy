@@ -1,6 +1,5 @@
 package org.nrg.xnat.pogo.experiments
 
-import org.joda.time.LocalDate
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
@@ -10,6 +9,8 @@ import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
 import org.nrg.xnat.util.MapUtils
+
+import java.time.LocalDate
 
 abstract class Experiment extends CustomVariableContainer<Experiment> {
 

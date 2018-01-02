@@ -1,12 +1,13 @@
 package org.xnat.xnat.pogo.test
 
 import org.apache.commons.lang3.StringUtils
-import org.joda.time.LocalDate
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.experiments.sessions.MRSession
 import org.testng.annotations.Test
+
+import java.time.LocalDate
 
 import static org.testng.AssertJUnit.*
 
@@ -19,7 +20,7 @@ class TestExperiments {
 
     @Test
     void testMRSession() {
-        final LocalDate date = new LocalDate("2014-02-20")
+        final LocalDate date = LocalDate.parse('2014-02-20')
         final Scan scan = new Scan().id("scan1")
 
         final MRSession mrSession = new MRSession().date(date)

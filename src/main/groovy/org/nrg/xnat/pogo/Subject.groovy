@@ -1,6 +1,5 @@
 package org.nrg.xnat.pogo
 
-import org.joda.time.LocalDate
 import org.nrg.xnat.enums.Gender
 import org.nrg.xnat.enums.Handedness
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
@@ -9,6 +8,8 @@ import org.nrg.xnat.pogo.extensions.subject.SubjectExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
 import org.nrg.xnat.util.RandomUtils
+
+import java.time.LocalDate
 
 class Subject extends CustomVariableContainer<Subject> {
 
