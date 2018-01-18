@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import org.nrg.xnat.pogo.Subject
 
+import java.time.format.DateTimeFormatter
+
 class SubjectSerializer extends CustomSerializer<Subject> {
 
     @Override
@@ -32,7 +34,7 @@ class SubjectSerializer extends CustomSerializer<Subject> {
         writeStringFieldIfNonempty(gen, 'src', subject.src)
         writeStringFieldIfNonempty(gen, 'group', subject.group)
         if (subject.dob != null) {
-            gen.writeStringField('dob', subject.dob.toString('yyyy-MM-dd'))
+            gen.writeStringField('dob', subject.dob.format(DateTimeFormatter.ISO_LOCAL_DATE))
         }
     }
 

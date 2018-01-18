@@ -1,4 +1,4 @@
-package org.xnat.xnat.pogo.test
+package org.nrg.xnat.pogo.test
 
 import org.apache.commons.lang3.StringUtils
 import org.nrg.xnat.pogo.DataType

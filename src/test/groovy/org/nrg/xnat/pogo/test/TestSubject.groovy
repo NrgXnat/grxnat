@@ -1,4 +1,4 @@
-package org.xnat.xnat.pogo.test
+package org.nrg.xnat.pogo.test
 
 import org.nrg.xnat.enums.Gender
 import org.nrg.xnat.enums.Handedness

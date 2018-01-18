@@ -1,4 +1,4 @@
-package org.xnat.xnat.pogo.test
+package org.nrg.xnat.util.test
 
 import org.nrg.xnat.util.TimeUtils
 import org.testng.annotations.Test

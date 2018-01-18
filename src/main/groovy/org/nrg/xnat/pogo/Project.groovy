@@ -27,7 +27,6 @@ class Project extends Extensible<Project> {
     private final List<Subject> subjects = []
     private final List<Subject> secondarySubjects = []
     private final List<Resource> projectResources = []
-    private final List<CustomUserGroup> customUserGroups = []
     boolean subjectParallelization = false
     boolean subjectAssessorParallelization = false
     boolean sessionAssessorParallelization = false
@@ -150,20 +149,22 @@ class Project extends Extensible<Project> {
         ListUtils.copyInto(projectResources, this.projectResources)
     }
 
-    List<CustomUserGroup> getCustomUserGroups() {
-        return customUserGroups
-    }
-
-    void setCustomUserGroups(List<CustomUserGroup> userGroups) {
-        ListUtils.copyInto(userGroups, customUserGroups)
-    }
-
     ProjectExtension getExtension() {
         super.extension as ProjectExtension
     }
 
     void setExtension(ProjectExtension extension) {
         super.setExtension(extension)
+    }
+
+    void setCustomUserGroups(List<CustomUserGroup> userGroups) {
+        userGroups.each { group ->
+            users[group] = []
+        }
+    }
+
+    Set<CustomUserGroup> getCustomUserGroups() {
+        users.keySet().findAll { it instanceof CustomUserGroup } as Set<CustomUserGroup>
     }
 
     Project id(String id) {
@@ -283,11 +284,6 @@ class Project extends Extensible<Project> {
 
     Project addResource(Resource resource) {
         if (!projectResources.contains(resource)) projectResources.add(resource)
-        this
-    }
-
-    Project customUserGroups(List<CustomUserGroup> userGroups) {
-        setCustomUserGroups(userGroups)
         this
     }
 

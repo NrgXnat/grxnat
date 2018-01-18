@@ -378,6 +378,18 @@ abstract class XnatInterface {
         queryBase().contentType(JSON).body(configSettings).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
+    void setLoginRequirement(boolean loginRequired) {
+        postToSiteConfig(['requireLogin' : loginRequired])
+    }
+
+    void openXnat() {
+        setLoginRequirement(false)
+    }
+
+    void closeXnat() {
+        setLoginRequirement(true)
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
                 response.then().assertThat().statusCode(200).and().extract().jsonPath().getString("ResultSet.Result.get(0).script")
@@ -393,7 +405,7 @@ abstract class XnatInterface {
     }
 
     void setSiteAnonScriptStatus(boolean status) {
-        postToSiteConfig(Collections.singletonMap('enableSitewideAnonymizationScript', status))
+        postToSiteConfig(['enableSitewideAnonymizationScript' : status])
     }
 
     void disableSiteAnonScript() {
@@ -405,7 +417,7 @@ abstract class XnatInterface {
     }
 
     void setSiteAnonScript(AnonScript script) {
-        postToSiteConfig(Collections.singletonMap('sitewideAnonymizationScript', script.getContents()))
+        postToSiteConfig(['sitewideAnonymizationScript' : script.getContents()])
     }
 
     String projectAnonScriptUrlBase(Project project) {
