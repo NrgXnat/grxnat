@@ -9,6 +9,7 @@ class TimeUtils {
     public static final DateTimeFormatter DICOM_DA_FORMAT = DateTimeFormatter.ofPattern('uuuuMMdd')
     public static final DateTimeFormatter DICOM_TM_FORMAT = tmFormatter()
     public static final DateTimeFormatter MM_DD_YYYY = DateTimeFormatter.ofPattern('MM/dd/uuuu')
+    public static final DateTimeFormatter UNAMBIGUOUS_DATETIME = DateTimeFormatter.ofPattern('uuuu-MM-dd HH:mm:ss')
 
     private static tmFormatter() {
         new DateTimeFormatterBuilder().appendPattern('HH').

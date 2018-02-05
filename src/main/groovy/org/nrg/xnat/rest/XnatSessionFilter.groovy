@@ -39,7 +39,7 @@ class XnatSessionFilter implements Filter {
         if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
             resetClient(request)
-            request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+            return request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
         } else if (response.statusCode in serverIssueCodes) {
             println "Received an HTTP status code ${response.statusCode} from the XNAT server, indicating an issue with the server itself. The request will be repeated ${serverIssueRetryCount} more time${serverIssueRetryCount == 1 ? '' : 's'}."
             for (int i = 0; i < serverIssueRetryCount; i++) {
