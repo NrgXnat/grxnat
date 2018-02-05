@@ -34,7 +34,7 @@ class ExperimentDeserializer<T extends Experiment> extends CustomDeserializer<T>
         setStringIfNonnull(node, 'label', experiment.&setLabel)
 
         if (fieldNonempty(node, 'date')) {
-            experiment.setDate(new LocalDate(node.get('date').asText()))
+            experiment.setDate(LocalDate.parse(node.get('date').asText()))
         }
 
         if (fieldNonnull(node, 'xsiType')) {
