@@ -15,6 +15,7 @@ class Scan extends Extensible<Scan> {
     String type
     String note
     String quality = "usable"
+    String uid
     private final List<Resource> scanResources = []
 
     Scan(ImagingSession session, String id) {
@@ -91,6 +92,11 @@ class Scan extends Extensible<Scan> {
         this
     }
 
+    Scan uid(String uid) {
+        setUid(uid)
+        this
+    }
+
     Scan scanResources(List<Resource> scanResources) {
         setScanResources(scanResources)
         this
@@ -118,6 +124,7 @@ class Scan extends Extensible<Scan> {
         Scan scan = (Scan) o
 
         if (id != scan.id) return false
+        if (session != scan.session) return false
 
         return true
     }

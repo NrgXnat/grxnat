@@ -318,6 +318,10 @@ class Project extends Extensible<Project> {
         this
     }
 
+    Subject findSubject(String label) {
+        subjects.find { it.label == label }
+    }
+
     private Map<UserGroup, List<User>> constructDefaultUserMap() {
         final Map<UserGroup, List<User>> userMap = [:]
         userMap.put(UserGroups.OWNER, [])

@@ -698,28 +698,14 @@ abstract class XnatInterface {
         }
     }
 
-    Subject findSubject(Project project, String label) {
-        project.subjects.find { it.label == label }
+    void populateAdditionalScanMetadata(Project project, Subject subject, ImagingSession session) {
+        session.scans.each { scan ->
+            readAdditionalScanMetadata(project, subject, session, scan)
+        }
     }
 
-    SubjectAssessor findSubjectAssessor(Subject subject, String label) {
-        subject.experiments.find { it.label == label }
-    }
-
-    SessionAssessor findSessionAssessor(ImagingSession session, String label) {
-        session.assessors.find { it.label == label }
-    }
-
-    Scan findScan(ImagingSession session, String scanId) {
-        session.scans.find { it.id == scanId }
-    }
-
-    List<Scan> filterScansByType(List<Scan> scans, String type) {
-        filterScansByType(scans, [type])
-    }
-
-    List<Scan> filterScansByType(List<Scan> scans, List<String> acceptableTypes) {
-        scans.findAll { it.type in acceptableTypes }
+    Scan readAdditionalScanMetadata(Project project, Subject subject, ImagingSession session, Scan scan) {
+        scan.uid(jsonQuery().get(scanUrl(project, subject, session, scan)).jsonPath().getString('items[0].data_fields.UID'))
     }
 
     Resource findResource(List<Resource> resources, String resourceLabel) {

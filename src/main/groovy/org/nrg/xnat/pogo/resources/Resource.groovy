@@ -93,7 +93,7 @@ abstract class Resource extends Extensible<Resource> {
     }
 
     Resource addResourceFile(ResourceFile resourceFile) {
-        resourceFiles.add(resourceFile)
+        if (!resourceFiles.contains(resourceFile)) resourceFiles.add(resourceFile)
         this
     }
 

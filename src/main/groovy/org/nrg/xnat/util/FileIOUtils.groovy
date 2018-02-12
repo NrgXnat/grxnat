@@ -6,11 +6,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter
 class FileIOUtils {
 
     static String readFile(File file) {
-        try {
-            FileUtils.readFileToString(file, "utf-8")
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read in file (${file}) due to: ${e}")
-        }
+        file.text
     }
 
     static List<File> listFilesRecursively(File directory) {

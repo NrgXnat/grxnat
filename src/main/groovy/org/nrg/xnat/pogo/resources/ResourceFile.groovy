@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.resources
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.extensions.ResourceFileExtension
 
@@ -11,9 +12,11 @@ class ResourceFile extends Extensible<ResourceFile> {
     String content
     String format
     String uri
+    @JsonProperty('digest') String md5
 
     ResourceFile(Resource resourceFolder, String name) {
         this.resourceFolder = resourceFolder
+        resourceFolder.addResourceFile(this)
         this.name = name
     }
 
@@ -67,6 +70,11 @@ class ResourceFile extends Extensible<ResourceFile> {
 
     ResourceFile uri(String uri) {
         setUri(uri)
+        this
+    }
+
+    ResourceFile md5(String md5) {
+        setMd5(md5)
         this
     }
 

@@ -11,7 +11,7 @@ abstract class SubjectAssessor extends Experiment {
         super()
         setPrimaryProject(project)
         setSubject(subject)
-        this.label = (label != null) ? label : RandomUtils.randomID()
+        this.label = label ?: RandomUtils.randomID()
     }
 
     SubjectAssessor() {

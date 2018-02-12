@@ -3,6 +3,7 @@ package org.nrg.xnat.pogo.experiments
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.extensions.session_assessor.SessionAssessorExtension
+import org.nrg.xnat.util.RandomUtils
 
 class SessionAssessor extends Experiment {
 
@@ -13,7 +14,7 @@ class SessionAssessor extends Experiment {
         this.primaryProject = project
         this.subject = subject
         setParentSession(parentSession)
-        this.label = label
+        this.label = label ?: RandomUtils.randomID()
     }
 
     SessionAssessor() {

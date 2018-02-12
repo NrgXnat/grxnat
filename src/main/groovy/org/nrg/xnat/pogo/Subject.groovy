@@ -3,6 +3,7 @@ package org.nrg.xnat.pogo
 import org.nrg.xnat.enums.Gender
 import org.nrg.xnat.enums.Handedness
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
+import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
 import org.nrg.xnat.pogo.extensions.subject.SubjectExtension
 import org.nrg.xnat.pogo.resources.Resource
@@ -105,6 +106,10 @@ class Subject extends CustomVariableContainer<Subject> {
 
     void removeExperiment(SubjectAssessor subjectAssessor) {
         experiments.remove(subjectAssessor)
+    }
+
+    List<ImagingSession> getSessions() {
+        experiments.findAll { it instanceof ImagingSession } as List<ImagingSession>
     }
 
     SubjectExtension getExtension() {
@@ -228,6 +233,10 @@ class Subject extends CustomVariableContainer<Subject> {
     Subject group(String group) {
         setGroup(group)
         this
+    }
+
+    SubjectAssessor findSubjectAssessor(String label) {
+        experiments.find { it.label == label }
     }
 
     @Override
