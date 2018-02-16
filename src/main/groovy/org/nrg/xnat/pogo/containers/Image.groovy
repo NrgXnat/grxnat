@@ -10,4 +10,9 @@ class Image {
     List<Command> commands = []
     ContainerType type = ContainerType.DOCKER
 
+    @Override
+    String toString() {
+        "${user}/${name}:${version}"
+    }
+
 }

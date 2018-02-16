@@ -265,6 +265,7 @@ abstract class XnatInterface {
     }
 
     void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {
+        println "A subsequent operation requires that the AutoRun pipeline complete on this session (${session}) before continuing. If this step appears to be hanging, it likely means that the pipeline engine is not configured correctly on the XNAT server. Waiting for AutoRun completion for up to ${maxTimeInSeconds} seconds..."
         final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
 
         final StopWatch stopWatch = CommonUtils.launchStopWatch()
