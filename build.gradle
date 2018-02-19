@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.9'
+def buildVersion = '1.9.1-SNAPSHOT'
 
 group groupName
 version buildVersion
