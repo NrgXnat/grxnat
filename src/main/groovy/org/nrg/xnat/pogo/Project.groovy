@@ -2,6 +2,7 @@ package org.nrg.xnat.pogo
 
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
+import org.nrg.xnat.pogo.events.Subscription
 import org.nrg.xnat.pogo.extensions.project.ProjectExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.users.CustomUserGroup
@@ -31,6 +32,7 @@ class Project extends Extensible<Project> {
     boolean subjectAssessorParallelization = false
     boolean sessionAssessorParallelization = false
     boolean scanParallelization = false
+    private final List<Subscription> subscriptions = []
 
     Project(String id) {
         super()
@@ -165,6 +167,14 @@ class Project extends Extensible<Project> {
 
     Set<CustomUserGroup> getCustomUserGroups() {
         users.keySet().findAll { it instanceof CustomUserGroup } as Set<CustomUserGroup>
+    }
+
+    void setSubscriptions(List<Subscription> subscriptions) {
+        ListUtils.copyInto(subscriptions, this.subscriptions)
+    }
+
+    List<Subscription> getSubscriptions() {
+        subscriptions
     }
 
     Project id(String id) {
@@ -315,6 +325,11 @@ class Project extends Extensible<Project> {
 
     Project enableScanParallelization() {
         setScanParallelization(true)
+        this
+    }
+
+    Project subscriptions(List<Subscription> subscriptions) {
+        setSubscriptions(subscriptions)
         this
     }
 

@@ -504,6 +504,13 @@ abstract class XnatInterface {
         "${dataType.xsiType}_${dataType.xsiType}/project_${project}_${permission}"
     }
 
+    void setupProjectEventSubscriptions(Project project) {
+        project.subscriptions.each { subscription ->
+            subscription.setProjectId(project.id)
+            queryBase().body(subscription).contentType(JSON).post(formatXapiUrl('/events/subscription')).then().assertThat().statusCode(201)
+        }
+    }
+
     void uploadResources(List<Resource> resources) {
         resources.each { resource ->
             uploadResource(resource)
@@ -725,6 +732,8 @@ abstract class XnatInterface {
         createInvestigators((project.pi != null) ? project.investigators + project.pi : project.investigators)
 
         project.extension.create()
+
+        setupProjectEventSubscriptions(project)
 
         project.customUserGroups.each { group ->
             createCustomUserGroup(project, group)
