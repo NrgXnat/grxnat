@@ -13,8 +13,13 @@ class UserDeserializer extends CustomDeserializer<User> {
 
         setStringIfNonnull(node, 'email', user.&setEmail)
         setStringIfNonnull(node, 'lastname', user.&setLastName)
+        setStringIfNonnull(node, 'lastName', user.&setLastName)
         setStringIfNonnull(node, 'firstname', user.&setFirstName)
+        setStringIfNonnull(node, 'firstName', user.&setFirstName)
         setStringIfNonnull(node, 'login', user.&setUsername)
+        setStringIfNonnull(node, 'username', user.&setUsername)
+        setBoolean(node, 'verified', user.&setVerified)
+        setBoolean(node, 'enabled', user.&setEnabled)
 
         user
     }

@@ -6,11 +6,12 @@ import static org.nrg.xnat.interfaces.XnatInterface.XNAT_REST_MAPPER
 
 class SerializationUtils {
 
-    private static final TypeReference<Map<String, Object>> mapTypeRef = new TypeReference<Map<String, Object>>(){}
+    public static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>(){}
+    public static final TypeReference<Map<String, String>> STRING_STRING_MAP = new TypeReference<Map<String, String>>(){}
 
     static Map<String, Object> serializeToMap(Object object) {
         try {
-            XNAT_REST_MAPPER.readValue(XNAT_REST_MAPPER.writeValueAsString(object), mapTypeRef)
+            XNAT_REST_MAPPER.readValue(XNAT_REST_MAPPER.writeValueAsString(object), MAP_TYPE_REF)
         } catch (Exception e) {
             throw new RuntimeException("Exception occurred in serializing object.", e)
         }

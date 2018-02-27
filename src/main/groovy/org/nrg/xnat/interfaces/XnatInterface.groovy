@@ -3,9 +3,11 @@ package org.nrg.xnat.interfaces
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
+import com.jayway.restassured.config.JsonConfig
 import com.jayway.restassured.config.RestAssuredConfig
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
+import com.jayway.restassured.path.json.config.JsonPathConfig
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
@@ -76,7 +78,7 @@ abstract class XnatInterface {
                         XNAT_REST_MAPPER
                     }
                 }
-        ))
+        )).jsonConfig(JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE))
         if (allowInsecureSSL) RestAssured.useRelaxedHTTPSValidation()
 
         if (given().get(CommonUtils.formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode == 200) {
@@ -342,9 +344,18 @@ abstract class XnatInterface {
         getNumberActiveSessions(authUser)
     }
 
+    User readUser(String username) {
+        queryBase().get(formatXapiUrl("users/profile/${username}")).then().assertThat().statusCode(200).and().extract().response().as(User)
+    }
+
     void createUser(User user) {
         prohibitNonadmin()
         queryBase().contentType(JSON).body(user).post(formatXapiUrl('users')).then().assertThat().statusCode(201)
+    }
+
+    void updateUser(User user) {
+        prohibitNonadmin()
+        queryBase().contentType(JSON).body(user).put(formatXapiUrl("users/${user.username}")).then().assertThat().statusCode(200)
     }
 
     void verifyUser(User user) {
