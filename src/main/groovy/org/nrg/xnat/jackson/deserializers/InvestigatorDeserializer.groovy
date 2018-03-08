@@ -19,6 +19,8 @@ class InvestigatorDeserializer extends CustomDeserializer<Investigator> {
         setStringIfNonnull(node, 'phone', investigator.&setPhone)
         setStringIfNonnull(node, 'department', investigator.&setDepartment)
         setStringIfNonnull(node, 'institution', investigator.&setInstitution)
+        setSimpleStringList(node, 'primaryProjects', investigator.&setPrimaryProjects)
+        setSimpleStringList(node, 'investigatorProjects', investigator.&setInvestigatorProjects)
 
         investigator
     }

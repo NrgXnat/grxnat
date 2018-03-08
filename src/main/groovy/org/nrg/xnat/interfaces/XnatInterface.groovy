@@ -232,7 +232,7 @@ abstract class XnatInterface {
     }
 
     XnatAliasToken generateAliasToken() {
-        queryBase().get(issueAliasTokenUrl()).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('', XnatAliasToken)
+        queryBase().get(issueAliasTokenUrl()).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('', XnatAliasToken) // use longer explicit jsonPath() extraction because content-type from XNAT is text/plain...
     }
 
     String projectExperimentsUrl(Project project) {

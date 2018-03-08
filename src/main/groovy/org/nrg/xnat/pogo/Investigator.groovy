@@ -9,6 +9,7 @@ class Investigator extends Extensible<Investigator> {
     String email
     String phone
     List<String> primaryProjects = []
+    List<String> investigatorProjects = []
     int xnatInvestigatordataId
 
     Investigator() {}
@@ -71,6 +72,11 @@ class Investigator extends Extensible<Investigator> {
 
     Investigator primaryProjects(List<String> projects) {
         setPrimaryProjects(projects)
+        this
+    }
+
+    Investigator investigatorProjects(List<String> projects) {
+        setInvestigatorProjects(projects)
         this
     }
 
