@@ -133,7 +133,7 @@ abstract class XnatInterface {
         sessionFilter.extractSessionId()
     }
 
-    void invalidateCachedUserSession() {
+    void regenerateUserSession() {
         logout()
         reauthenticate()
     }
