@@ -323,7 +323,19 @@ abstract class XnatInterface {
 
     void expireAllActiveSessions(User targetUser) {
         if (userIsAdmin() || authUser == targetUser) {
-            queryBase().delete(userSessionsRestUrl(targetUser)).then().assertThat().statusCode(200)
+            final int status = queryBase().delete(userSessionsRestUrl(targetUser)).statusCode
+            switch (status) {
+                case 200:
+                    break
+                case 403:
+                    println 'Attempt to expire active sessions returned a 403. This can occur if the authenticating JSESSION has timed out, so a new one will be generated, and the query repeated.'
+                    logout()
+                    reauthenticate()
+                    queryBase().delete(userSessionsRestUrl(targetUser)).then().assertThat().statusCode(200)
+                    break
+                default:
+                    throw new AssertionError("Call to expire active sessions returned unexpected status code: ${status}.")
+            }
         } else {
             prohibitNonadmin()
         }
