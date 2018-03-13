@@ -299,6 +299,7 @@ abstract class XnatInterface {
         final Map<String, String> queryPararms = [:]
         queryPararms.put('dest', '/archive')
         queryPararms.put('PROJECT_ID', project.getId())
+        queryPararms.put('project', project.getId()) // ecat as a zip won't recognize PROJECT_ID
 
         if (subject != null) queryPararms.put('SUBJECT_ID', subject.label)
         if (session != null) queryPararms.put('EXPT_LABEL', session.label)
