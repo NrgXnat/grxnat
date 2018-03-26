@@ -9,6 +9,7 @@ class ImagingSession extends SubjectAssessor {
 
     protected final List<Scan> scans = []
     protected final List<SessionAssessor> assessors = []
+    String modality
 
     ImagingSession(Project project, Subject subject, String label) {
         super(project, subject, label)
@@ -53,25 +54,31 @@ class ImagingSession extends SubjectAssessor {
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T scans(List<Scan> scans) {
         ListUtils.copyInto(scans, this.scans)
-        return (T)this
+        (T)this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T addScan(Scan scan) {
         if (!scans.any { it.id == scan.id }) scans.add(scan)
-        return (T)this
+        (T)this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T assessors(List<SessionAssessor> assessors) {
         ListUtils.copyInto(assessors, this.assessors)
-        return (T)this
+        (T)this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T addAssessor(SessionAssessor assessor) {
         if (!assessors.contains(assessor)) assessors.add(assessor)
-        return (T)this
+        (T)this
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends ImagingSession> T modality(String modality) {
+        setModality(modality)
+        (T)this
     }
 
     SessionAssessor findSessionAssessor(String label) {

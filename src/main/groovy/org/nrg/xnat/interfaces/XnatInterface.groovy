@@ -23,6 +23,8 @@ import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.Subject
+import org.nrg.xnat.pogo.custom_variable.CustomVariable
+import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.pogo.experiments.NonimagingAssessor
@@ -55,6 +57,7 @@ import static com.jayway.restassured.http.ContentType.JSON
 import static com.jayway.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
 
+@SuppressWarnings(["GroovyUnusedDeclaration", "GrMethodMayBeStatic"])
 abstract class XnatInterface {
 
     public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
@@ -329,8 +332,7 @@ abstract class XnatInterface {
                     break
                 case 403:
                     println 'Attempt to expire active sessions returned a 403. This can occur if the authenticating JSESSION has timed out, so a new one will be generated, and the query repeated.'
-                    logout()
-                    reauthenticate()
+                    regenerateUserSession()
                     queryBase().delete(userSessionsRestUrl(targetUser)).then().assertThat().statusCode(200)
                     break
                 default:
@@ -345,6 +347,7 @@ abstract class XnatInterface {
         expireAllActiveSessions(authUser)
     }
 
+    @SuppressWarnings("GroovyMissingReturnStatement")
     int getNumberActiveSessions(User targetUser) {
         if (userIsAdmin() || authUser == targetUser) {
             queryBase().get(userSessionsRestUrl(targetUser)).then().assertThat().statusCode(200).assertThat().extract().jsonPath().getInt(targetUser.username)
@@ -508,8 +511,9 @@ abstract class XnatInterface {
         addUserToGroups(addedUser, "${project.id}_${(userGroup instanceof CustomUserGroup) ? userGroup.name : userGroup.singularName().toLowerCase()}")
     }
 
+    @SuppressWarnings("GroovyGStringKey")
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
-        final Map<String, Object> formData = ['xdat:userGroup/displayName' : userGroup.singularName(), 'xdat:userGroup/tag' : project.id, 'src' : 'project', 'ELEMENT_0' : 'xdat:userGroup', 'eventSubmit_doPerform' : 'Submit', "xnat:projectData_xnat:projectData/ID_${project.id}_R" : 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')) : 1]
+        final Map<String, Object> formData = ['xdat:userGroup/displayName': userGroup.singularName(), 'xdat:userGroup/tag': project.id, 'src': 'project', 'ELEMENT_0': 'xdat:userGroup', 'eventSubmit_doPerform': 'Submit', "xnat:projectData_xnat:projectData/ID_${project.id}_R": 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')): 1] as Map<String, Object>
         userGroup.accessLevelMap.each { dataType, level ->
             if (level in [READ_ONLY, CREATE_AND_EDIT, DELETE, ALL]) {
                 formData.put(customUserGroupPermissionString(project, dataType, 'R'), 1)
@@ -669,12 +673,12 @@ abstract class XnatInterface {
         }
 
         project.subjects(readSubjects(project))
+        project.secondarySubjects(readSecondarySubjects(project))
         // TODO: anon scripts
     }
 
     List<Subject> readSubjects(Project project) {
-        final List<Subject> subjects = jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
-            get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project == '${project.id}' }", Subject[])
+        final List<Subject> subjects = subjectQuery(project, true)
 
         subjects.each { subject ->
             if (readResources) {
@@ -685,7 +689,17 @@ abstract class XnatInterface {
             )
         }
         subjects
-        // TODO: shares, secondary subjects
+        // TODO: shares
+    }
+
+    List<Subject> readSecondarySubjects(Project project) {
+        subjectQuery(project, false)
+        // TODO: fully populate secondary subject objects. Issue: how to handle setting project objects for other projects (i.e. when the project is not the variable "project"). Could make empty project objects, but then attempting to access them later gives incomplete objects.
+    }
+
+    private List<Subject> subjectQuery(Project project, boolean primary) {
+        jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
+                get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project ${primary ? '=' : '!'}= '${project.id}' }", Subject[])
     }
 
     List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject) {
@@ -698,6 +712,7 @@ abstract class XnatInterface {
         final List<SubjectAssessor> nonimagingSubjectAssessors = SerializationUtils.deserializeList(nonimagingMaps, NonimagingAssessor)
         final List<ImagingSession> imagingSessions = SerializationUtils.deserializeList(imagingMaps, ImagingSession)
 
+        //noinspection GroovyAssignabilityCheck
         subject.experiments(nonimagingSubjectAssessors + imagingSessions)
 
         subject.experiments.each { assessor ->
@@ -809,6 +824,8 @@ abstract class XnatInterface {
             shareSubject(project, subject, share)
         }
 
+        putCustomVariableValues(subjectUrl(project, subject), subject, subject.fields)
+
         if (project.isSubjectAssessorParallelization()) {
             GParsPool.withPool {
                 subject.experiments.eachParallel { subjectAssessor ->
@@ -902,6 +919,8 @@ abstract class XnatInterface {
         subjectAssessor.shares.each { share ->
             shareSubjectAssessor(project, subject, subjectAssessor, share)
         }
+
+        putCustomVariableValues(subjectAssessorUrl(project, subject, subjectAssessor), subjectAssessor, subjectAssessor.fields)
 
         if (subjectAssessor instanceof ImagingSession) {
             final ImagingSession session = subjectAssessor as ImagingSession
@@ -1060,6 +1079,8 @@ abstract class XnatInterface {
             resource.project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)
         }
         uploadResources(assessor.resources)
+
+        putCustomVariableValues(sessionAssessorUrl(project, subject, session, assessor), assessor, assessor.fields)
     }
 
     void createSessionAssessor(SessionAssessor assessor) {
@@ -1097,6 +1118,18 @@ abstract class XnatInterface {
 
     void deleteProject(Project project) {
         queryBase().queryParam('removeFiles', true).delete(projectUrl(project)).then().assertThat().statusCode(200)
+    }
+
+    void putCustomVariableValue(String url, CustomVariableContainer baseObject, String variable, Object value) {
+        putCustomVariableValues(url, baseObject, [(variable) : value])
+    }
+
+    void putCustomVariableValues(String url, CustomVariableContainer baseObject, Map<String, Object> values) {
+        if (values == null || values.isEmpty()) return
+        final Map<String, Object> formValues = values.collectEntries { variable, value ->
+            ["${baseObject.fieldBaseDataType()}/fields/field[name=${variable.toLowerCase()}]/field", value]
+        } as Map<String, Object>
+        queryBase().formParams(formValues).put(url).then().assertThat().statusCode(200)
     }
 
     void deleteAllProjectData(Project project) {

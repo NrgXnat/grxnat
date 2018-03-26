@@ -141,6 +141,11 @@ abstract class Experiment extends CustomVariableContainer<Experiment> {
     }
 
     @Override
+    String fieldBaseDataType() {
+        'xnat:experimentData'
+    }
+
+    @Override
     String toString() {
         label
     }

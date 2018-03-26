@@ -11,7 +11,7 @@ class DicomUtils {
     public static final int SMALLEST_DATASET_HEADER = 0x00080000
 
     static int stringHeaderToHexInt(String header) {
-        Integer.parseInt(header.replaceAll("\\(|\\)|,| ", ""), 16)
+        Integer.parseInt(header.replaceAll('[(), ]', ''), 16)
     }
 
     static String intToSimpleHeaderString(int header) {

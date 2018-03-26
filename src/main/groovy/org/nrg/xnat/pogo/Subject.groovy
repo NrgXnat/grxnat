@@ -240,6 +240,11 @@ class Subject extends CustomVariableContainer<Subject> {
     }
 
     @Override
+    String fieldBaseDataType() {
+        'xnat:subjectData'
+    }
+
+    @Override
     boolean equals(o) {
         if (this.is(o)) return true
         if (getClass() != o.class) return false

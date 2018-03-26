@@ -6,7 +6,7 @@ import org.nrg.xnat.util.MapUtils
 
 abstract class CustomVariableContainer<X extends Extensible<X>> extends Extensible<X> {
 
-    private final Map<CustomVariableSet, Map<CustomVariable, Object>> customVariables = [:]
+    final Map<String, Object> fields = [:]
 
     CustomVariableContainer(Extension<X> extension) {
         super(extension)
@@ -16,16 +16,16 @@ abstract class CustomVariableContainer<X extends Extensible<X>> extends Extensib
         super(null)
     }
 
-    Map<CustomVariableSet, Map<CustomVariable, Object>> getCustomVariables() {
-        return customVariables
+    void setFields(Map<String, Object> customVariables) {
+        MapUtils.copyInto(customVariables, this.fields)
     }
 
-    void setCustomVariables(Map<CustomVariableSet, Map<CustomVariable, Object>> customVariables) {
-        MapUtils.copyInto(customVariables, this.customVariables)
+    @SuppressWarnings("unchecked")
+    <T extends CustomVariableContainer> T fields(Map<String, Object> customVariables) {
+        setFields(customVariables)
+        this as T
     }
 
-    void addCustomVariableSet(CustomVariableSet variableSet, Map<CustomVariable, Object> variables) {
-        customVariables.put(variableSet, variables)
-    }
+    abstract String fieldBaseDataType()
 
 }

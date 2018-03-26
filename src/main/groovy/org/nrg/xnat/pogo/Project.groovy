@@ -2,6 +2,7 @@ package org.nrg.xnat.pogo
 
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
+import org.nrg.xnat.pogo.custom_variable.CustomVariableSet
 import org.nrg.xnat.pogo.events.Subscription
 import org.nrg.xnat.pogo.extensions.project.ProjectExtension
 import org.nrg.xnat.pogo.resources.Resource
@@ -33,6 +34,7 @@ class Project extends Extensible<Project> {
     boolean sessionAssessorParallelization = false
     boolean scanParallelization = false
     private final List<Subscription> subscriptions = []
+    private final List<CustomVariableSet> variableSets = []
 
     Project(String id) {
         super()
@@ -143,6 +145,10 @@ class Project extends Extensible<Project> {
         ListUtils.copyInto(secondarySubjects, this.secondarySubjects)
     }
 
+    List<Subject> getAllSubjects() {
+        subjects + secondarySubjects
+    }
+
     List<Resource> getProjectResources() {
         projectResources
     }
@@ -175,6 +181,14 @@ class Project extends Extensible<Project> {
 
     List<Subscription> getSubscriptions() {
         subscriptions
+    }
+
+    void setVariableSets(List<CustomVariableSet> sets) {
+        ListUtils.copyInto(sets, variableSets)
+    }
+
+    List<CustomVariableSet> getVariableSets() {
+        variableSets
     }
 
     Project id(String id) {
@@ -330,6 +344,11 @@ class Project extends Extensible<Project> {
 
     Project subscriptions(List<Subscription> subscriptions) {
         setSubscriptions(subscriptions)
+        this
+    }
+
+    Project variableSets(List<CustomVariableSet> variableSets) {
+        setVariableSets(variableSets)
         this
     }
 

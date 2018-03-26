@@ -10,11 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.apache.commons.lang3.StringUtils
+import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.Resource
 
 @SuppressWarnings("GrMethodMayBeStatic")
 abstract class CustomDeserializer<T> extends StdDeserializer<T> {
 
+    public static final TypeReference STRING_OBJECT_MAP = new TypeReference<Map<String, Object>>() {}
     public static final TypeReference NESTED_STRING_MAP = new TypeReference<Map<String, Map<String, String>>>() {}
 
     protected CustomDeserializer(Class<T> aClass) {
@@ -80,6 +82,10 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
                 readObject(objectNode, codec, objectClass)
             })
         }
+    }
+
+    protected void setCustomVariables(JsonNode parentNode, ObjectCodec codec, CustomVariableContainer baseObject) {
+        if (fieldNonnull(parentNode, 'customVariables')) baseObject.setFields((codec as ObjectMapper).readValue(parentNode.get('customVariables').toString(), STRING_OBJECT_MAP) as Map<String, Object>)
     }
 
     protected void setResources(JsonNode parentNode, ObjectCodec codec, Class<? extends Resource> resourceClass, Closure setResourceMethod) {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.experiments.Experiment
+import org.nrg.xnat.pogo.experiments.ImagingSession
 
 import java.time.LocalDate
 
@@ -44,6 +45,8 @@ class ExperimentDeserializer<T extends Experiment> extends CustomDeserializer<T>
         
         setStringIfNonnull(node, 'ID', experiment.&setAccessionNumber)
         setStringIfNonempty(node, 'note', experiment.&setNotes)
+        setStringIfNonempty(node, 'modality', (experiment as ImagingSession).&setModality)
+        setCustomVariables(node, codec, experiment)
 
         experiment
     }
