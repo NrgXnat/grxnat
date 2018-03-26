@@ -45,7 +45,7 @@ class ExperimentDeserializer<T extends Experiment> extends CustomDeserializer<T>
         
         setStringIfNonnull(node, 'ID', experiment.&setAccessionNumber)
         setStringIfNonempty(node, 'note', experiment.&setNotes)
-        setStringIfNonempty(node, 'modality', (experiment as ImagingSession).&setModality)
+        if (experiment instanceof ImagingSession) setStringIfNonempty(node, 'modality', experiment.&setModality)
         setCustomVariables(node, codec, experiment)
 
         experiment
