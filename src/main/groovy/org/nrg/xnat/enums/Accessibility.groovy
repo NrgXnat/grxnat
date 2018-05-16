@@ -3,9 +3,9 @@ package org.nrg.xnat.enums
 import org.apache.commons.lang3.StringUtils
 
 enum Accessibility {
-    PUBLIC ("public"),
-    PROTECTED ("protected"),
-    PRIVATE ("private")
+    PUBLIC ('public'),
+    PROTECTED ('protected'),
+    PRIVATE ('private')
 
     private final String string
 
@@ -17,11 +17,12 @@ enum Accessibility {
         for (Accessibility accessibility : values()) {
             if (StringUtils.equalsIgnoreCase(accessibility.string, value)) return accessibility
         }
-        return null
+        null
     }
 
     @Override
     String toString() {
-        return string
+        string
     }
+
 }

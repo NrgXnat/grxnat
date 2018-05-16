@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.custom_variable
 
+import org.nrg.xnat.enums.VariableType
 import org.nrg.xnat.util.ListUtils
 
 import java.time.LocalDate
@@ -8,30 +9,30 @@ class CustomVariable<T> {
 
     String name
     boolean required = false
-    String type
+    VariableType type
     private final List<T> possibleValues = []
 
     CustomVariable(String name) {
         this.name = name
     }
 
-    CustomVariable(Class<T> type) {
-        switch (type) {
+    CustomVariable(Class<T> classToken) {
+        switch (classToken) {
             case String:
-                dataType = 'string'
+                type = VariableType.STRING
                 break
             case Integer:
-                dataType = 'integer'
+                type = VariableType.INTEGER
                 break
             case Double:
             case Float:
-                dataType = 'float'
+                type = VariableType.FLOAT
                 break
             case Boolean:
-                dataType = 'boolean'
+                type = VariableType.BOOLEAN
                 break
             case LocalDate:
-                dataType = 'date'
+                type = VariableType.DATE
                 break
         }
     }
@@ -46,19 +47,24 @@ class CustomVariable<T> {
         ListUtils.copyInto(possibleValues, this.possibleValues)
     }
 
-    CustomVariable name(String name) {
+    CustomVariable<T> name(String name) {
         setName(name)
-        return this
+        this
     }
 
-    CustomVariable required(boolean required) {
+    CustomVariable<T> required(boolean required) {
         setRequired(required)
-        return this
+        this
     }
 
-    CustomVariable possibleValues(List<T> possibleValues) {
+    CustomVariable<T> type(VariableType type) {
+        setType(type)
+        this
+    }
+
+    CustomVariable<T> possibleValues(List<T> possibleValues) {
         ListUtils.copyInto(possibleValues, this.possibleValues)
-        return this
+        this
     }
 
 }

@@ -22,6 +22,7 @@ import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
+import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.custom_variable.CustomVariable
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
@@ -418,9 +419,13 @@ abstract class XnatInterface {
         setLoginRequirement(true)
     }
 
+    void setSessionXmlRebuilderTimes(int interval, int schedule) {
+        postToSiteConfig([(SiteConfig.AUTOARCHIVE_IDLE_TIME) : interval, (SiteConfig.AUTOARCHIVE_IDLE_SCHEDULE) : schedule])
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
-                response.then().assertThat().statusCode(200).and().extract().jsonPath().getString("ResultSet.Result.get(0).script")
+                response.then().assertThat().statusCode(200).and().extract().jsonPath().getString('ResultSet.Result.get(0).script')
         )
     }
 
@@ -433,7 +438,7 @@ abstract class XnatInterface {
     }
 
     void setSiteAnonScriptStatus(boolean status) {
-        postToSiteConfig(['enableSitewideAnonymizationScript' : status])
+        postToSiteConfig([(SiteConfig.ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT) : status])
     }
 
     void disableSiteAnonScript() {
@@ -445,7 +450,7 @@ abstract class XnatInterface {
     }
 
     void setSiteAnonScript(AnonScript script) {
-        postToSiteConfig(['sitewideAnonymizationScript' : script.getContents()])
+        postToSiteConfig([(SiteConfig.SITEWIDE_ANONYMIZATION_SCRIPT) : script.getContents()])
     }
 
     String projectAnonScriptUrlBase(Project project) {
