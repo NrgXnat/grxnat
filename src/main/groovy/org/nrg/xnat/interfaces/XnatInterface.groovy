@@ -628,6 +628,10 @@ abstract class XnatInterface {
         queryBase().put(formatRestUrl("/projects/${project.id}/prearchive_code/${code.code}")).then().assertThat().statusCode(200)
     }
 
+    List<Project> listProjects() {
+        jsonQuery().queryParam('columns', 'description,ID,secondary_ID,name,keywords').get(formatRestUrl('projects')).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('ResultSet.Result', Project[])
+    }
+
     Project readProject(String projectID) {
         final JsonPath projectCall = jsonQuery().get(projectUrl(new Project(projectID))).then().
                 assertThat().statusCode(200).and().extract().jsonPath().setRoot('items')
