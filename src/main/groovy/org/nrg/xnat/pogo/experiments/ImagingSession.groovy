@@ -2,6 +2,7 @@ package org.nrg.xnat.pogo.experiments
 
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.util.ListUtils
 
@@ -9,6 +10,7 @@ class ImagingSession extends SubjectAssessor {
 
     protected final List<Scan> scans = []
     protected final List<SessionAssessor> assessors = []
+    protected final List<Reconstruction> reconstructions = []
     String modality
 
     ImagingSession(Project project, Subject subject, String label) {
@@ -28,7 +30,7 @@ class ImagingSession extends SubjectAssessor {
     }
 
     List<Scan> getScans() {
-        return scans
+        scans
     }
 
     void setScans(List<Scan> scans) {
@@ -40,7 +42,7 @@ class ImagingSession extends SubjectAssessor {
     }
 
     List<SessionAssessor> getAssessors() {
-        return ListUtils.copy(assessors)
+        ListUtils.copy(assessors)
     }
 
     void setAssessors(List<SessionAssessor> assessors) {
@@ -51,34 +53,54 @@ class ImagingSession extends SubjectAssessor {
         assessors.remove(assessor)
     }
 
+    void setReconstructions(List<Reconstruction> reconstructions) {
+        ListUtils.copyInto(reconstructions, this.reconstructions)
+    }
+
+    List<Reconstruction> getReconstructions() {
+        ListUtils.copy(reconstructions)
+    }
+
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T scans(List<Scan> scans) {
-        ListUtils.copyInto(scans, this.scans)
-        (T)this
+        setScans(scans)
+        (T) this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T addScan(Scan scan) {
-        if (!scans.any { it.id == scan.id }) scans.add(scan)
-        (T)this
+        if (!scans.any { it.id == scan.id }) scans << scan
+        (T) this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T assessors(List<SessionAssessor> assessors) {
-        ListUtils.copyInto(assessors, this.assessors)
-        (T)this
+        setAssessors(assessors)
+        (T) this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T addAssessor(SessionAssessor assessor) {
-        if (!assessors.contains(assessor)) assessors.add(assessor)
-        (T)this
+        if (!assessors.contains(assessor)) assessors << assessor
+        (T) this
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends ImagingSession> T reconstructions(List<Reconstruction> reconstructions) {
+        setReconstructions(reconstructions)
+        (T) this
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends ImagingSession> T addReconstruction(Reconstruction reconstruction) {
+        if (!reconstructions.contains(reconstruction)) reconstructions << reconstruction
+        (T) this
     }
 
     @SuppressWarnings("unchecked")
     <T extends ImagingSession> T modality(String modality) {
         setModality(modality)
-        (T)this
+        (T) this
     }
 
     SessionAssessor findSessionAssessor(String label) {

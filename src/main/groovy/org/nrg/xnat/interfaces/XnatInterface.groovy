@@ -21,6 +21,7 @@ import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
@@ -34,6 +35,7 @@ import org.nrg.xnat.pogo.experiments.SessionAssessor
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
 import org.nrg.xnat.pogo.extensions.SimpleResourceFileExtension
 import org.nrg.xnat.pogo.extensions.project.ProjectQueryPutExtension
+import org.nrg.xnat.pogo.extensions.reconstruction.ReconstructionQueryPutExtension
 import org.nrg.xnat.pogo.extensions.session_assessor.SessionAssessorQueryPutExtension
 import org.nrg.xnat.pogo.extensions.subject.SubjectQueryPutExtension
 import org.nrg.xnat.pogo.extensions.subject_assessor.SessionImportExtension
@@ -958,6 +960,10 @@ abstract class XnatInterface {
                     createSessionAssessor(project, subject, session, assessor)
                 }
             }
+
+            session.reconstructions.each { reconstruction ->
+                createReconstruction(project, subject, session, reconstruction)
+            }
         }
     }
 
@@ -1098,16 +1104,16 @@ abstract class XnatInterface {
 
     void deleteSessionAssessor(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
         if (project == null) {
-            throw new UnsupportedOperationException("project cannot be null")
+            throw new UnsupportedOperationException('project cannot be null')
         }
         if (subject == null) {
-            throw new UnsupportedOperationException("subject cannot be null")
+            throw new UnsupportedOperationException('subject cannot be null')
         }
         if (session == null) {
-            throw new UnsupportedOperationException("session cannot be null")
+            throw new UnsupportedOperationException('session cannot be null')
         }
         if (sessionAssessor == null) {
-            throw new UnsupportedOperationException("sessionAssessor cannot be null")
+            throw new UnsupportedOperationException('sessionAssessor cannot be null')
         }
 
         queryBase().delete(sessionAssessorUrl(project, subject, session, sessionAssessor)).then().assertThat().statusCode(200)
@@ -1123,6 +1129,45 @@ abstract class XnatInterface {
 
     String sessionAssessorUrl(SessionAssessor assessor) {
         sessionAssessorUrl(assessor.getPrimaryProject(), assessor.getSubject(), assessor.getParentSession(), assessor)
+    }
+
+    String reconstructionUrl(Project project, Subject subject, ImagingSession session, Reconstruction reconstruction) {
+        "${subjectAssessorUrl(project, subject, session)}/reconstructions/${reconstruction.label}"
+    }
+
+    String reconstructionUrl(Reconstruction reconstruction) {
+        "${subjectAssessorUrl(reconstruction.parentSession)}/reconstructions/${reconstruction.label}"
+    }
+
+    void createReconstruction(Project project, Subject subject, ImagingSession session, Reconstruction reconstruction) {
+        if (project == null) {
+            throw new UnsupportedOperationException('project cannot be null')
+        }
+        if (subject == null) {
+            throw new UnsupportedOperationException('subject cannot be null')
+        }
+        if (session == null) {
+            throw new UnsupportedOperationException('session cannot be null')
+        }
+        if (reconstruction == null) {
+            throw new UnsupportedOperationException('reconstruction cannot be null')
+        }
+
+        if (reconstruction.extension == null) {
+            reconstruction.extension(new ReconstructionQueryPutExtension(this, reconstruction))
+        }
+
+        reconstruction.extension.create(project, subject, session)
+
+        reconstruction.resources.each { resource ->
+            resource.project(project).subject(subject).subjectAssessor(session).reconstruction(reconstruction)
+        }
+        uploadResources(reconstruction.resources)
+    }
+
+    void createReconstruction(Reconstruction reconstruction) {
+        final ImagingSession session = reconstruction.parentSession
+        createReconstruction(session.primaryProject, session.subject, session, reconstruction)
     }
 
     void deleteProject(Project project) {

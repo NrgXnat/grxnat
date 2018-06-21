@@ -37,7 +37,7 @@ class SessionAssessor extends Experiment {
     }
 
     SessionAssessorExtension getExtension() {
-        return (SessionAssessorExtension)super.getExtension()
+        (SessionAssessorExtension) super.extension
     }
 
     void setExtension(SessionAssessorExtension extension) {
@@ -46,7 +46,7 @@ class SessionAssessor extends Experiment {
 
     @SuppressWarnings("unchecked")
     <T extends Experiment> T extension(SessionAssessorExtension extension) {
-        return super.extension(extension)
+        super.extension(extension)
     }
 
 }

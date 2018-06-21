@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.nrg.xnat.jackson.serializers.*
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.resources.Resource
@@ -20,6 +21,7 @@ class XnatRestWriteSerializationModule {
         module.addSerializer(Subject, new SubjectSerializer())
         module.addSerializer(Experiment, new ExperimentSerializer())
         module.addSerializer(Scan, new ScanSerializer())
+        module.addSerializer(Reconstruction, new ReconstructionSerializer())
 
         module.addSerializer(Resource, new ResourceSerializer())
         module.addSerializer(ResourceFile, new ResourceFileSerializer())
