@@ -1187,10 +1187,8 @@ abstract class XnatInterface {
     }
 
     void deleteAllProjectData(Project project) {
-        jsonQuery().queryParam('columns', 'ID,subject_ID').get(formatRestUrl("/projects/${project.id}/experiments")).jsonPath().getList('ResultSet.Result').each { experiment ->
-            queryBase().queryParam('removeFiles', true).
-                    delete(formatRestUrl("projects/${project.id}/subjects/${experiment.subject_ID}/experiments/${experiment.ID}")).
-                    then().assertThat().statusCode(200)
+        jsonQuery().queryParam('project', project.id).get(formatRestUrl("/experiments")).jsonPath().getList('ResultSet.Result').reverse().each { experiment -> // reverse list to delete assessors before their parent session
+            queryBase().queryParam('removeFiles', true).delete(formatRestUrl("projects/${project.id}/experiments/${experiment.ID}")).then().assertThat().statusCode(200)
         }
 
         jsonQuery().queryParam('columns', 'ID').get(formatRestUrl("projects/${project.id}/subjects")).jsonPath().getList('ResultSet.Result.ID').each { subject ->
