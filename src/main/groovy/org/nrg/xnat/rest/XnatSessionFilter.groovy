@@ -6,9 +6,12 @@ import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.FilterableRequestSpecification
 import com.jayway.restassured.specification.FilterableResponseSpecification
 import com.jayway.restassured.specification.RequestSpecification
+import org.apache.commons.lang3.time.StopWatch
 import org.apache.http.impl.client.SystemDefaultHttpClient
 import org.nrg.testing.CommonUtils
 import org.nrg.xnat.pogo.users.User
+
+import java.util.concurrent.TimeUnit
 
 class XnatSessionFilter implements Filter {
 
@@ -20,17 +23,26 @@ class XnatSessionFilter implements Filter {
     private final int[] serverIssueCodes = [502, 503, 504]
     private final int waitTime = 10000
     private int serverIssueRetryCount = 1
+    private final int SESSION_TIMEOUT = 15 * 60 // Could pull and parse this from the site config. Not worth it for now
+    private StopWatch stopWatch = new StopWatch()
 
     XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL) {
         this.user = user
         this.xnatUrl = xnatUrl
         this.allowInsecureSSL = allowInsecureSSL
+        stopWatch.start()
         extractSessionId()
     }
 
     @SuppressWarnings(["ChangeToOperator", "GrDeprecatedAPIUsage"])
     @Override
     Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
+        if (stopWatch.getTime(TimeUnit.SECONDS) > SESSION_TIMEOUT) {
+            extractSessionId()
+        }
+        stopWatch.reset()
+        stopWatch.start()
+
         final FilterableRequestSpecification request = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
 
         if (sessionId != null) request = request.sessionId(sessionId)
@@ -85,7 +97,7 @@ class XnatSessionFilter implements Filter {
         sessionId = response.getSessionId()
     }
 
-    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @SuppressWarnings(['GrDeprecatedAPIUsage', 'GrMethodMayBeStatic'])
     private void resetClient(RequestSpecification request) {
         request.httpClient.connectionManager.shutdown()
         request.httpClient = new SystemDefaultHttpClient()
