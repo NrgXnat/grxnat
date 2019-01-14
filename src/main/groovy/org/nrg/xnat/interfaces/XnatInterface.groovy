@@ -541,7 +541,7 @@ abstract class XnatInterface {
 
     void setupProjectEventSubscriptions(Project project) {
         project.subscriptions.each { subscription ->
-            subscription.setProjectId(project.id)
+            subscription.eventFilter.setProjectIds([project.id])
             queryBase().body(subscription).contentType(JSON).post(formatXapiUrl('/events/subscription')).then().assertThat().statusCode(201)
         }
     }

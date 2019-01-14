@@ -39,7 +39,7 @@ class TestTime {
         assertEquals(0, timeWithoutMinutes.minute)
         assertEquals(0, timeWithoutMinutes.second)
 
-        println 'Parsed times.'
+        println('Parsed times.')
     }
 
 }
