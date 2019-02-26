@@ -25,7 +25,6 @@ import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
-import org.nrg.xnat.pogo.custom_variable.CustomVariable
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
