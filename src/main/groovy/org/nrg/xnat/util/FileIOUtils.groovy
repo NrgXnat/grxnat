@@ -5,6 +5,10 @@ import org.apache.commons.io.filefilter.TrueFileFilter
 
 class FileIOUtils {
 
+    static String readFile(String filePath) {
+        readFile(new File(filePath))
+    }
+
     static String readFile(File file) {
         file.text
     }

@@ -18,4 +18,8 @@ abstract class UserGroup {
         accessLevelMap.get(dataType) ?: DataAccessLevel.NONE
     }
 
+    void setPermission(DataType dataType, DataAccessLevel accessLevel) {
+        accessLevelMap.put(dataType, accessLevel)
+    }
+
 }

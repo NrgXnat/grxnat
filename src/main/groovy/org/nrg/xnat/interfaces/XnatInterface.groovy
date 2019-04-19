@@ -58,6 +58,7 @@ import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfi
 import static com.jayway.restassured.http.ContentType.JSON
 import static com.jayway.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
+import static org.nrg.testing.CommonUtils.formatUrl
 
 @SuppressWarnings(["GroovyUnusedDeclaration", "GrMethodMayBeStatic"])
 abstract class XnatInterface {
@@ -68,6 +69,8 @@ abstract class XnatInterface {
     protected User authUser
     protected Optional<Boolean> isAdmin = Optional.absent()
     protected boolean readResources = true
+
+    protected XnatInterface() {}
 
     protected XnatInterface(XnatSessionFilter sessionFilter) {
         this.xnatUrl = sessionFilter.xnatUrl
@@ -86,14 +89,14 @@ abstract class XnatInterface {
         )).jsonConfig(JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE))
         if (allowInsecureSSL) RestAssured.useRelaxedHTTPSValidation()
 
-        if (given().get(CommonUtils.formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode == 200) {
+        if (given().get(formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode == 200) {
             final XnatSessionFilter sessionFilter = new XnatSessionFilter(user, xnatUrl, allowInsecureSSL)
-            if (given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/data/auth')).statusCode == 200) {
-                final Response oldResponse = given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/data/version'))
+            if (given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode == 200) {
+                final Response oldResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
                 if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
                     new XnatInterface_1_6(sessionFilter)
                 } else {
-                    final Response newResponse = given().filter(sessionFilter).get(CommonUtils.formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
+                    final Response newResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
                     if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
                         final String version = newResponse.jsonPath().getString('version')
                         if (version.startsWith('1.7.0')) {
@@ -152,20 +155,19 @@ abstract class XnatInterface {
     }
 
     String formatXnatUrl(String... components) {
-        CommonUtils.formatUrl(xnatUrl, CommonUtils.formatUrl((Object[]) components))
+        formatUrl(xnatUrl, formatUrl((Object[]) components))
     }
 
     String formatRestUrl(String... components) {
-        formatXnatUrl('data', CommonUtils.formatUrl((Object[]) components))
+        formatXnatUrl('data', formatUrl((Object[]) components))
     }
 
     String formatXapiUrl(String... components) {
-        formatXnatUrl('xapi', CommonUtils.formatUrl((Object[]) components))
+        formatXnatUrl('xapi', formatUrl((Object[]) components))
     }
 
     String readXnatCsrfToken() {
-        final String csrfTokenLine = queryBase().get(formatXnatUrl('/app/Index.vm')).then().assertThat().statusCode(200).and().extract().response().asString().split('\n').find { it.contains('var csrfToken') }
-        csrfTokenLine.substring(csrfTokenLine.indexOf("'") + 1, csrfTokenLine.lastIndexOf("'"))
+        queryBase().queryParam('CSRF', true).get(formatRestUrl('auth')).then().assertThat().statusCode(200).and().extract().response().asString().split('=')[1]
     }
 
     void saveBinaryResponseToFile(Response response, File file) {
@@ -552,6 +554,10 @@ abstract class XnatInterface {
     }
 
     void uploadResource(Resource resource) {
+        if (resource.folder == null) {
+            throw new UnsupportedOperationException('Resource is missing a label (folder).')
+        }
+
         queryBase().queryParams(SerializationUtils.serializeToMap(resource)).put(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}")).then().assertThat().statusCode(200)
 
         resource.resourceFiles.each { file ->
@@ -577,7 +583,7 @@ abstract class XnatInterface {
     }
 
     String resourceFileUrl(Resource resource, ResourceFile file) {
-        CommonUtils.formatUrl(resourceFilesUrl(resource), file.name)
+        formatUrl(resourceFilesUrl(resource), file.name)
     }
 
     /**
@@ -601,7 +607,11 @@ abstract class XnatInterface {
     }
 
     List<ResourceFile> readResourceFiles(Resource resource) {
-        resource.resourceFiles(jsonQuery().get(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}/files")).jsonPath().getObject('ResultSet.Result', ResourceFile[]) as List<ResourceFile>).resourceFiles
+        resource.resourceFiles(
+                jsonQuery().get(
+                        formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}/files")
+                ).jsonPath().getObject('ResultSet.Result', ResourceFile[]) as List<ResourceFile>
+        ).resourceFiles
     }
 
     void deleteResource(Resource resource) {
@@ -622,6 +632,9 @@ abstract class XnatInterface {
     }
 
     String projectUrl(Project project) {
+        if (project.id == null) {
+            throw new UnsupportedOperationException('project.id cannot be null')
+        }
         formatRestUrl("projects/${project.id}")
     }
 
@@ -707,6 +720,7 @@ abstract class XnatInterface {
         // TODO: fully populate secondary subject objects. Issue: how to handle setting project objects for other projects (i.e. when the project is not the variable "project"). Could make empty project objects, but then attempting to access them later gives incomplete objects.
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     private List<Subject> subjectQuery(Project project, boolean primary) {
         jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
                 get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project ${primary ? '=' : '!'}= '${project.id}' }", Subject[])
@@ -719,7 +733,7 @@ abstract class XnatInterface {
                 get(formatRestUrl("/projects/${project}/subjects/${subject}/experiments")).then().assertThat().statusCode(200).
                 and().extract().response().jsonPath().getList('ResultSet.Result').split { it.xsiType.matches('xnat:.+SessionData') }
 
-        final List<SubjectAssessor> nonimagingSubjectAssessors = SerializationUtils.deserializeList(nonimagingMaps, NonimagingAssessor)
+        final List<NonimagingAssessor> nonimagingSubjectAssessors = SerializationUtils.deserializeList(nonimagingMaps, NonimagingAssessor)
         final List<ImagingSession> imagingSessions = SerializationUtils.deserializeList(imagingMaps, ImagingSession)
 
         //noinspection GroovyAssignabilityCheck
@@ -735,6 +749,7 @@ abstract class XnatInterface {
             session.scans(readScans(project, subject, session))
             session.assessors(readSessionAssessors(project, subject, session))
         }
+        subject.experiments
     }
 
     List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
@@ -850,11 +865,14 @@ abstract class XnatInterface {
     }
 
     String projectSubjectsUrl(Project project) {
-        formatRestUrl("/projects/${project.id}/subjects")
+        formatUrl(projectUrl(project), 'subjects')
     }
 
     String subjectUrl(Project project, Subject subject) {
-        formatRestUrl("/projects/${project.id}/subjects/${subject.label}")
+        if (subject.label == null) {
+            throw new UnsupportedOperationException('subject.label cannot be null')
+        }
+        formatUrl(projectUrl(project), 'subjects', subject.label)
     }
 
     String subjectUrl(Subject subject) {
@@ -877,7 +895,7 @@ abstract class XnatInterface {
             throw new UnsupportedOperationException('Destination project string cannot be null for subject sharing.')
         }
 
-        queryBase().queryParam('label', share.destinationLabel ?: subject.label).put(CommonUtils.formatUrl(subjectUrl(sourceProject, subject), "projects/${share.destinationProject}")).
+        queryBase().queryParam('label', share.destinationLabel ?: subject.label).put(formatUrl(subjectUrl(sourceProject, subject), "projects/${share.destinationProject}")).
                 then().assertThat().statusCode(200)
     }
 
@@ -891,13 +909,6 @@ abstract class XnatInterface {
     }
 
     void deleteSubject(Project project, Subject subject) {
-        if (project == null) {
-            throw new UnsupportedOperationException('project cannot be null')
-        }
-        if (subject == null) {
-            throw new UnsupportedOperationException('subject cannot be null')
-        }
-
         queryBase().delete(subjectUrl(project, subject)).then().assertThat().statusCode(200)
     }
 
@@ -976,7 +987,7 @@ abstract class XnatInterface {
         }
 
         queryBase().queryParam('label', share.destinationLabel ?: subjectAssessor.label).
-                put(CommonUtils.formatUrl(subjectAssessorUrl(project, subject, subjectAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(200)
+                put(formatUrl(subjectAssessorUrl(project, subject, subjectAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(200)
     }
 
     void relabelSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, String newLabel) {
@@ -996,16 +1007,6 @@ abstract class XnatInterface {
     }
 
     void deleteSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor) {
-        if (project == null) {
-            throw new UnsupportedOperationException("project cannot be null")
-        }
-        if (subject == null) {
-            throw new UnsupportedOperationException("subject cannot be null")
-        }
-        if (subjectAssessor == null) {
-            throw new UnsupportedOperationException("subjectAssessor cannot be null")
-        }
-
         queryBase().queryParam('removeFiles', true).delete(subjectAssessorUrl(project, subject, subjectAssessor)).then().assertThat().statusCode(200)
     }
 
@@ -1014,7 +1015,10 @@ abstract class XnatInterface {
     }
 
     String subjectAssessorUrl(Project project, Subject subject, SubjectAssessor assessor) {
-        formatRestUrl("projects/${project.id}/subjects/${subject.label}/experiments/${assessor.label}")
+        if (assessor.label == null) {
+            throw new UnsupportedOperationException('assessor.label cannot be null')
+        }
+        formatUrl(subjectUrl(project, subject), 'experiments', assessor.label)
     }
 
     String subjectAssessorUrl(SubjectAssessor assessor) {
@@ -1022,7 +1026,7 @@ abstract class XnatInterface {
     }
 
     String sessionScansUrl(Project project, Subject subject, ImagingSession session) {
-        formatRestUrl("projects/${project.id}/subjects/${subject.label}/experiments/${session.label}/scans")
+        formatUrl(subjectAssessorUrl(project, subject, session), 'scans')
     }
 
     String sessionScansUrl(ImagingSession session) {
@@ -1042,7 +1046,10 @@ abstract class XnatInterface {
     }
 
     String scanUrl(Project project, Subject subject, ImagingSession session, Scan scan) {
-        CommonUtils.formatUrl(sessionScansUrl(project, subject, session), scan.id)
+        if (scan.id == null) {
+            throw new UnsupportedOperationException('scan.id cannot be null')
+        }
+        formatUrl(sessionScansUrl(project, subject, session), scan.id)
     }
 
     String scanUrl(Scan scan) {
@@ -1066,7 +1073,7 @@ abstract class XnatInterface {
     }
 
     String assessorsUrl(Project project, Subject subject, ImagingSession session) {
-        formatRestUrl("projects/${project.id}/subjects/${subject.label}/experiments/${session.label}/assessors")
+        formatUrl(subjectAssessorUrl(project, subject, session), 'assessors')
     }
 
     void createSessionAssessor(Project project, Subject subject, ImagingSession session, SessionAssessor assessor) {
@@ -1102,19 +1109,6 @@ abstract class XnatInterface {
     }
 
     void deleteSessionAssessor(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
-        if (project == null) {
-            throw new UnsupportedOperationException('project cannot be null')
-        }
-        if (subject == null) {
-            throw new UnsupportedOperationException('subject cannot be null')
-        }
-        if (session == null) {
-            throw new UnsupportedOperationException('session cannot be null')
-        }
-        if (sessionAssessor == null) {
-            throw new UnsupportedOperationException('sessionAssessor cannot be null')
-        }
-
         queryBase().delete(sessionAssessorUrl(project, subject, session, sessionAssessor)).then().assertThat().statusCode(200)
     }
 
@@ -1123,7 +1117,10 @@ abstract class XnatInterface {
     }
 
     String sessionAssessorUrl(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
-        formatRestUrl("projects/${project.id}/subjects/${subject.label}/experiments/${session.label}/assessors/${sessionAssessor.label}")
+        if (sessionAssessor.label == null) {
+            throw new UnsupportedOperationException('sessionAssessor.label cannot be null')
+        }
+        formatUrl(subjectAssessorUrl(project, subject, session), 'assessors', sessionAssessor.label)
     }
 
     String sessionAssessorUrl(SessionAssessor assessor) {
@@ -1131,11 +1128,14 @@ abstract class XnatInterface {
     }
 
     String reconstructionUrl(Project project, Subject subject, ImagingSession session, Reconstruction reconstruction) {
-        "${subjectAssessorUrl(project, subject, session)}/reconstructions/${reconstruction.label}"
+        if (reconstruction.label == null) {
+            throw new UnsupportedOperationException('reconstruction.label cannot be null')
+        }
+        formatUrl(subjectAssessorUrl(project, subject, session), 'reconstructions', reconstruction.label)
     }
 
     String reconstructionUrl(Reconstruction reconstruction) {
-        "${subjectAssessorUrl(reconstruction.parentSession)}/reconstructions/${reconstruction.label}"
+        formatUrl(subjectAssessorUrl(reconstruction.parentSession), 'reconstructions', reconstruction.label)
     }
 
     void createReconstruction(Project project, Subject subject, ImagingSession session, Reconstruction reconstruction) {

@@ -4,6 +4,7 @@ import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.pogo.extensions.reconstruction.ReconstructionExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
+import org.nrg.xnat.util.RandomUtils
 
 class Reconstruction extends Extensible<Reconstruction> {
 
@@ -12,6 +13,19 @@ class Reconstruction extends Extensible<Reconstruction> {
     String type
     String baseScanType
     private final List<Resource> resources = []
+
+    Reconstruction(ImagingSession session, String label) {
+        setLabel(label)
+        if (session != null) setParentSession(session)
+    }
+
+    Reconstruction(ImagingSession session) {
+        this(session, RandomUtils.randomID())
+    }
+
+    Reconstruction() {
+        this(null)
+    }
 
     List<Resource> getResources() {
         resources
@@ -24,6 +38,11 @@ class Reconstruction extends Extensible<Reconstruction> {
     Reconstruction parentSession(ImagingSession session) {
         setParentSession(session)
         this
+    }
+
+    void setParentSession(ImagingSession session) {
+        parentSession = session
+        session.addReconstruction(this)
     }
 
     Reconstruction type(String type) {
