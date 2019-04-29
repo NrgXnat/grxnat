@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.users
 
+import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.Extension
 
@@ -13,6 +14,7 @@ class User extends Extensible<User> {
     boolean verified
     boolean enabled
     boolean admin = false
+    SiteDataRole dataRole = SiteDataRole.NONE
 
     User(String username) {
         this.username = username
@@ -20,8 +22,15 @@ class User extends Extensible<User> {
 
     User() {}
 
+    void setAdmin(boolean adminStatus) {
+        admin = adminStatus
+        if (admin) {
+            setDataRole(SiteDataRole.ALL_DATA_ADMIN)
+        }
+    }
+
     Extension<User> getExtension() {
-        return super.getExtension()
+        super.getExtension()
     }
 
     void setExtension(Extension<User> extension) {
@@ -30,47 +39,52 @@ class User extends Extensible<User> {
 
     User username(String username) {
         setUsername(username)
-        return this
+        this
     }
 
     User password(String password) {
         setPassword(password)
-        return this
+        this
     }
 
     User email(String email) {
         setEmail(email)
-        return this
+        this
     }
 
     User firstName(String firstName) {
         setFirstName(firstName)
-        return this
+        this
     }
 
     User lastName(String lastName) {
         setLastName(lastName)
-        return this
+        this
     }
 
     User verified(boolean verified) {
         setVerified(verified)
-        return this
+        this
     }
 
     User enabled(boolean enabled) {
         setEnabled(enabled)
-        return this
+        this
     }
 
     User admin(boolean admin) {
         setAdmin(admin)
-        return this
+        this
+    }
+
+    User dataRole(SiteDataRole role) {
+        setDataRole(role)
+        this
     }
 
     User extension(Extension<User> extension) {
         setExtension(extension)
-        return this
+        this
     }
 
     @Override

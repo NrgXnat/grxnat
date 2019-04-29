@@ -16,6 +16,7 @@ import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.CommonUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
+import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.jackson.mappers.XnatRestReadWriteObjectMapper
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.DataType
@@ -63,6 +64,7 @@ import static org.nrg.testing.CommonUtils.formatUrl
 @SuppressWarnings(["GroovyUnusedDeclaration", "GrMethodMayBeStatic"])
 abstract class XnatInterface {
 
+    private static final ADMIN_ROLE = 'Administrator'
     public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
     protected XnatSessionFilter sessionFilter
     protected String xnatUrl
@@ -202,7 +204,7 @@ abstract class XnatInterface {
 
     boolean queryUserAdmin() {
         final Response response = queryBase().get(formatXapiUrl("/users/${authUser.username}/roles"))
-        if (response.statusCode == 200 && 'Administrator' in response.jsonPath().getList('')) {
+        if (response.statusCode == 200 && ADMIN_ROLE in response.jsonPath().getList('')) {
             true
         } else {
             false
@@ -371,6 +373,12 @@ abstract class XnatInterface {
     void createUser(User user) {
         prohibitNonadmin()
         queryBase().contentType(JSON).body(user).post(formatXapiUrl('users')).then().assertThat().statusCode(201)
+        if (user.isAdmin()) {
+            assignUserToRoles(user, ADMIN_ROLE)
+        }
+        if (user.dataRole != SiteDataRole.NONE) {
+            addUserToGroups(user, user.dataRole.name())
+        }
     }
 
     void updateUser(User user) {
@@ -400,7 +408,7 @@ abstract class XnatInterface {
     }
 
     void makeUserAdmin(User user) {
-        assignUserToRoles(user, 'Administrator')
+        assignUserToRoles(user, ADMIN_ROLE)
         addUserToGroups(user, 'ALL_DATA_ADMIN')
         user.admin(true)
     }
