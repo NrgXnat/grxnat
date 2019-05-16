@@ -22,4 +22,9 @@ abstract class UserGroup {
         accessLevelMap.put(dataType, accessLevel)
     }
 
+    UserGroup permission(DataType dataType, DataAccessLevel accessLevel) {
+        setPermission(dataType, accessLevel)
+        this
+    }
+
 }
