@@ -10,7 +10,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 class SessionAssessorQueryPutExtension extends SessionAssessorExtension {
 
-    private XnatInterface xnatInterface
+    protected XnatInterface xnatInterface
 
     SessionAssessorQueryPutExtension(XnatInterface xnatInterface, SessionAssessor sessionAssessor) {
         super(sessionAssessor)
@@ -24,10 +24,13 @@ class SessionAssessorQueryPutExtension extends SessionAssessorExtension {
         }
 
         parentObject.accessionNumber(
-                xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(xnatInterface.sessionAssessorUrl(project, subject, session, parentObject as SessionAssessor)).
+                xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(url(project, subject, session, parentObject as SessionAssessor)).
                 then().assertThat().statusCode(Matchers.isOneOf(200, 201)).and().extract().response().asString().trim()
         )
     }
 
+    String url(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
+        xnatInterface.sessionAssessorUrl(project, subject, session, sessionAssessor)
+    }
 
 }

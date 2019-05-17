@@ -9,7 +9,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 class SubjectAssessorQueryPutExtension extends SubjectAssessorExtension {
 
-    private XnatInterface xnatInterface
+    protected XnatInterface xnatInterface
 
     SubjectAssessorQueryPutExtension(XnatInterface xnatInterface, SubjectAssessor subjectAssessor) {
         super(subjectAssessor)
@@ -24,9 +24,12 @@ class SubjectAssessorQueryPutExtension extends SubjectAssessorExtension {
 
         parentObject.accessionNumber(
                 xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).
-                        put(xnatInterface.formatRestUrl("/projects/${project.id}/subjects/${subject.label}/experiments/${parentObject.label}")).
-                        then().assertThat().statusCode(Matchers.isOneOf(200, 201)).and().extract().response().asString().trim()
+                        put(url(project, subject, parentObject as SubjectAssessor)).then().assertThat().statusCode(Matchers.isOneOf(200, 201)).and().extract().response().asString().trim()
         )
+    }
+
+    String url(Project project, Subject subject, SubjectAssessor subjectAssessor) {
+        xnatInterface.subjectAssessorUrl(project, subject, subjectAssessor)
     }
 
 }
