@@ -27,4 +27,8 @@ abstract class UserGroup {
         this
     }
 
+    String groupIdSuffix() {
+        singularName().toLowerCase()
+    }
+
 }

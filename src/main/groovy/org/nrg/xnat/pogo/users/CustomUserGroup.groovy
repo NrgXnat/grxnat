@@ -21,6 +21,11 @@ class CustomUserGroup extends UserGroup {
     }
 
     @Override
+    String groupIdSuffix() {
+        name
+    }
+
+    @Override
     String toString() {
         name
     }

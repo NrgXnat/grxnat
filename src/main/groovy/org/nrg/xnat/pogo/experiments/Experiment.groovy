@@ -4,6 +4,7 @@ import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
+import org.nrg.xnat.pogo.Shareable
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.Resource
@@ -12,7 +13,7 @@ import org.nrg.xnat.util.MapUtils
 
 import java.time.LocalDate
 
-abstract class Experiment extends CustomVariableContainer<Experiment> {
+abstract class Experiment extends CustomVariableContainer<Experiment> implements Shareable {
 
     Project primaryProject
     Subject subject

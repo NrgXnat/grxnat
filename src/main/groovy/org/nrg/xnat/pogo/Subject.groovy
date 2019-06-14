@@ -12,7 +12,7 @@ import org.nrg.xnat.util.RandomUtils
 
 import java.time.LocalDate
 
-class Subject extends CustomVariableContainer<Subject> {
+class Subject extends CustomVariableContainer<Subject> implements Shareable {
 
     private Project project
     String label
@@ -242,6 +242,11 @@ class Subject extends CustomVariableContainer<Subject> {
     @Override
     String fieldBaseDataType() {
         'xnat:subjectData'
+    }
+
+    @Override
+    Project getPrimaryProject() {
+        project
     }
 
     @Override

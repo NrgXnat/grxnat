@@ -155,7 +155,7 @@ task fatJar(type: Jar) {
     with jar
 }
 
-def propertyWithDefault(def String property, def Object value) {
+def propertyWithDefault(String property, Object value) {
     hasProperty(property) ? getProperty(property) : value
 }
 

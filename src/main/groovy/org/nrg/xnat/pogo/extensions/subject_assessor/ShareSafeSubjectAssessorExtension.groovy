@@ -13,7 +13,7 @@ class ShareSafeSubjectAssessorExtension extends SubjectAssessorQueryPutExtension
 
     @Override
     String url(Project project, Subject subject, SubjectAssessor subjectAssessor) {
-        "/data/projects/${project.id}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${subjectAssessor.label}"
+        xnatInterface.formatRestUrl("/projects/${subjectAssessor.getPrimaryProject() ?: project}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${subjectAssessor.label}")
     }
 
 }

@@ -16,6 +16,8 @@ class User extends Extensible<User> {
     boolean admin = false
     SiteDataRole dataRole = SiteDataRole.NONE
 
+    public static final User GUEST = new User('guest')
+
     User(String username) {
         this.username = username
     }

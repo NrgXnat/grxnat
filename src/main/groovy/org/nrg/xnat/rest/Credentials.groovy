@@ -8,10 +8,16 @@ import org.nrg.xnat.pogo.users.User
 class Credentials {
 
     static RequestSpecification build(String username, String password, boolean preemptive) {
-        if (username == null || password == null) return null
-
-        final AuthenticationSpecification credentials = RestAssured.given().authentication()
-        return (preemptive) ? credentials.preemptive().basic(username, password) : credentials.basic(username, password)
+        if (username == null) {
+            null
+        } else if (username == User.GUEST.username) {
+            RestAssured.given()
+        } else if (password == null) {
+            null
+        } else {
+            final AuthenticationSpecification credentials = RestAssured.given().authentication()
+            (preemptive) ? credentials.preemptive().basic(username, password) : credentials.basic(username, password)
+        }
     }
 
     static RequestSpecification build(String username, String password) {

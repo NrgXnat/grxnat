@@ -14,7 +14,7 @@ class ShareSafeSessionAssessorExtension extends SessionAssessorQueryPutExtension
 
     @Override
     String url(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
-        "/data/projects/${project.id}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${xnatInterface.getAccessionNumber(session)}/assessors/${sessionAssessor.label}"
+        xnatInterface.formatRestUrl("/projects/${sessionAssessor.getPrimaryProject() ?: project.id}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${xnatInterface.getAccessionNumber(session)}/assessors/${sessionAssessor.label}")
     }
 
 }

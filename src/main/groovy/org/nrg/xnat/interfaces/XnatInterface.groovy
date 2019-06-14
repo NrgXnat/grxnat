@@ -13,6 +13,7 @@ import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.time.StopWatch
+import org.hamcrest.Matchers
 import org.nrg.testing.CommonUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
@@ -26,6 +27,7 @@ import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
+import org.nrg.xnat.pogo.XnatPlugin
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
@@ -407,6 +409,10 @@ abstract class XnatInterface {
         queryBase().contentType(JSON).body(groups).put(formatXapiUrl("/users/${user.username}/groups")).then().assertThat().statusCode(200)
     }
 
+    void removeUserFromGroups(User user, String... groups) {
+        queryBase().contentType(JSON).body(groups).delete(formatXapiUrl("/users/${user.username}/groups")).then().assertThat().statusCode(200)
+    }
+
     void makeUserAdmin(User user) {
         assignUserToRoles(user, ADMIN_ROLE)
         addUserToGroups(user, 'ALL_DATA_ADMIN')
@@ -432,6 +438,10 @@ abstract class XnatInterface {
 
     void setSessionXmlRebuilderTimes(int interval, int schedule) {
         postToSiteConfig([(SiteConfig.AUTOARCHIVE_IDLE_TIME) : interval, (SiteConfig.AUTOARCHIVE_IDLE_SCHEDULE) : schedule])
+    }
+
+    List<XnatPlugin> readInstalledPlugins() {
+        SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
     }
 
     private AnonScript readAnonScript(Response response) {
@@ -524,7 +534,7 @@ abstract class XnatInterface {
     }
 
     void addUserToProject(User addedUser, Project project, UserGroup userGroup) {
-        addUserToGroups(addedUser, "${project.id}_${(userGroup instanceof CustomUserGroup) ? userGroup.name : userGroup.singularName().toLowerCase()}")
+        queryBase().put(formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${addedUser.username}"))
     }
 
     @SuppressWarnings("GroovyGStringKey")
@@ -834,7 +844,7 @@ abstract class XnatInterface {
         }
     }
 
-    void createSubject(Project project, Subject subject) {
+    void createSubject(Project project, Subject subject, boolean suppressAssessors = false) {
         if (project == null) {
             throw new UnsupportedOperationException('project cannot be null')
         }
@@ -858,6 +868,8 @@ abstract class XnatInterface {
         }
 
         putCustomVariableValues(subjectUrl(project, subject), subject, subject.fields)
+
+        if (suppressAssessors) return
 
         if (project.isSubjectAssessorParallelization()) {
             GParsPool.withPool {
@@ -924,7 +936,7 @@ abstract class XnatInterface {
         deleteSubject(subject.project, subject)
     }
 
-    void createSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor) {
+    void createSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, boolean suppressAssessors = false) {
         if (project == null) {
             throw new UnsupportedOperationException('project cannot be null')
         }
@@ -946,7 +958,7 @@ abstract class XnatInterface {
         uploadResources(subjectAssessor.resources)
 
         subjectAssessor.shares.each { share ->
-            shareSubjectAssessor(project, subject, subjectAssessor, share)
+            shareSubjectAssessor(subjectAssessor, share)
         }
 
         putCustomVariableValues(subjectAssessorUrl(project, subject, subjectAssessor), subjectAssessor, subjectAssessor.fields)
@@ -967,6 +979,12 @@ abstract class XnatInterface {
                 }
             }
 
+            session.reconstructions.each { reconstruction ->
+                createReconstruction(project, subject, session, reconstruction)
+            }
+
+            if (suppressAssessors) return
+
             if (project.isSessionAssessorParallelization()) {
                 GParsPool.withPool {
                     session.assessors.each { assessor ->
@@ -978,10 +996,6 @@ abstract class XnatInterface {
                     createSessionAssessor(project, subject, session, assessor)
                 }
             }
-
-            session.reconstructions.each { reconstruction ->
-                createReconstruction(project, subject, session, reconstruction)
-            }
         }
     }
 
@@ -989,13 +1003,12 @@ abstract class XnatInterface {
         createSubjectAssessor(subjectAssessor.getPrimaryProject(), subjectAssessor.getSubject(), subjectAssessor)
     }
 
-    void shareSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, Share share) {
+    void shareSubjectAssessor(SubjectAssessor subjectAssessor, Share share) {
         if (share.destinationProject == null) {
             throw new UnsupportedOperationException('Destination project string cannot be null for experiment sharing.')
         }
 
-        queryBase().queryParam('label', share.destinationLabel ?: subjectAssessor.label).
-                put(formatUrl(subjectAssessorUrl(project, subject, subjectAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(200)
+        queryBase().queryParam('label', share.destinationLabel ?: subjectAssessor.label).put(formatUrl(simplifiedSubjectAssessorUrl(subjectAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
     void relabelSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, String newLabel) {
@@ -1031,6 +1044,10 @@ abstract class XnatInterface {
 
     String subjectAssessorUrl(SubjectAssessor assessor) {
         subjectAssessorUrl(assessor.primaryProject ?: assessor.subject.project, assessor.subject, assessor)
+    }
+
+    String simplifiedSubjectAssessorUrl(SubjectAssessor subjectAssessor) {
+        formatRestUrl("/experiments/${getAccessionNumber(subjectAssessor)}")
     }
 
     String sessionScansUrl(Project project, Subject subject, ImagingSession session) {
@@ -1104,6 +1121,10 @@ abstract class XnatInterface {
 
         assessor.extension.create(project, subject, session)
 
+        assessor.shares.each { share ->
+            shareSessionAssessor(session, assessor, share)
+        }
+
         assessor.resources.each { resource ->
             resource.project(project).subject(subject).subjectAssessor(session).sessionAssessor(assessor)
         }
@@ -1114,6 +1135,14 @@ abstract class XnatInterface {
 
     void createSessionAssessor(SessionAssessor assessor) {
         createSessionAssessor(assessor.getPrimaryProject(), assessor.getSubject(), assessor.getParentSession(), assessor)
+    }
+
+    void shareSessionAssessor(SubjectAssessor session, SessionAssessor sessionAssessor, Share share) {
+        if (share.destinationProject == null) {
+            throw new UnsupportedOperationException('Destination project string cannot be null for experiment sharing.')
+        }
+
+        queryBase().queryParam('label', share.destinationLabel ?: sessionAssessor.label).put(formatUrl(simplifiedSessionAssessorUrl(session, sessionAssessor), 'projects', share.destinationProject)).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
     void deleteSessionAssessor(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
@@ -1133,6 +1162,10 @@ abstract class XnatInterface {
 
     String sessionAssessorUrl(SessionAssessor assessor) {
         sessionAssessorUrl(assessor.getPrimaryProject(), assessor.getSubject(), assessor.getParentSession(), assessor)
+    }
+
+    String simplifiedSessionAssessorUrl(SubjectAssessor session, SessionAssessor sessionAssessor) {
+        formatUrl(simplifiedSubjectAssessorUrl(session), '/assessors/', sessionAssessor.accessionNumber) // TODO: retrieve ID if needed
     }
 
     String reconstructionUrl(Project project, Subject subject, ImagingSession session, Reconstruction reconstruction) {
