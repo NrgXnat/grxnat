@@ -1,11 +1,10 @@
 package org.nrg.xnat.pogo.extensions.subject
 
 import com.jayway.restassured.http.ContentType
-import org.nrg.testing.CommonUtils
+import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
-import org.nrg.xnat.util.FileIOUtils
 
 class SubjectXMLPutExtension extends SubjectExtension {
 
@@ -25,9 +24,9 @@ class SubjectXMLPutExtension extends SubjectExtension {
     @Override
     void create(Project project) {
         final String subjectResponse = xnatInterface.queryBase().queryParam('format', 'xml').contentType(ContentType.XML).
-                body(FileIOUtils.readFile(xmlFile)).post(xnatInterface.projectSubjectsUrl(project)).then().assertThat().statusCode(200).and().extract().response().asString()
+                body(xmlFile.text).post(xnatInterface.projectSubjectsUrl(project)).then().assertThat().statusCode(200).and().extract().response().asString()
 
-        final Subject createdSubject = xnatInterface.readSubject(CommonUtils.last(subjectResponse.split('/')))
+        final Subject createdSubject = xnatInterface.readSubject(CommonStringUtils.last(subjectResponse.split('/')))
         if (parentObject == null) setParentObject(new Subject())
         parentObject.accessionNumber(createdSubject.accessionNumber).label(createdSubject.label)
     }

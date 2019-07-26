@@ -89,6 +89,10 @@ class CStore {
         headers(attributes)
     }
 
+    Attributes getHeaders() {
+        storeSCU.attributes
+    }
+
     void send() {
         storeSCU.open()
         storeSCU.sendFiles()

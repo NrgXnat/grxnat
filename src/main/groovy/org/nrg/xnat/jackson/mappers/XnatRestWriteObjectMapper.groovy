@@ -7,7 +7,7 @@ class XnatRestWriteObjectMapper extends ObjectMapper {
 
     XnatRestWriteObjectMapper() {
         super()
-        registerModule(XnatRestWriteSerializationModule.build())
+        registerModule(new XnatRestWriteSerializationModule())
     }
 
 }

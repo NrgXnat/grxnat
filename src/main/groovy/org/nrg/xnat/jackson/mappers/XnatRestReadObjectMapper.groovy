@@ -13,7 +13,7 @@ class XnatRestReadObjectMapper extends ObjectMapper {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
         }
-        registerModule(XnatRestReadDeserializationModule.build())
+        registerModule(new XnatRestReadDeserializationModule())
     }
 
 }

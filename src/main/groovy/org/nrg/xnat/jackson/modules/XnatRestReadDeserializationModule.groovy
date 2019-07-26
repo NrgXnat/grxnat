@@ -11,24 +11,22 @@ import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.users.User
 import org.reflections.Reflections
 
-class XnatRestReadDeserializationModule {
+class XnatRestReadDeserializationModule extends SimpleModule {
 
-    static SimpleModule build() {
-        final SimpleModule module = new SimpleModule("XNAT_REST_Deserializers")
+    XnatRestReadDeserializationModule() {
+        super('XNAT_REST_Deserializers')
 
-        module.addDeserializer(Investigator, new InvestigatorDeserializer())
-        module.addDeserializer(Project, new ProjectDeserializer())
-        module.addDeserializer(Subject, new SubjectDeserializer())
-        new Reflections("org.nrg.xnat.pogo.experiments").getSubTypesOf(Experiment).each { experiment ->
-            module.addDeserializer(experiment, new ExperimentDeserializer(experiment))
+        addDeserializer(Investigator, new InvestigatorDeserializer())
+        addDeserializer(Project, new ProjectDeserializer())
+        addDeserializer(Subject, new SubjectDeserializer())
+        new Reflections('org.nrg.xnat.pogo.experiments').getSubTypesOf(Experiment).each { experiment ->
+            addDeserializer(experiment, new ExperimentDeserializer(experiment))
         }
-        module.addDeserializer(Scan, new ScanDeserializer())
-        module.addDeserializer(User, new UserDeserializer())
-        new Reflections("org.nrg.xnat.pogo.resources").getSubTypesOf(Resource).each { resourceClass ->
-            module.addDeserializer(resourceClass, new ResourceDeserializer(resourceClass))
+        addDeserializer(Scan, new ScanDeserializer())
+        addDeserializer(User, new UserDeserializer())
+        new Reflections('org.nrg.xnat.pogo.resources').getSubTypesOf(Resource).each { resourceClass ->
+            addDeserializer(resourceClass, new ResourceDeserializer(resourceClass))
         }
-
-        module
     }
 
 }

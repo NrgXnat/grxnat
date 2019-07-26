@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.14'
+def buildVersion = '1.15-SNAPSHOT'
 
 group groupName
 version buildVersion
@@ -13,24 +13,14 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 
-def vBom = '2.0.1'
-def vGroovy = '2.4.4'
-def vTestUtils = '1.1'
-def vGPars = '1.2.0'
+def vBom = '3.0-SNAPSHOT'
+def vTestUtils = '2.0-SNAPSHOT'
 
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
         jcenter()
-        maven {
-            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
-            name 'XNAT Release Repository'
-        }
-        maven {
-            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
-            name 'XNAT Snapshot Repository'
-        }
     }
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
@@ -47,18 +37,8 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven {
-        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
-        name 'XNAT Release Repository'
-    }
-    maven {
-        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
-        name 'XNAT Snapshot Repository'
-    }
-    maven {
-        url 'https://nrgxnat.jfrog.io/nrgxnat/ext-release'
-        name 'XNAT External Release Repository'
-    }
+    maven { url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release' }
+    maven { url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot' }
 }
 
 sourceCompatibility = 1.8
@@ -69,7 +49,7 @@ configurations {
 }
 
 dependencies {
-    compile("org.codehaus.groovy:groovy-all:${vGroovy}")
+    compile('org.codehaus.groovy:groovy-all')
     compileAndInclude('org.apache.commons:commons-lang3')
     compileAndInclude('commons-io:commons-io')
     compileAndInclude('com.fasterxml.jackson.core:jackson-annotations')
@@ -79,11 +59,11 @@ dependencies {
     compileAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
     compileAndInclude('org.reflections:reflections')
     compileAndInclude('com.jayway.restassured:rest-assured') {
-        exclude group: 'org.codehaus.groovy', module: '*'
+        exclude(group: 'org.codehaus.groovy', module: '*')
     }
     compileAndInclude('org.slf4j:slf4j-log4j12')
     compileAndInclude("org.nrg:test_utils:${vTestUtils}")
-    compileAndInclude("org.codehaus.gpars:gpars:${vGPars}")
+    compileAndInclude('org.codehaus.gpars:gpars')
     compileAndInclude('org.dcm4che.tool:dcm4che-tool-storescu')
 
     testCompile 'org.testng:testng'
@@ -93,64 +73,65 @@ test {
     useTestNG {}
 }
 
-publishing.publications {
-    mavenJava(MavenPublication) {
-        groupId groupName
-        artifactId artifactName
-        version buildVersion
-
-        from components.java
-
-        pom.withXml {
-            def root = asNode()
-            root.appendNode('name', 'grxnat')
-            root.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
-            root.appendNode('inceptionYear', '2017')
-
-            def scm = root.appendNode('scm')
-            scm.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
-            scm.appendNode('connection', 'https://bitbucket.org/xnatdev/grxnat')
-            scm.appendNode('developerConnection', 'scm:git://bitbucket.org/xnatdev/grxnat.git')
-
-            def developers = root.appendNode('developers')
-
-            def charlie = developers.appendNode('developer')
-            charlie.appendNode('id', 'grepStar')
-            charlie.appendNode('name', 'Charlie Moore')
-            charlie.appendNode('email', 'moore.c@wustl.edu')
-        }
-    }
-}
-
 jar {
     from sourceSets.main.allSource
 }
 
-publishing.repositories {
-    maven {
-        credentials {
-            // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
-            // line in the form -PrepoUsername=foo -PrepoPassword=bar.
-            username propertyWithDefault('repoUsername', 'username')
-            password propertyWithDefault('repoPassword', 'password')
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId groupName
+            artifactId artifactName
+            version buildVersion
+
+            from components.java
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', 'grxnat')
+                root.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
+                root.appendNode('inceptionYear', '2017')
+
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'https://bitbucket.org/xnatdev/grxnat')
+                scm.appendNode('connection', 'https://bitbucket.org/xnatdev/grxnat')
+                scm.appendNode('developerConnection', 'scm:git://bitbucket.org/xnatdev/grxnat.git')
+
+                def developers = root.appendNode('developers')
+
+                def charlie = developers.appendNode('developer')
+                charlie.appendNode('id', 'grepStar')
+                charlie.appendNode('name', 'Charlie Moore')
+                charlie.appendNode('email', 'moore.c@wustl.edu')
+            }
         }
-        if (project.version.endsWith('-SNAPSHOT')) {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local"
-        } else {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
+    }
+    repositories {
+        maven {
+            credentials {
+                // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
+                // line in the form -PrepoUsername=foo -PrepoPassword=bar.
+                username propertyWithDefault('repoUsername', 'username')
+                password propertyWithDefault('repoPassword', 'password')
+            }
+            if (project.version.endsWith('-SNAPSHOT')) {
+                url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local'
+            } else {
+                url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release-local'
+            }
         }
     }
 }
 
 task fatJar(type: Jar) {
     zip64 true
-    classifier = "fat"
+    classifier = 'fat'
     from {
         configurations.compileAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
     } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
     }
     with jar
 }

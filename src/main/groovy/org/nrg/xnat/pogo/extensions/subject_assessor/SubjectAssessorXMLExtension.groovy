@@ -1,12 +1,11 @@
 package org.nrg.xnat.pogo.extensions.subject_assessor
 
 import com.jayway.restassured.http.ContentType
-import org.nrg.testing.CommonUtils
+import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
-import org.nrg.xnat.util.FileIOUtils
 
 class SubjectAssessorXMLExtension extends SubjectAssessorExtension {
 
@@ -26,13 +25,13 @@ class SubjectAssessorXMLExtension extends SubjectAssessorExtension {
     @Override
     void create(Project project, Subject subject) {
         getParentObject().accessionNumber(
-                CommonUtils.last(
-                        xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(FileIOUtils.readFile(assessorXML)).
+                CommonStringUtils.last(
+                        xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
                                 post(xnatInterface.formatRestUrl("/projects/${project.id}/subjects/${subject.label}/experiments")).
                                 then().assertThat().statusCode(200).and().extract().response().asString().split('/')
                 )
         )
-        final SubjectAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, parentObject.getClass()) as SubjectAssessor
+        final SubjectAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, parentObject.class) as SubjectAssessor
         parentObject.label(createdAssessor.label)
     }
 

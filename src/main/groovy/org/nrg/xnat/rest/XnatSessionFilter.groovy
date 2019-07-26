@@ -8,7 +8,7 @@ import com.jayway.restassured.specification.FilterableResponseSpecification
 import com.jayway.restassured.specification.RequestSpecification
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.http.impl.client.SystemDefaultHttpClient
-import org.nrg.testing.CommonUtils
+import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.pogo.users.User
 
 import java.util.concurrent.TimeUnit
@@ -92,7 +92,7 @@ class XnatSessionFilter implements Filter {
     }
 
     void extractSessionId() {
-        final Response response = Credentials.build(user).get(CommonUtils.formatUrl(xnatUrl, '/data/auth'))
+        final Response response = Credentials.build(user).get(CommonStringUtils.formatUrl(xnatUrl, '/data/auth'))
         if (response.statusCode != 200) throw new AssertionError('Provided username and password combination do not appear to be correct')
         sessionId = response.getSessionId()
     }

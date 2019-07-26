@@ -11,10 +11,9 @@ import com.jayway.restassured.path.json.config.JsonPathConfig
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
-import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.time.StopWatch
 import org.hamcrest.Matchers
-import org.nrg.testing.CommonUtils
+import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.enums.SiteDataRole
@@ -61,9 +60,9 @@ import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfi
 import static com.jayway.restassured.http.ContentType.JSON
 import static com.jayway.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
-import static org.nrg.testing.CommonUtils.formatUrl
+import static org.nrg.testing.CommonStringUtils.formatUrl
 
-@SuppressWarnings(["GroovyUnusedDeclaration", "GrMethodMayBeStatic"])
+@SuppressWarnings(['GroovyUnusedDeclaration', 'GrMethodMayBeStatic'])
 abstract class XnatInterface {
 
     private static final ADMIN_ROLE = 'Administrator'
@@ -174,22 +173,16 @@ abstract class XnatInterface {
         queryBase().queryParam('CSRF', true).get(formatRestUrl('auth')).then().assertThat().statusCode(200).and().extract().response().asString().split('=')[1]
     }
 
-    void saveBinaryResponseToFile(Response response, File file) {
-        response.then().assertThat().statusCode(200)
-        final InputStream inputStream = response.asInputStream()
-        try {
-            FileUtils.copyInputStreamToFile(inputStream, file)
-        } catch (IOException ioe) {
-            throw new RuntimeException("Could not download data and copy to file: " + ioe)
-        }
-    }
-
     RequestSpecification queryBase() {
         given().filter(sessionFilter)
     }
 
     RequestSpecification jsonQuery() {
         queryBase().queryParam('format', 'json')
+    }
+
+    RequestSpecification xmlQuery() {
+        queryBase().queryParam('format', 'xml')
     }
 
     RequestSpecification requestWithCsrfToken() {
@@ -206,11 +199,7 @@ abstract class XnatInterface {
 
     boolean queryUserAdmin() {
         final Response response = queryBase().get(formatXapiUrl("/users/${authUser.username}/roles"))
-        if (response.statusCode == 200 && ADMIN_ROLE in response.jsonPath().getList('')) {
-            true
-        } else {
-            false
-        }
+        response.statusCode == 200 && ADMIN_ROLE in response.jsonPath().getList('')
     }
 
     final boolean userIsAdmin() {
@@ -281,9 +270,9 @@ abstract class XnatInterface {
         println "A subsequent operation requires that the AutoRun pipeline complete on this session (${session}) before continuing. If this step appears to be hanging, it likely means that the pipeline engine is not configured correctly on the XNAT server. Waiting for AutoRun completion for up to ${maxTimeInSeconds} seconds..."
         final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
 
-        final StopWatch stopWatch = CommonUtils.launchStopWatch()
+        final StopWatch stopWatch = CommonStringUtils.launchStopWatch()
         while (true) {
-            CommonUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
+            CommonStringUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
 
             final String status = queryBase().queryParam("experiment", accessionNumber).queryParam("format", "json").
                     get(formatRestUrl('services/workflows/AutoRun')).then().extract().jsonPath().getString('items.get(0).data_fields.status')
@@ -293,7 +282,7 @@ abstract class XnatInterface {
             } else if (status == 'Failed') {
                 throw new AssertionError('AutoRun failed.')
             }
-            CommonUtils.sleep(1000)
+            CommonStringUtils.sleep(1000)
         }
     }
 
@@ -537,9 +526,16 @@ abstract class XnatInterface {
         queryBase().put(formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${addedUser.username}"))
     }
 
-    @SuppressWarnings("GroovyGStringKey")
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
-        final Map<String, Object> formData = ['xdat:userGroup/displayName': userGroup.singularName(), 'xdat:userGroup/tag': project.id, 'src': 'project', 'ELEMENT_0': 'xdat:userGroup', 'eventSubmit_doPerform': 'Submit', "xnat:projectData_xnat:projectData/ID_${project.id}_R": 1, (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')): 1] as Map<String, Object>
+        final Map<String, Object> formData = [
+                'xdat:userGroup/displayName' : userGroup.singularName(),
+                'xdat:userGroup/tag' : project.id,
+                'src' : 'project',
+                'ELEMENT_0' : 'xdat:userGroup',
+                'eventSubmit_doPerform' : 'Submit',
+                ("xnat:projectData_xnat:projectData/ID_${project.id}_R".toString()) : 1,
+                (customUserGroupPermissionString(project, DataType.SUBJECT, 'R')): 1
+        ] as Map<String, Object>
         userGroup.accessLevelMap.each { dataType, level ->
             if (level in [READ_ONLY, CREATE_AND_EDIT, DELETE, ALL]) {
                 formData.put(customUserGroupPermissionString(project, dataType, 'R'), 1)

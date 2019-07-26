@@ -7,7 +7,7 @@ class XnatRestReadWriteObjectMapper extends XnatRestReadObjectMapper {
 
     XnatRestReadWriteObjectMapper() {
         super(false)
-        registerModule(XnatRestWriteSerializationModule.build())
+        registerModule(new XnatRestWriteSerializationModule())
         configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true)
     }
 

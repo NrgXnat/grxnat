@@ -14,18 +14,17 @@ enum Gender {
     }
 
     static Gender get(String value) {
-        for (Gender gender : values()) {
-            if (StringUtils.equalsIgnoreCase(gender.string, value)) return gender
+        values().find { gender ->
+            StringUtils.equalsIgnoreCase(gender.string, value)
         }
-        return null
     }
 
     String capitalize() {
-        return StringUtils.capitalize(string)
+        StringUtils.capitalize(string)
     }
 
     @Override
     String toString() {
-        return string
+        string
     }
 }

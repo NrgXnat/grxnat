@@ -2,8 +2,8 @@ package org.nrg.xnat.jackson.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
+import org.nrg.testing.TimeUtils
 import org.nrg.xnat.pogo.experiments.Experiment
-import org.nrg.xnat.util.TimeUtils
 
 class ExperimentSerializer extends CustomSerializer<Experiment> {
 
