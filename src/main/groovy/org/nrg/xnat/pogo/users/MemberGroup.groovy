@@ -7,12 +7,12 @@ class MemberGroup extends UserGroup {
 
     @Override
     String singularName() {
-        "Member"
+        'Member'
     }
 
     @Override
     String pluralName() {
-        "Members"
+        'Members'
     }
 
     @Override

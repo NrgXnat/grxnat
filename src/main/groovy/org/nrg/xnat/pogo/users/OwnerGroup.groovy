@@ -7,12 +7,12 @@ class OwnerGroup extends UserGroup {
 
     @Override
     String singularName() {
-        "Owner"
+        'Owner'
     }
 
     @Override
     String pluralName() {
-        "Owners"
+        'Owners'
     }
 
     @Override

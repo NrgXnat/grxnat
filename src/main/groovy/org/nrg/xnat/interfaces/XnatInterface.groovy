@@ -14,6 +14,7 @@ import groovyx.gpars.GParsPool
 import org.apache.commons.lang3.time.StopWatch
 import org.hamcrest.Matchers
 import org.nrg.testing.CommonStringUtils
+import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.enums.SiteDataRole
@@ -272,7 +273,7 @@ abstract class XnatInterface {
 
         final StopWatch stopWatch = CommonStringUtils.launchStopWatch()
         while (true) {
-            CommonStringUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
+            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
 
             final String status = queryBase().queryParam("experiment", accessionNumber).queryParam("format", "json").
                     get(formatRestUrl('services/workflows/AutoRun')).then().extract().jsonPath().getString('items.get(0).data_fields.status')
@@ -282,7 +283,7 @@ abstract class XnatInterface {
             } else if (status == 'Failed') {
                 throw new AssertionError('AutoRun failed.')
             }
-            CommonStringUtils.sleep(1000)
+            TimeUtils.sleep(1000)
         }
     }
 
@@ -587,7 +588,7 @@ abstract class XnatInterface {
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
-                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", resource.class)
+                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", Resource)
 
         resource.fileCount(responseResource.fileCount).fileSize(responseResource.fileSize)
     }
@@ -672,7 +673,7 @@ abstract class XnatInterface {
             )
         }
 
-        if (projectCall.get("children.get(0).find { it.field == 'investigators/investigator' }.") != null) {
+        if (projectCall.get("children.get(0).find { it.field == 'investigators/investigator' }") != null) {
             project.setInvestigators(projectCall.getObject("children.get(0).find { it.field == 'investigators/investigator' }.items.data_fields", Investigator[]) as List)
         }
 

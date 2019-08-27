@@ -16,6 +16,7 @@ class DataType {
 
     static final List<DataType> KNOWN_TYPES = []
 
+    // Concrete types
     public static final DataType PROJECT = new DataType('xnat:projectData', null, 'Project')
     public static final DataType SUBJECT = new DataType('xnat:subjectData', null, 'Subject')
     public static final DataType MR_SESSION = makeSessionDataType('mr').associatedClass(MRSession)
@@ -29,6 +30,11 @@ class DataType {
     public static final DataType PET_SCAN = makeScanDataType('pet').associatedScanClass(PETScan)
     public static final DataType CT_SCAN = makeScanDataType('ct').associatedScanClass(CTScan)
     public static final DataType FREESURFER = new DataType('fs:fsData', null, 'Freesurfer', 'Freesurfers')
+    // Abstract types
+    public static final DataType SUBJECT_ASSESSOR = new DataType('xnat:subjectAssessorData', null, null, null)
+    public static final DataType IMAGE_SESSION = new DataType('xnat:imageSessionData', null, null, null)
+    public static final DataType IMAGE_SCAN = new DataType('xnat:imageScanData', null, null, null)
+    public static final DataType IMAGE_ASSESSOR = new DataType('xnat:imageAssessorData', null, null, null)
 
     String xsiType
     String code
@@ -42,7 +48,7 @@ class DataType {
         this.code = code
         this.singularName = singularName
         this.pluralName = pluralName
-        KNOWN_TYPES.add(this)
+        KNOWN_TYPES << this
     }
 
     DataType(String xsiType, String code, String singularName) {

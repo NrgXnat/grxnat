@@ -7,12 +7,12 @@ class CollaboratorGroup extends UserGroup {
 
     @Override
     String singularName() {
-        "Collaborator"
+        'Collaborator'
     }
 
     @Override
     String pluralName() {
-        "Collaborators"
+        'Collaborators'
     }
 
     @Override
