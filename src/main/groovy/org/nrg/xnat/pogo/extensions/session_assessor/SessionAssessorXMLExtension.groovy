@@ -26,11 +26,9 @@ class SessionAssessorXMLExtension extends SessionAssessorExtension {
     @Override
     void create(Project project, Subject subject, ImagingSession session) {
         parentObject.accessionNumber(
-                CommonStringUtils.last(
-                        xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
-                                post(xnatInterface.assessorsUrl(project, subject, session)).then().
-                                assertThat().statusCode(200).and().extract().response().asString().split('/')
-                )
+                xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
+                        post(xnatInterface.assessorsUrl(project, subject, session)).then().
+                        assertThat().statusCode(200).and().extract().response().asString().split('/').last()
         )
         final SessionAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, SessionAssessor) as SessionAssessor
         parentObject.label(createdAssessor.getLabel())

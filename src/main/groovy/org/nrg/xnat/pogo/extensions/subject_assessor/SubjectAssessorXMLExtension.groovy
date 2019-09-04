@@ -25,11 +25,9 @@ class SubjectAssessorXMLExtension extends SubjectAssessorExtension {
     @Override
     void create(Project project, Subject subject) {
         getParentObject().accessionNumber(
-                CommonStringUtils.last(
-                        xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
-                                post(xnatInterface.formatRestUrl("/projects/${project.id}/subjects/${subject.label}/experiments")).
-                                then().assertThat().statusCode(200).and().extract().response().asString().split('/')
-                )
+                xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
+                        post(xnatInterface.formatRestUrl("/projects/${project.id}/subjects/${subject.label}/experiments")).
+                        then().assertThat().statusCode(200).and().extract().response().asString().split('/').last()
         )
         final SubjectAssessor createdAssessor = xnatInterface.readExperiment(parentObject.accessionNumber, parentObject.class) as SubjectAssessor
         parentObject.label(createdAssessor.label)

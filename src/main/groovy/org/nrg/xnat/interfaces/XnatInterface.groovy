@@ -13,7 +13,6 @@ import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
 import org.apache.commons.lang3.time.StopWatch
 import org.hamcrest.Matchers
-import org.nrg.testing.CommonStringUtils
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
@@ -271,7 +270,7 @@ abstract class XnatInterface {
         println "A subsequent operation requires that the AutoRun pipeline complete on this session (${session}) before continuing. If this step appears to be hanging, it likely means that the pipeline engine is not configured correctly on the XNAT server. Waiting for AutoRun completion for up to ${maxTimeInSeconds} seconds..."
         final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
 
-        final StopWatch stopWatch = CommonStringUtils.launchStopWatch()
+        final StopWatch stopWatch = TimeUtils.launchStopWatch()
         while (true) {
             TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
 
@@ -588,7 +587,7 @@ abstract class XnatInterface {
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
-                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", Resource)
+                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", resource.class)
 
         resource.fileCount(responseResource.fileCount).fileSize(responseResource.fileSize)
     }
