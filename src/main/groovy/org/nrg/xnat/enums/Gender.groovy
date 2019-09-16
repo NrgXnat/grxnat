@@ -3,9 +3,9 @@ package org.nrg.xnat.enums
 import org.apache.commons.lang3.StringUtils
 
 enum Gender {
-    MALE ("male"),
-    FEMALE ("female"),
-    UNKNOWN ("unknown")
+    MALE ('male'),
+    FEMALE ('female'),
+    UNKNOWN ('unknown')
 
     private final String string
 

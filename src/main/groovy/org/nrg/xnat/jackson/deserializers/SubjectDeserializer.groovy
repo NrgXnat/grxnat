@@ -23,6 +23,7 @@ class SubjectDeserializer extends CustomDeserializer<Subject> {
         setStringIfNonnull(node, 'race', subject.&setRace)
         setStringIfNonnull(node, 'ethnicity', subject.&setEthnicity)
         setStringIfNonnull(node, 'ID', subject.&setAccessionNumber)
+        setStringIfNonnull(node, 'group', subject.&setGroup)
         setCustomVariables(node, codec, subject)
 
         subject
