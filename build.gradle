@@ -57,6 +57,7 @@ dependencies {
     compileAndInclude('com.fasterxml.jackson.core:jackson-databind')
     compileAndInclude('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
     compileAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
+    compileAndInclude('org.hibernate:hibernate-core')
     compileAndInclude('org.reflections:reflections')
     compileAndInclude('com.jayway.restassured:rest-assured') {
         exclude(group: 'org.codehaus.groovy', module: '*')
