@@ -1,6 +1,6 @@
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.15-SNAPSHOT'
+def buildVersion = '1.15'
 
 group groupName
 version buildVersion
@@ -13,8 +13,8 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 
-def vBom = '3.0-SNAPSHOT'
-def vTestUtils = '2.0-SNAPSHOT'
+def vBom = '3.0'
+def vTestUtils = '2.0'
 
 buildscript {
     repositories {
