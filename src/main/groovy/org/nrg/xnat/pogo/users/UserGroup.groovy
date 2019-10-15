@@ -31,4 +31,18 @@ abstract class UserGroup {
         singularName().toLowerCase()
     }
 
+    boolean equals(o) {
+        if (this.is(o)) {
+            true
+        } else if (!(o instanceof UserGroup)) {
+            false
+        } else {
+            pluralName() == (o as UserGroup).pluralName()
+        }
+    }
+
+    int hashCode() {
+        (pluralName() != null ? pluralName().hashCode() : 0)
+    }
+    
 }
