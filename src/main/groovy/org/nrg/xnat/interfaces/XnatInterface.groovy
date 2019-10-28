@@ -416,7 +416,7 @@ abstract class XnatInterface {
     }
 
     void setLoginRequirement(boolean loginRequired) {
-        postToSiteConfig(['requireLogin' : loginRequired])
+        postToSiteConfig([(SiteConfig.LOGIN_REQUIRED) : loginRequired])
     }
 
     void openXnat() {
@@ -431,11 +431,20 @@ abstract class XnatInterface {
         postToSiteConfig([(SiteConfig.AUTOARCHIVE_IDLE_TIME) : interval, (SiteConfig.AUTOARCHIVE_IDLE_SCHEDULE) : schedule])
     }
 
+    void setNonadminProjectSetting(boolean allowed) {
+        postToSiteConfig([(SiteConfig.ALLOW_NON_ADMIN_PROJECT_CREATION) : allowed])
+    }
+
+    void setSiteUserListRestriction(boolean restricted) {
+        postToSiteConfig([(SiteConfig.RESTRICT_USER_LIST_TO_ADMIN) : restricted])
+    }
+
     List<XnatPlugin> readInstalledPlugins() {
         SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
     }
 
     void setDicomProjectRules(String ruleString) {
+        prohibitNonadmin()
         queryBase().contentType(ContentType.TEXT).body(ruleString).put(formatRestUrl('/config/dicom/projectRules')).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
