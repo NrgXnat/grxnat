@@ -5,6 +5,7 @@ import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.JsonConfig
 import com.jayway.restassured.config.RestAssuredConfig
+import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.path.json.config.JsonPathConfig
@@ -13,6 +14,7 @@ import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
 import org.apache.commons.lang3.time.StopWatch
 import org.hamcrest.Matchers
+import org.nrg.testing.DicomUtils
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
@@ -431,6 +433,14 @@ abstract class XnatInterface {
 
     List<XnatPlugin> readInstalledPlugins() {
         SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
+    }
+
+    void setDicomProjectRules(String ruleString) {
+        queryBase().contentType(ContentType.TEXT).body(ruleString).put(formatRestUrl('/config/dicom/projectRules')).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
+    }
+
+    void setDicomProjectRulesFrom(int dicomElement, String regex) {
+        setDicomProjectRules("${DicomUtils.intToFullHexString(dicomElement)}:${regex}")
     }
 
     private AnonScript readAnonScript(Response response) {

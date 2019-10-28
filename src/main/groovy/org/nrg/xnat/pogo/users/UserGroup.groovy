@@ -44,5 +44,5 @@ abstract class UserGroup {
     int hashCode() {
         (pluralName() != null ? pluralName().hashCode() : 0)
     }
-    
+
 }
