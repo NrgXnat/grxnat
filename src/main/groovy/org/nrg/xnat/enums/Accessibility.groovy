@@ -14,10 +14,9 @@ enum Accessibility {
     }
 
     static Accessibility get(String value) {
-        for (Accessibility accessibility : values()) {
-            if (StringUtils.equalsIgnoreCase(accessibility.string, value)) return accessibility
+        values().find {
+            StringUtils.equalsIgnoreCase(it.string, value)
         }
-        null
     }
 
     @Override

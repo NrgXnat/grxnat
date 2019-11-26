@@ -9,5 +9,8 @@ class SiteConfig {
     public static final String LOGIN_REQUIRED = 'requireLogin'
     public static final String ALLOW_NON_ADMIN_PROJECT_CREATION = 'uiAllowNonAdminProjectCreation'
     public static final String RESTRICT_USER_LIST_TO_ADMIN = 'restrictUserListAccessToAdmins'
+    public static final String PASSWORD_COMPLEXITY = 'passwordComplexity'
+    public static final String PASSWORD_COMPLEXITY_MESSAGE = 'passwordComplexityMessage'
+    public static final String SESSION_TIMEOUT = 'sessionTimeout'
 
 }

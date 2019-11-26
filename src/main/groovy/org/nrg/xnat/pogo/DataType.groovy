@@ -66,10 +66,9 @@ class DataType {
     }
 
     static DataType lookup(String xsiType) {
-        for (DataType dataType : KNOWN_TYPES) {
-            if (dataType.getXsiType() == xsiType) return dataType
-        }
-        new DataType().xsiType(xsiType)
+        KNOWN_TYPES.find {dataType ->
+            dataType.xsiType == xsiType
+        } ?: new DataType().xsiType(xsiType)
     }
 
     static DataType lookupDataTypeByAssociatedClass(Class aClass) {
