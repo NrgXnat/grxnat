@@ -14,12 +14,15 @@ import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
 import org.apache.commons.lang3.time.StopWatch
 import org.hamcrest.Matchers
+import org.nrg.testing.CommonStringUtils
 import org.nrg.testing.DicomUtils
+import org.nrg.testing.FileIOUtils
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.jackson.mappers.XnatRestReadWriteObjectMapper
+import org.nrg.xnat.jackson.mappers.YamlObjectMapper
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Investigator
@@ -56,6 +59,8 @@ import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAliasToken
 import org.nrg.xnat.rest.XnatSessionFilter
+
+import java.util.spi.ResourceBundleControlProvider
 
 import static com.jayway.restassured.RestAssured.given
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
@@ -531,6 +536,20 @@ abstract class XnatInterface {
         investigator.setXnatInvestigatordataId(
                 queryBase().contentType(JSON).body(investigator).post(formatXapiUrl('investigators')).jsonPath().getInt('xnatInvestigatordataId')
         )
+    }
+
+    void setupDataType(DataType dataType) {
+        prohibitNonadmin()
+        final String serializedDataType = CommonStringUtils.replaceEach(FileIOUtils.loadResource('generic_data_type.yaml').text, [
+                '$xsiType' : dataType.xsiType,
+                '$code' : dataType.code ?: '',
+                '$singularName' : dataType.singularName,
+                '$pluralName' : dataType.pluralName
+        ])
+
+        requestWithCsrfToken().contentType(URLENC).formParams(new YamlObjectMapper().readValue(serializedDataType, Map)).post(formatXnatUrl('/app/action/ElementSecurityWizard')).
+                then().assertThat().statusCode(200)
+        println("Successfully set up data type: ${dataType.xsiType}...")
     }
 
     void addListedUsersToProject(Project project) {

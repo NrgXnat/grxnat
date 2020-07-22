@@ -62,7 +62,7 @@ class DataType {
     }
 
     static DataType makeScanDataType(String sessionCode) {
-        new DataType("xnat:${sessionCode.toLowerCase()}ScanData", null, null, null)
+        new DataType("xnat:${sessionCode.toLowerCase()}ScanData", null, "${sessionCode.toUpperCase()} Scan")
     }
 
     static DataType lookup(String xsiType) {
