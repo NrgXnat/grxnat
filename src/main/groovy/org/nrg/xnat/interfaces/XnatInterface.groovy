@@ -147,6 +147,10 @@ abstract class XnatInterface {
         sessionFilter.deleteSessionId()
     }
 
+    void removeCachedAuth() {
+        sessionFilter.deleteSessionId()
+    }
+
     void reauthenticate() {
         sessionFilter.extractSessionId()
     }

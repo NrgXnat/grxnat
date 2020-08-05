@@ -2,12 +2,12 @@ package org.nrg.xnat.rest
 
 import com.jayway.restassured.filter.Filter
 import com.jayway.restassured.filter.FilterContext
+import com.jayway.restassured.internal.RequestSpecificationImpl
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.FilterableRequestSpecification
 import com.jayway.restassured.specification.FilterableResponseSpecification
 import com.jayway.restassured.specification.RequestSpecification
 import org.apache.commons.lang3.time.StopWatch
-import org.apache.http.impl.client.SystemDefaultHttpClient
 import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.pogo.users.User
 
@@ -21,10 +21,10 @@ class XnatSessionFilter implements Filter {
     private final boolean allowInsecureSSL
     private final int[] authIssueCodes = [302, 401]
     private final int[] serverIssueCodes = [502, 503, 504]
-    private final int waitTime = 10000
     private int serverIssueRetryCount = 1
-    private final int SESSION_TIMEOUT = 15 * 60 // Could pull and parse this from the site config. Not worth it for now
     private StopWatch stopWatch = new StopWatch()
+    private static final int WAIT_TIME = 10000
+    private static final int SESSION_TIMEOUT = 15 * 60 // Could pull and parse this from the site config. Not worth it for now
 
     XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL) {
         this.user = user
@@ -34,33 +34,28 @@ class XnatSessionFilter implements Filter {
         extractSessionId()
     }
 
-    @SuppressWarnings(["ChangeToOperator", "GrDeprecatedAPIUsage"])
     @Override
     Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
-        if (stopWatch.getTime(TimeUnit.SECONDS) > SESSION_TIMEOUT) {
+        if (stopWatch.getTime(TimeUnit.SECONDS) > SESSION_TIMEOUT || sessionId == null) {
             extractSessionId()
         }
         stopWatch.reset()
         stopWatch.start()
 
-        final FilterableRequestSpecification request = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
-
-        if (sessionId != null) request = request.sessionId(sessionId)
-        final Response response = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+        final RequestSpecificationImpl request = preprocessRequest(requestSpec.noFiltersOfType(XnatSessionFilter))
+        final Response response = ctx.send(request)
 
         if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
-            resetClient(request)
-            return request.sessionId(sessionId).sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+            return ctx.send(request.sessionId(sessionId))
         } else if (response.statusCode in serverIssueCodes) {
             println "Received an HTTP status code ${response.statusCode} from the XNAT server, indicating an issue with the server itself. The request will be repeated ${serverIssueRetryCount} more time${serverIssueRetryCount == 1 ? '' : 's'}."
-            for (int i = 0; i < serverIssueRetryCount; i++) {
-                resetClient(request)
-                final Response repeatedResponse = request.sendRequest(ctx.getRequestPath(), ctx.getRequestMethod(), ctx.assertionClosure, request)
+            serverIssueRetryCount.times {
+                final Response repeatedResponse = ctx.send(request)
                 if (!(repeatedResponse.statusCode in serverIssueCodes)) {
                     return repeatedResponse
                 } else {
-                    sleep(waitTime)
+                    sleep(WAIT_TIME)
                 }
             }
         }
@@ -68,11 +63,11 @@ class XnatSessionFilter implements Filter {
     }
 
     String getXnatUrl() {
-        return xnatUrl
+        xnatUrl
     }
 
     User getUser() {
-        return user
+        user
     }
 
     void deleteSessionId() {
@@ -80,11 +75,11 @@ class XnatSessionFilter implements Filter {
     }
 
     String getSessionId() {
-        return sessionId
+        sessionId
     }
 
     boolean getAllowInsecureSSL() {
-        return allowInsecureSSL
+        allowInsecureSSL
     }
 
     void setServerIssueRetryCount(int count) {
@@ -93,14 +88,15 @@ class XnatSessionFilter implements Filter {
 
     void extractSessionId() {
         final Response response = Credentials.build(user).get(CommonStringUtils.formatUrl(xnatUrl, '/data/auth'))
-        if (response.statusCode != 200) throw new AssertionError('Provided username and password combination do not appear to be correct')
-        sessionId = response.getSessionId()
+        if (response.statusCode == 200) {
+            sessionId = response.getSessionId()
+        } else {
+            throw new RuntimeException('Provided username and password combination do not appear to be correct')
+        }
     }
 
-    @SuppressWarnings(['GrDeprecatedAPIUsage', 'GrMethodMayBeStatic'])
-    private void resetClient(RequestSpecification request) {
-        request.httpClient.connectionManager.shutdown()
-        request.httpClient = new SystemDefaultHttpClient()
+    private RequestSpecificationImpl preprocessRequest(RequestSpecification requestSpec) {
+        ((allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec).sessionId(sessionId) as RequestSpecificationImpl
     }
 
 }
