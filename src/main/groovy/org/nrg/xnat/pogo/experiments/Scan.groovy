@@ -3,10 +3,12 @@ package org.nrg.xnat.pogo.experiments
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.Extension
+import org.nrg.xnat.pogo.HasUri
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
+import org.nrg.xnat.util.XnatUriUtils
 
-class Scan extends Extensible<Scan> {
+class Scan extends Extensible<Scan> implements HasUri {
 
     private ImagingSession session
     String id
@@ -30,6 +32,17 @@ class Scan extends Extensible<Scan> {
 
     Scan() {
         this(null, null)
+    }
+
+    @Override
+    String getUri() {
+        XnatUriUtils.scanUri(
+                (session.primaryProject ?: session.subject.primaryProject).id,
+                session.subject.label,
+                session.label,
+                id,
+                true
+        )
     }
 
     ImagingSession getSession() {

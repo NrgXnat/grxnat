@@ -12,5 +12,6 @@ class SiteConfig {
     public static final String PASSWORD_COMPLEXITY = 'passwordComplexity'
     public static final String PASSWORD_COMPLEXITY_MESSAGE = 'passwordComplexityMessage'
     public static final String SESSION_TIMEOUT = 'sessionTimeout'
+    public static final String PREVENT_CROSS_MODALITY_MERGE = 'preventCrossModalityMerge'
 
 }

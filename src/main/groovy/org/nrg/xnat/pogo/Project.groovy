@@ -12,8 +12,9 @@ import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.pogo.users.UserGroups
 import org.nrg.xnat.util.ListUtils
 import org.nrg.xnat.util.RandomUtils
+import org.nrg.xnat.util.XnatUriUtils
 
-class Project extends Extensible<Project> {
+class Project extends Extensible<Project> implements HasUri {
 
     String id
     private String runningTitle
@@ -43,6 +44,11 @@ class Project extends Extensible<Project> {
 
     Project() {
         this(RandomUtils.randomID())
+    }
+
+    @Override
+    String getUri() {
+        XnatUriUtils.projectUri(id, true)
     }
 
     String getRunningTitle() {

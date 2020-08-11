@@ -9,10 +9,11 @@ import org.nrg.xnat.pogo.extensions.subject.SubjectExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
 import org.nrg.xnat.util.RandomUtils
+import org.nrg.xnat.util.XnatUriUtils
 
 import java.time.LocalDate
 
-class Subject extends CustomVariableContainer<Subject> implements Shareable {
+class Subject extends CustomVariableContainer<Subject> implements Shareable, HasUri {
 
     private Project project
     String label
@@ -45,6 +46,11 @@ class Subject extends CustomVariableContainer<Subject> implements Shareable {
 
     Subject() {
         this(null)
+    }
+
+    @Override
+    String getUri() {
+        XnatUriUtils.subjectUri(project.id, label, true)
     }
 
     Project getProject() {
