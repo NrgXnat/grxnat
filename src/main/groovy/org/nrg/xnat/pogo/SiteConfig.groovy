@@ -7,6 +7,8 @@ class SiteConfig {
     public static final String ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT = 'enableSitewideAnonymizationScript'
     public static final String SITEWIDE_ANONYMIZATION_SCRIPT = 'sitewideAnonymizationScript'
     public static final String LOGIN_REQUIRED = 'requireLogin'
+    public static final String AUTO_ENABLE = 'userRegistration'
+    public static final String REQUIRE_EMAIL_VERIFICATION = 'emailVerification'
     public static final String ALLOW_NON_ADMIN_PROJECT_CREATION = 'uiAllowNonAdminProjectCreation'
     public static final String RESTRICT_USER_LIST_TO_ADMIN = 'restrictUserListAccessToAdmins'
     public static final String PASSWORD_COMPLEXITY = 'passwordComplexity'

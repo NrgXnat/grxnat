@@ -127,10 +127,10 @@ abstract class XnatInterface {
                     }
                 }
             } else {
-                throw new AssertionError("Provided credentials don't appear to be valid.")
+                throw new RuntimeException("Provided credentials don't appear to be valid.")
             }
         } else {
-            throw new AssertionError("There doesn't seem to be an XNAT reachable at that address.")
+            throw new RuntimeException("There doesn't seem to be an XNAT reachable at that address.")
         }
     }
 
