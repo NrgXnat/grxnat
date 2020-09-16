@@ -44,6 +44,7 @@ class CStore {
         final Connection remoteConnection = storeSCU.getRemoteConnection()
         remoteConnection.setHostname(receiver.host)
         remoteConnection.setPort(receiver.port)
+        storeSCU.setAttributes(new Attributes())
     }
 
     CStore directory(File scannedDirectory) {
