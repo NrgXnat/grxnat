@@ -20,6 +20,7 @@ import org.nrg.testing.FileIOUtils
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
+import org.nrg.xnat.enums.RoutingRulesType
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.jackson.mappers.XnatRestReadWriteObjectMapper
 import org.nrg.xnat.jackson.mappers.YamlObjectMapper
@@ -452,17 +453,15 @@ abstract class XnatInterface {
         SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
     }
 
-    void setDicomRoutingConfig(String path, String contents) {
-        String url = formatRestUrl("config", "dicom", path)
-        Map<String, String> params = ["status": "enabled", "contents": contents]
-        queryBase().contentType(JSON).body(params)
-                .put(url).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
+    void setDicomRoutingConfig(RoutingRulesType routingRulesType, String contents) {
+        final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
+        final Map<String, String> params = [status : 'enabled', 'contents' : contents]
+        queryBase().contentType(JSON).body(params).put(url).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
-    void disableDicomRoutingConfig(String path) {
-        String url = formatRestUrl("config", "dicom", path)
-        queryBase().queryParam("status", "disabled")
-                .put(url).then().assertThat().statusCode(200)
+    void disableDicomRoutingConfig(RoutingRulesType routingRulesType) {
+        final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
+        queryBase().queryParam('status', 'disabled').put(url).then().assertThat().statusCode(200)
     }
 
     void setDicomProjectRules(String ruleString) {
