@@ -454,6 +454,7 @@ abstract class XnatInterface {
     }
 
     void setDicomRoutingConfig(RoutingRulesType routingRulesType, String contents) {
+        prohibitNonadmin()
         final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
         final Map<String, String> params = [status : 'enabled', 'contents' : contents]
         queryBase().contentType(JSON).body(params).put(url).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
@@ -465,8 +466,7 @@ abstract class XnatInterface {
     }
 
     void setDicomProjectRules(String ruleString) {
-        prohibitNonadmin()
-        queryBase().contentType(ContentType.TEXT).body(ruleString).put(formatRestUrl('/config/dicom/projectRules')).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
+        setDicomRoutingConfig(RoutingRulesType.PROJECT_RULES, ruleString)
     }
 
     void setDicomProjectRulesFrom(int dicomElement, String regex) {
