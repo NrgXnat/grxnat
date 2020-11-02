@@ -5,7 +5,6 @@ import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.JsonConfig
 import com.jayway.restassured.config.RestAssuredConfig
-import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.path.json.config.JsonPathConfig
@@ -61,8 +60,6 @@ import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAliasToken
 import org.nrg.xnat.rest.XnatSessionFilter
 
-import java.util.spi.ResourceBundleControlProvider
-
 import static com.jayway.restassured.RestAssured.given
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
 import static com.jayway.restassured.http.ContentType.JSON
@@ -83,10 +80,11 @@ abstract class XnatInterface {
 
     protected XnatInterface() {}
 
-    protected XnatInterface(XnatSessionFilter sessionFilter) {
-        this.xnatUrl = sessionFilter.xnatUrl
-        this.sessionFilter = sessionFilter
+    protected XnatInterface withFilter(XnatSessionFilter sessionFilter) {
+        xnatUrl = sessionFilter.xnatUrl
         authUser = sessionFilter.user
+        this.sessionFilter = sessionFilter
+        this
     }
 
     static XnatInterface authenticate(String xnatUrl, User user, boolean allowInsecureSSL = false) {
@@ -105,26 +103,14 @@ abstract class XnatInterface {
             if (given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode == 200) {
                 final Response oldResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
                 if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
-                    new XnatInterface_1_6(sessionFilter)
+                    return new XnatInterface_1_6().withFilter(sessionFilter)
                 } else {
                     final Response newResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
                     if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
                         final String version = newResponse.jsonPath().getString('version')
-                        if (version.startsWith('1.7.0')) {
-                            new XnatInterface_1_7_0(sessionFilter)
-                        } else if (version.startsWith('1.7.1')) {
-                            new XnatInterface_1_7_1(sessionFilter)
-                        } else if (version.startsWith('1.7.2')) {
-                            new XnatInterface_1_7_2(sessionFilter)
-                        } else if (version.startsWith('1.7.3')) {
-                            new XnatInterface_1_7_3(sessionFilter)
-                        } else if (version.startsWith('1.7.4')) {
-                            new XnatInterface_1_7_4(sessionFilter)
-                        } else {
-                            new XnatInterface_1_7_5(sessionFilter)
-                        }
+                        return XnatInterfaceMap.lookup(version).newInstance().withFilter(sessionFilter)
                     } else {
-                        new XnatInterface_1_7_5(sessionFilter)
+                        return new XnatInterface_1_8_0().withFilter(sessionFilter)
                     }
                 }
             } else {
@@ -278,25 +264,7 @@ abstract class XnatInterface {
         experiment.dataType(DataType.lookup(response.jsonPath().getString("items.get(0).meta.'xsi:type'")))
     }
 
-    void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {
-        println "A subsequent operation requires that the AutoRun pipeline complete on this session (${session}) before continuing. If this step appears to be hanging, it likely means that the pipeline engine is not configured correctly on the XNAT server. Waiting for AutoRun completion for up to ${maxTimeInSeconds} seconds..."
-        final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
-
-        final StopWatch stopWatch = TimeUtils.launchStopWatch()
-        while (true) {
-            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "AutoRun did not complete in allotted number of seconds: ${maxTimeInSeconds}")
-
-            final String status = queryBase().queryParam("experiment", accessionNumber).queryParam("format", "json").
-                    get(formatRestUrl('services/workflows/AutoRun')).then().extract().jsonPath().getString('items.get(0).data_fields.status')
-
-            if (status == 'Complete') {
-                return
-            } else if (status == 'Failed') {
-                throw new AssertionError('AutoRun failed.')
-            }
-            TimeUtils.sleep(1000)
-        }
-    }
+    void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {}
 
     String getBuildInfo() {
         final JsonPath buildPath = queryBase().get(formatXapiUrl('/siteConfig/buildInfo')).then().assertThat().statusCode(200).and().extract().jsonPath()
@@ -1309,5 +1277,7 @@ abstract class XnatInterface {
 
         formatRestUrl("experiments/${session.accessionNumber}/assessors/${assessor.accessionNumber}")
     }
+
+    abstract String versionIdentifier()
 
 }

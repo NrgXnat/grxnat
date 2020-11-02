@@ -1,11 +1,10 @@
 package org.nrg.xnat.interfaces
 
-import org.nrg.xnat.rest.XnatSessionFilter
-
 class XnatInterface_1_7_1 extends XnatInterface_1_7_2 {
 
-    XnatInterface_1_7_1(XnatSessionFilter sessionFilter) {
-        super(sessionFilter)
+    @Override
+    String versionIdentifier() {
+        '1.7.2'
     }
 
 }

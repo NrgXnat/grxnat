@@ -2,12 +2,12 @@ package org.nrg.xnat.interfaces
 
 import com.jayway.restassured.http.ContentType
 import org.nrg.xnat.pogo.AnonScript
-import org.nrg.xnat.rest.XnatSessionFilter
 
 class XnatInterface_1_6 extends XnatInterface_1_7_0 {
 
-    XnatInterface_1_6(XnatSessionFilter sessionFilter) {
-        super(sessionFilter)
+    @Override
+    String versionIdentifier() {
+        '1.6'
     }
 
     @Override

@@ -7,4 +7,9 @@ class UnitTestXnatInterface extends XnatInterface {
         xnatUrl = url
     }
 
+    @Override
+    String versionIdentifier() {
+        'not used'
+    }
+
 }

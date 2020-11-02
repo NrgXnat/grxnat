@@ -1,10 +1,10 @@
 package org.nrg.xnat.interfaces
 
-class XnatInterface_1_7_2 extends XnatInterface_1_7_3 {
+class XnatInterface_1_8_0 extends XnatInterface {
 
     @Override
     String versionIdentifier() {
-        '1.7.2'
+        '1.8.0'
     }
 
 }
