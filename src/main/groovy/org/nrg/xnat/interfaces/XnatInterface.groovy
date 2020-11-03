@@ -264,6 +264,25 @@ abstract class XnatInterface {
         experiment.dataType(DataType.lookup(response.jsonPath().getString("items.get(0).meta.'xsi:type'")))
     }
 
+    void waitForPipelineCompletion(ImagingSession session, String pipelineName, int maxTimeInSeconds = 60) {
+        final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
+
+        final StopWatch stopWatch = TimeUtils.launchStopWatch()
+        while (true) {
+            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Pipeline '${pipelineName}' did not complete in allotted number of seconds: ${maxTimeInSeconds}")
+
+            final String status = queryBase().queryParam("experiment", accessionNumber).queryParam("format", "json").
+                    get(formatRestUrl('services/workflows', pipelineName)).then().extract().jsonPath().getString('items.get(0).data_fields.status')
+
+            if (status == 'Complete') {
+                return
+            } else if (status == 'Failed') {
+                throw new RuntimeException("Pipeline '${pipelineName}' failed.")
+            }
+            TimeUtils.sleep(1000)
+        }
+    }
+
     void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {}
 
     String getBuildInfo() {
