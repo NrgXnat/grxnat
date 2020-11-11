@@ -8,6 +8,7 @@ import com.jayway.restassured.specification.FilterableRequestSpecification
 import com.jayway.restassured.specification.FilterableResponseSpecification
 import com.jayway.restassured.specification.RequestSpecification
 import org.apache.commons.lang3.time.StopWatch
+import org.codehaus.groovy.runtime.ReflectionMethodInvoker
 import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.pogo.users.User
 
@@ -43,11 +44,11 @@ class XnatSessionFilter implements Filter {
         stopWatch.start()
 
         final RequestSpecificationImpl request = preprocessRequest(requestSpec.noFiltersOfType(XnatSessionFilter))
-        final Response response = ctx.send(request)
+        final Response response = issueRequest(request, ctx)
 
         if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
-            return ctx.send(request.sessionId(sessionId))
+            return issueRequest(request.sessionId(sessionId), ctx)
         } else if (response.statusCode in serverIssueCodes) {
             println "Received an HTTP status code ${response.statusCode} from the XNAT server, indicating an issue with the server itself. The request will be repeated ${serverIssueRetryCount} more time${serverIssueRetryCount == 1 ? '' : 's'}."
             serverIssueRetryCount.times {
@@ -97,6 +98,10 @@ class XnatSessionFilter implements Filter {
 
     private RequestSpecificationImpl preprocessRequest(RequestSpecification requestSpec) {
         ((allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec).sessionId(sessionId) as RequestSpecificationImpl
+    }
+
+    private Response issueRequest(RequestSpecification request, FilterContext ctx) {
+        ReflectionMethodInvoker.invoke(request, ctx.requestMethod.toString().toLowerCase(), URLDecoder.decode(ctx.requestPath, 'UTF-8')) as Response// TODO: this is a hack copied out of FilterContextImpl. It will likely need to be modified or thrown out when upgrading RestAssured
     }
 
 }

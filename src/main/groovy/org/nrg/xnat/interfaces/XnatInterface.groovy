@@ -5,6 +5,7 @@ import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.JsonConfig
 import com.jayway.restassured.config.RestAssuredConfig
+import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.path.json.config.JsonPathConfig
@@ -23,15 +24,21 @@ import org.nrg.xnat.enums.RoutingRulesType
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.jackson.mappers.XnatRestReadWriteObjectMapper
 import org.nrg.xnat.jackson.mappers.YamlObjectMapper
+import org.nrg.xnat.meta.RequireAdmin
+import org.nrg.xnat.meta.RequirePlugin
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Investigator
+import org.nrg.xnat.pogo.PluginRegistry
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.XnatPlugin
+import org.nrg.xnat.pogo.containers.Command
+import org.nrg.xnat.pogo.containers.DockerServer
+import org.nrg.xnat.pogo.containers.Image
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
@@ -77,6 +84,7 @@ abstract class XnatInterface {
     protected User authUser
     protected Optional<Boolean> isAdmin = Optional.absent()
     protected boolean readResources = true
+    protected List<XnatPlugin> installedPlugins
 
     protected XnatInterface() {}
 
@@ -360,8 +368,8 @@ abstract class XnatInterface {
         queryBase().get(formatXapiUrl("users/profile/${username}")).then().assertThat().statusCode(200).and().extract().response().as(User)
     }
 
+    @RequireAdmin
     void createUser(User user) {
-        prohibitNonadmin()
         queryBase().contentType(JSON).body(user).post(formatXapiUrl('users')).then().assertThat().statusCode(201)
         if (user.isAdmin()) {
             assignUserToRoles(user, ADMIN_ROLE)
@@ -371,25 +379,25 @@ abstract class XnatInterface {
         }
     }
 
+    @RequireAdmin
     void updateUser(User user) {
-        prohibitNonadmin()
         queryBase().contentType(JSON).body(user).put(formatXapiUrl("users/${user.username}")).then().assertThat().statusCode(200)
     }
 
+    @RequireAdmin
     void verifyUser(User user) {
-        prohibitNonadmin()
         queryBase().put(formatXapiUrl("/users/${user.username}/verified/true")).then().assertThat().statusCode(200)
         user.verified(true)
     }
 
+    @RequireAdmin
     void enableUser(User user) {
-        prohibitNonadmin()
         queryBase().put(formatXapiUrl("/users/${user.username}/enabled/true")).then().assertThat().statusCode(200)
         user.enabled(true)
     }
 
+    @RequireAdmin
     void assignUserToRoles(User user, String... roles) {
-        prohibitNonadmin()
         queryBase().contentType(JSON).body(roles).put(formatXapiUrl("/users/${user.username}/roles")).then().assertThat().statusCode(200)
     }
 
@@ -407,8 +415,8 @@ abstract class XnatInterface {
         user.admin(true)
     }
 
+    @RequireAdmin
     void postToSiteConfig(Map configSettings) {
-        prohibitNonadmin()
         queryBase().contentType(JSON).body(configSettings).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
@@ -437,16 +445,20 @@ abstract class XnatInterface {
     }
 
     List<XnatPlugin> readInstalledPlugins() {
-        SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
+        if (installedPlugins == null) {
+            installedPlugins = SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('plugins')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('values().toList()'), XnatPlugin)
+        }
+        installedPlugins
     }
 
+    @RequireAdmin
     void setDicomRoutingConfig(RoutingRulesType routingRulesType, String contents) {
-        prohibitNonadmin()
         final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
         final Map<String, String> params = [status : 'enabled', 'contents' : contents]
         queryBase().contentType(JSON).body(params).put(url).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
     }
 
+    @RequireAdmin
     void disableDicomRoutingConfig(RoutingRulesType routingRulesType) {
         final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
         queryBase().queryParam('status', 'disabled').put(url).then().assertThat().statusCode(200)
@@ -541,8 +553,8 @@ abstract class XnatInterface {
         )
     }
 
+    @RequireAdmin
     void setupDataType(DataType dataType) {
-        prohibitNonadmin()
         final String serializedDataType = CommonStringUtils.replaceEach(FileIOUtils.loadResource('generic_data_type.yaml').text, [
                 '$xsiType' : dataType.xsiType,
                 '$code' : dataType.code ?: '',
@@ -628,7 +640,7 @@ abstract class XnatInterface {
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
-                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", resource.class)
+                and().extract().response().jsonPath().getObject("ResultSet.Result.find { it.label == '${resource.folder}' }", resource.class as Class<Resource>)
 
         resource.fileCount(responseResource.fileCount).fileSize(responseResource.fileSize)
     }
@@ -1295,6 +1307,78 @@ abstract class XnatInterface {
         }
 
         formatRestUrl("experiments/${session.accessionNumber}/assessors/${assessor.accessionNumber}")
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    List<Image> readImages(String imageFilter = null) {
+        SerializationUtils.deserializeList(queryBase().get(formatXapiUrl('docker', 'image-summaries')).
+                then().assertThat().statusCode(200).and().extract().
+                jsonPath().getList(imageFilter ?: ''), Image)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface deleteImage(String imageId, boolean force = false) {
+        queryBase().queryParam('force', force).delete(formatXapiUrl('docker', 'images', imageId)).then().assertThat().statusCode(204)
+        this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface deleteImage(Image image, boolean force = false) {
+        deleteImage(image.imageId, force)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    List<Command> readCommands(String fullImageTag = null) {
+        final Map<String, String> queryParams = fullImageTag != null ? ['image' : fullImageTag] : [:]
+        SerializationUtils.deserializeList(
+                queryBase().queryParams(queryParams).get(formatXapiUrl('commands')).then().assertThat().statusCode(200).and().extract().jsonPath().getList('$'),
+                Command
+        )
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    List<Command> readCommands(Image image) {
+        readCommands(image.toString())
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface pullImage(String fullImageTag, boolean saveCommands = true) {
+        queryBase().queryParam('save-commands', true).queryParam('image', fullImageTag).post(formatXapiUrl('/docker/pull')).then().assertThat().statusCode(200)
+        this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface pullImage(Image image, boolean saveCommands = true) {
+        pullImage(image.toString(), saveCommands)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface saveCommandsFromLabels(String fullImageTag) {
+        queryBase().queryParam('image', fullImageTag).post(formatXapiUrl('/docker/images/save')).then().assertThat().statusCode(200)
+        this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface saveCommandsFromLabels(Image image) {
+        saveCommandsFromLabels(image.toString())
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    DockerServer readDockerServer() {
+        queryBase().get(formatXapiUrl('/docker/server')).then().assertThat().statusCode(200).extract().as(DockerServer)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    @RequireAdmin
+    XnatInterface updateDockerServer(DockerServer dockerServerSpec) {
+        queryBase().content(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
+        this
     }
 
     abstract String versionIdentifier()

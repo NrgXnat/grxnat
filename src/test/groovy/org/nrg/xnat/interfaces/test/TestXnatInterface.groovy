@@ -2,6 +2,7 @@ package org.nrg.xnat.interfaces.test
 
 import org.nrg.xnat.interfaces.UnitTestXnatInterface
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.pogo.PluginRegistry
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Reconstruction
 import org.nrg.xnat.pogo.Subject
@@ -46,5 +47,25 @@ class TestXnatInterface {
         assertEquals("${baseUrl}/data/projects/${projectId}/subjects/${subjectLabel}/experiments/${sessionLabel}/assessors/${sessionAssessorLabel}", xnatInterface.sessionAssessorUrl(project, subject, session, sessionAssessor))
         assertEquals("${baseUrl}/data/projects/${projectId}/subjects/${subjectLabel}/experiments/${sessionLabel}/assessors/${sessionAssessorLabel}", xnatInterface.sessionAssessorUrl(sessionAssessor))
     }
-    
+
+    @Test(expectedExceptions = UnsupportedOperationException)
+    void testNonadminProtectedAccess() {
+        new UnitTestXnatInterface(false, []).openXnat()
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException)
+    void testMissingPluginAttemptedAccess() {
+        new UnitTestXnatInterface(true, []).readImages()
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException)
+    void testNonadminAttemptedPluginAccess() {
+        new UnitTestXnatInterface(false, [PluginRegistry.CONTAINER_SERVICE]).pullImage('xnat/dcm2niix:latest')
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException)
+    void testAdminMissingPluginAccess() {
+        new UnitTestXnatInterface(true, []).pullImage('xnat/dcm2niix:latest')
+    }
+
 }
