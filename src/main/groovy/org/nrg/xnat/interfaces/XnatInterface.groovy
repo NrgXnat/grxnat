@@ -5,11 +5,11 @@ import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.JsonConfig
 import com.jayway.restassured.config.RestAssuredConfig
-import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.path.json.config.JsonPathConfig
 import com.jayway.restassured.response.Response
+import com.jayway.restassured.response.ValidatableResponse
 import com.jayway.restassured.specification.RequestSpecification
 import groovyx.gpars.GParsPool
 import org.apache.commons.lang3.time.StopWatch
@@ -22,6 +22,7 @@ import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.enums.RoutingRulesType
 import org.nrg.xnat.enums.SiteDataRole
+import org.nrg.xnat.enums.WorkflowStatus
 import org.nrg.xnat.jackson.mappers.XnatRestReadWriteObjectMapper
 import org.nrg.xnat.jackson.mappers.YamlObjectMapper
 import org.nrg.xnat.meta.RequireAdmin
@@ -37,8 +38,10 @@ import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.XnatPlugin
 import org.nrg.xnat.pogo.containers.Command
+import org.nrg.xnat.pogo.containers.CommandSummaryForContext
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
+import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.ImagingSession
@@ -77,7 +80,7 @@ import static org.nrg.testing.CommonStringUtils.formatUrl
 @SuppressWarnings(['GroovyUnusedDeclaration', 'GrMethodMayBeStatic'])
 abstract class XnatInterface {
 
-    private static final ADMIN_ROLE = 'Administrator'
+    private static final String ADMIN_ROLE = 'Administrator'
     public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
     protected XnatSessionFilter sessionFilter
     protected String xnatUrl
@@ -272,20 +275,30 @@ abstract class XnatInterface {
         experiment.dataType(DataType.lookup(response.jsonPath().getString("items.get(0).meta.'xsi:type'")))
     }
 
-    void waitForPipelineCompletion(ImagingSession session, String pipelineName, int maxTimeInSeconds = 60) {
-        final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
+    WorkflowStatus readWorkflowStatus(int workflowId) {
+        WorkflowStatus.get(
+                jsonQuery().get(formatRestUrl("/workflows/${workflowId}")).then().assertThat().statusCode(200).and().extract().jsonPath().getString('items.data_fields.status')
+        )
+    }
 
+    XnatInterface waitForPipelineCompletion(ImagingSession session, String pipelineName, int maxTimeInSeconds = 60) {
+        final String accessionNumber = session.accessionNumber ?: getAccessionNumber(session)
+        final int workflowId = jsonQuery().queryParams('experiment', accessionNumber).get(formatRestUrl("/services/workflows/${pipelineName}")).
+                then().assertThat().statusCode(200).and().extract().jsonPath().getInt('items.get(0).data_fields.wrk_workflowData_id')
+        waitForWorkflowComplete(workflowId, maxTimeInSeconds)
+    }
+
+    XnatInterface waitForWorkflowComplete(int workflowId, int maxTimeInSeconds = 60) {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
         while (true) {
-            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Pipeline '${pipelineName}' did not complete in allotted number of seconds: ${maxTimeInSeconds}")
+            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} did not complete in allotted number of seconds: ${maxTimeInSeconds}")
 
-            final String status = queryBase().queryParam("experiment", accessionNumber).queryParam("format", "json").
-                    get(formatRestUrl('services/workflows', pipelineName)).then().extract().jsonPath().getString('items.get(0).data_fields.status')
+            final WorkflowStatus status = readWorkflowStatus(workflowId)
 
-            if (status == 'Complete') {
-                return
-            } else if (status == 'Failed') {
-                throw new RuntimeException("Pipeline '${pipelineName}' failed.")
+            if (status == WorkflowStatus.COMPLETE) {
+                return this
+            } else if (status == WorkflowStatus.FAILED) {
+                throw new RuntimeException("Pipeline ${workflowId} failed.")
             }
             TimeUtils.sleep(1000)
         }
@@ -660,7 +673,7 @@ abstract class XnatInterface {
      */
     List<Resource> readResources(Resource dummyResource) {
         final List resourceResp = jsonQuery().get(formatXnatUrl(dummyResource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
-            and().extract().response().jsonPath().getList('ResultSet.Result')
+                and().extract().response().jsonPath().getList('ResultSet.Result')
         final List<Resource> resources = SerializationUtils.deserializeList(resourceResp, dummyResource.class)
         resources.each { resource ->
             if (dummyResource.project != null) resource.project(dummyResource.project)
@@ -775,7 +788,7 @@ abstract class XnatInterface {
                 subject.resources(readResources(new SubjectResource().project(project).subject(subject)))
             }
             subject.experiments(
-                readSubjectAssessors(project, subject)
+                    readSubjectAssessors(project, subject)
             )
         }
         subjects
@@ -1379,6 +1392,80 @@ abstract class XnatInterface {
     XnatInterface updateDockerServer(DockerServer dockerServerSpec) {
         queryBase().content(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
         this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    List<CommandSummaryForContext> readAvailableCommands(DataType dataType, Project project = null) {
+        final Map<String, String> queryParams = ['xsiType' : dataType.xsiType]
+        final List<String> urlComponents = ['commands', 'available']
+        if (project == null) {
+            urlComponents << 'site'
+        } else {
+            queryParams.put('project', project.id)
+        }
+
+        SerializationUtils.deserializeList(
+                queryBase().queryParams(queryParams).get(formatXapiUrl(urlComponents.join('/'))).then().assertThat().statusCode(200).and().extract().jsonPath().getList('$'),
+                CommandSummaryForContext
+        )
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface setWrapperStatusOnProject(int wrapperId, Project project, boolean enable) {
+        queryBase().put(formatXapiUrl('/projects', project.id, '/wrappers/', String.valueOf(wrapperId), enable ? 'enabled' : 'disabled')).then().assertThat().statusCode(200)
+        this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface setWrapperStatusOnProject(Wrapper wrapper, Project project, boolean enable) {
+        setWrapperStatusOnProject(wrapper.id, project, enable)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface setWrapperStatusOnProject(CommandSummaryForContext availableCommand, Project project, boolean enable) {
+        setWrapperStatusOnProject(availableCommand.wrapperId, project, enable)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    int launchContainer(Project project, int wrapperId, String rootElementName, String rootElementUri, Map<String, String> otherInputs = [:]) {
+        final Map<String, String> params = otherInputs.clone() as Map<String, String>
+        params.put(rootElementName, rootElementUri)
+        issueContainerLaunchRequest(project, wrapperId, rootElementName, false, params).body('status', Matchers.equalTo('success')).extract().jsonPath().getInt('workflow-id')
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    int launchContainer(Project project, Wrapper wrapper, String rootElementUri, Map<String, String> otherInputs = [:]) {
+        launchContainer(project, wrapper.id, wrapper.externalInputs[0].name, rootElementUri, otherInputs)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    int launchContainer(Project project, CommandSummaryForContext wrapper, String rootElementUri, Map<String, String> otherInputs = [:]) {
+        launchContainer(project, wrapper.wrapperId, wrapper.rootElementName, rootElementUri, otherInputs)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface bulkLaunchContainers(Project project, int wrapperId, String rootElementName, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
+        final Map<String, String> params = otherInputs.clone() as Map<String, String>
+        params.put(rootElementName, '["' + rootElementUris.join('","') + '"]')
+        issueContainerLaunchRequest(project, wrapperId, rootElementName, true, params).assertThat().
+                body('successes', Matchers.hasSize(rootElementUris.size())).
+                body('failures', Matchers.hasSize(0))
+        this
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface bulkLaunchContainers(Project project, Wrapper wrapper, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
+        bulkLaunchContainers(project, wrapper.id, wrapper.externalInputs[0].name, rootElementUris, otherInputs)
+    }
+
+    @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
+    XnatInterface bulkLaunchContainers(Project project, CommandSummaryForContext wrapper, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
+        bulkLaunchContainers(project, wrapper.wrapperId, wrapper.rootElementName, rootElementUris, otherInputs)
+    }
+
+    protected ValidatableResponse issueContainerLaunchRequest(Project project, int wrapperId, String rootElementName, boolean isBulk, Map<String, String> allQueryParams) {
+        queryBase().body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
+                then().assertThat().statusCode(200).and()
     }
 
     abstract String versionIdentifier()
