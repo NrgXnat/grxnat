@@ -1390,6 +1390,12 @@ abstract class XnatInterface {
     @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
     @RequireAdmin
     XnatInterface updateDockerServer(DockerServer dockerServerSpec) {
+        dockerServerSpec.setId(null)
+        if (dockerServerSpec.swarmConstraints != null) {
+            dockerServerSpec.swarmConstraints.each { constraint ->
+                constraint.setId(null)
+            }
+        }
         queryBase().content(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
         this
     }
