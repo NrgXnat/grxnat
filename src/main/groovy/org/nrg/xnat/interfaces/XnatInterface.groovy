@@ -69,6 +69,9 @@ import org.nrg.xnat.pogo.users.UserGroup
 import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAliasToken
 import org.nrg.xnat.rest.XnatSessionFilter
+import org.nrg.xnat.versions.XnatVersion
+import org.nrg.xnat.versions.XnatVersionList
+import org.nrg.xnat.versions.Xnat_1_6dev
 
 import static com.jayway.restassured.RestAssured.given
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
@@ -98,7 +101,7 @@ abstract class XnatInterface {
         this
     }
 
-    static XnatInterface authenticate(String xnatUrl, User user, boolean allowInsecureSSL = false) {
+    static XnatInterface authenticate(String xnatUrl, User user, Class<? extends XnatVersion> versionClass = null, boolean allowInsecureSSL = false) {
         RestAssured.config = RestAssuredConfig.config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory(
                 new Jackson2ObjectMapperFactory() {
                     @Override
@@ -107,28 +110,41 @@ abstract class XnatInterface {
                     }
                 }
         )).jsonConfig(JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE))
-        if (allowInsecureSSL) RestAssured.useRelaxedHTTPSValidation()
+        if (allowInsecureSSL) {
+            RestAssured.useRelaxedHTTPSValidation()
+        }
 
-        if (given().get(formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode == 200) {
-            final XnatSessionFilter sessionFilter = new XnatSessionFilter(user, xnatUrl, allowInsecureSSL)
-            if (given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode == 200) {
-                final Response oldResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
-                if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
-                    return new XnatInterface_1_6().withFilter(sessionFilter)
-                } else {
-                    final Response newResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
-                    if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
-                        final String version = newResponse.jsonPath().getString('version')
-                        return XnatInterfaceMap.lookup(version).newInstance().withFilter(sessionFilter)
-                    } else {
-                        return new XnatInterface_1_8_0().withFilter(sessionFilter)
-                    }
-                }
-            } else {
-                throw new RuntimeException("Provided credentials don't appear to be valid.")
-            }
+        switch (given().get(formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode) {
+            case 200:
+                return performLogin(xnatUrl, user, versionClass, allowInsecureSSL)
+            case 302:
+                throw new RuntimeException('Attempting to check availability of XNAT login page returned a 302 status code. Is the provided protocol (http versus https) correct?')
+            default:
+                throw new RuntimeException("There doesn't seem to be an XNAT reachable at that address.")
+        }
+    }
+
+    protected static XnatInterface performLogin(String xnatUrl, User user, Class<? extends XnatVersion> prespecifiedVersionClass, boolean allowInsecureSSL) {
+        final XnatSessionFilter sessionFilter = new XnatSessionFilter(user, xnatUrl, allowInsecureSSL)
+        if (given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode != 200) {
+            throw new RuntimeException("Provided credentials don't appear to be valid.")
+        }
+        final Class<? extends XnatVersion> versionClass = prespecifiedVersionClass ?: determineVersionClass(xnatUrl, sessionFilter)
+        versionClass.newInstance().interfaceClass.newInstance().withFilter(sessionFilter)
+    }
+
+    protected static Class<? extends XnatVersion> determineVersionClass(String xnatUrl, XnatSessionFilter sessionFilter) {
+        final Response oldResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
+        if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
+            Xnat_1_6dev
         } else {
-            throw new RuntimeException("There doesn't seem to be an XNAT reachable at that address.")
+            final Response newResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
+            if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
+                final String version = newResponse.jsonPath().getString('version')
+                XnatVersionList.lookup(version)
+            } else {
+                XnatVersionList.lookup('unknown')
+            }
         }
     }
 
@@ -158,8 +174,8 @@ abstract class XnatInterface {
         reauthenticate()
     }
 
-    static XnatInterface authenticate(String xnatUrl, String username, String password, boolean allowInsecureSSL = false) {
-        authenticate(xnatUrl, new User(username).password(password), allowInsecureSSL)
+    static XnatInterface authenticate(String xnatUrl, String username, String password, Class<? extends XnatVersion> versionClass = null, boolean allowInsecureSSL = false) {
+        authenticate(xnatUrl, new User(username).password(password), versionClass, allowInsecureSSL)
     }
 
     void setServerIssueRetryCount(int count) {
@@ -1473,7 +1489,5 @@ abstract class XnatInterface {
         queryBase().body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
                 then().assertThat().statusCode(200).and()
     }
-
-    abstract String versionIdentifier()
 
 }

@@ -15,9 +15,4 @@ class UnitTestXnatInterface extends XnatInterface {
         installedPlugins = representedPlugins
     }
 
-    @Override
-    String versionIdentifier() {
-        'not used'
-    }
-
 }

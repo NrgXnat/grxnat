@@ -1,11 +1,6 @@
 package org.nrg.xnat.interfaces
 
-class XnatInterface_1_7_4 extends XnatInterface_1_7_5 {
-
-    @Override
-    String versionIdentifier() {
-        '1.7.4'
-    }
+class XnatInterface_1_7_4 extends XnatInterface_1_7_7 {
 
     @Override
     String readXnatCsrfToken() {

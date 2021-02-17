@@ -4,12 +4,7 @@ import com.jayway.restassured.http.ContentType
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.AnonScript
 
-class XnatInterface_1_6 extends XnatInterface_1_7_0 {
-
-    @Override
-    String versionIdentifier() {
-        '1.6'
-    }
+class XnatInterface_1_6 extends XnatInterface_1_7_4 {
 
     @Override
     boolean queryUserAdmin() {
