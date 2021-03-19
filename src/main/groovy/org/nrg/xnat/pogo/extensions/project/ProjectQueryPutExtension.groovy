@@ -6,16 +6,13 @@ import org.nrg.xnat.rest.SerializationUtils
 
 class ProjectQueryPutExtension extends ProjectExtension {
 
-    private XnatInterface xnatInterface
-
-    ProjectQueryPutExtension(XnatInterface xnatInterface, Project project) {
+    ProjectQueryPutExtension(Project project) {
         super(project)
-        this.xnatInterface = xnatInterface
     }
 
     @Override
-    void create() {
-        xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(xnatInterface.projectUrl(parentObject)).then().assertThat().statusCode(200)
+    void create(XnatInterface xnatInterface) {
+        xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(xnatInterface.projectUrl(parentObject as Project)).then().assertThat().statusCode(200)
     }
 
 }

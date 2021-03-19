@@ -96,12 +96,12 @@ class XnatSessionFilter implements Filter {
         }
     }
 
-    private RequestSpecificationImpl preprocessRequest(RequestSpecification requestSpec) {
+    protected RequestSpecificationImpl preprocessRequest(RequestSpecification requestSpec) {
         ((allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec).sessionId(sessionId) as RequestSpecificationImpl
     }
 
-    private Response issueRequest(RequestSpecification request, FilterContext ctx) {
-        ReflectionMethodInvoker.invoke(request, ctx.requestMethod.toString().toLowerCase(), URLDecoder.decode(ctx.requestPath, 'UTF-8')) as Response// TODO: this is a hack copied out of FilterContextImpl. It will likely need to be modified or thrown out when upgrading RestAssured
+    protected Response issueRequest(RequestSpecification request, FilterContext ctx) {
+        ReflectionMethodInvoker.invoke(request, ctx.requestMethod.toString().toLowerCase(), URLDecoder.decode(ctx.requestPath, 'UTF-8')) as Response // TODO: this is a hack copied out of FilterContextImpl. It will likely need to be modified or thrown out when upgrading RestAssured
     }
 
 }

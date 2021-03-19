@@ -1,7 +1,6 @@
 package org.nrg.xnat.pogo.extensions.session_assessor
 
 import com.jayway.restassured.http.ContentType
-import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
@@ -10,21 +9,19 @@ import org.nrg.xnat.pogo.experiments.SessionAssessor
 
 class SessionAssessorXMLExtension extends SessionAssessorExtension {
 
-    XnatInterface xnatInterface
     File assessorXML
 
-    SessionAssessorXMLExtension(XnatInterface xnatInterface, SessionAssessor assessor, File assessorXML) {
+    SessionAssessorXMLExtension(SessionAssessor assessor, File assessorXML) {
         super(assessor)
-        this.xnatInterface = xnatInterface
         this.assessorXML = assessorXML
     }
 
-    SessionAssessorXMLExtension(XnatInterface xnatInterface, File assessorXML) {
-        this(xnatInterface, null, assessorXML)
+    SessionAssessorXMLExtension(File assessorXML) {
+        this(null, assessorXML)
     }
 
     @Override
-    void create(Project project, Subject subject, ImagingSession session) {
+    void create(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session) {
         parentObject.accessionNumber(
                 xnatInterface.queryBase().contentType(ContentType.XML).queryParam('format', 'xml').body(assessorXML.text).
                         post(xnatInterface.assessorsUrl(project, subject, session)).then().

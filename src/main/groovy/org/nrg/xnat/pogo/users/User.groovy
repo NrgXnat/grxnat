@@ -3,8 +3,10 @@ package org.nrg.xnat.pogo.users
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.Extension
+import org.nrg.xnat.rest.XnatAuthProvider
+import org.nrg.xnat.rest.XnatSessionFilter
 
-class User extends Extensible<User> {
+class User extends Extensible<User> implements XnatAuthProvider {
 
     String username
     String password
@@ -92,6 +94,11 @@ class User extends Extensible<User> {
     @Override
     String toString() {
         "${lastName}, ${firstName} (${username})"
+    }
+
+    @Override
+    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL) {
+        new XnatSessionFilter(this, xnatUrl, allowInsecureSSL)
     }
 
 }

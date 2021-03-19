@@ -1,9 +1,9 @@
 package org.nrg.xnat.pogo.extensions.subject
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
-import org.nrg.xnat.pogo.users.User
 
 abstract class SubjectExtension extends Extension<Subject> {
 
@@ -11,6 +11,6 @@ abstract class SubjectExtension extends Extension<Subject> {
         super(subject)
     }
 
-    abstract void create(Project project)
+    abstract void create(XnatInterface xnatInterface, Project project)
 
 }

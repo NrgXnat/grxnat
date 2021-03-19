@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.extensions.reconstruction
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Reconstruction
@@ -12,6 +13,6 @@ abstract class ReconstructionExtension extends Extension<Reconstruction> {
         super(reconstruction)
     }
 
-    abstract void create(Project project, Subject subject, ImagingSession session)
+    abstract void create(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session)
 
 }

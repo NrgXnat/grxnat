@@ -1,6 +1,6 @@
 package org.nrg.xnat.rest
 
-class XnatAliasToken {
+class XnatAliasToken implements XnatAuthProvider {
 
     String alias
     String secret
@@ -11,5 +11,10 @@ class XnatAliasToken {
     }
 
     XnatAliasToken() {}
+
+    @Override
+    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL) {
+        new AliasTokenSessionFilter(this, xnatUrl, allowInsecureSSL)
+    }
 
 }

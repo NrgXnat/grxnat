@@ -7,20 +7,18 @@ import org.nrg.xnat.pogo.Project
 class ProjectXMLPutExtension extends ProjectExtension {
 
     private File xmlFile
-    private XnatInterface xnatInterface
 
-    ProjectXMLPutExtension(XnatInterface xnatInterface, Project project, File file) {
+    ProjectXMLPutExtension(Project project, File file) {
         super(project)
         xmlFile = file
-        this.xnatInterface = xnatInterface
     }
 
-    ProjectXMLPutExtension(XnatInterface xnatInterface, File file) {
-        this(xnatInterface, null, file)
+    ProjectXMLPutExtension(File file) {
+        this(null, file)
     }
 
     @Override
-    void create() {
+    void create(XnatInterface xnatInterface) {
         xnatInterface.queryBase().queryParam('format', 'xml').contentType(ContentType.XML).body(xmlFile.text).
                 put(xnatInterface.projectUrl(parentObject)).then().assertThat().statusCode(200)
     }

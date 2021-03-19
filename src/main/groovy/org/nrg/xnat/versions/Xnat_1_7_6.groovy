@@ -1,7 +1,7 @@
 package org.nrg.xnat.versions
 
 import org.nrg.xnat.interfaces.XnatInterface
-import org.nrg.xnat.interfaces.XnatInterface_1_7_7
+import org.nrg.xnat.interfaces.XnatInterface_1_8_0
 
 @Follows(Xnat_1_7_5)
 class Xnat_1_7_6 extends XnatVersion {
@@ -13,7 +13,7 @@ class Xnat_1_7_6 extends XnatVersion {
 
     @Override
     Class<? extends XnatInterface> getInterfaceClass() {
-        XnatInterface_1_7_7
+        XnatInterface_1_8_0
     }
 
 }

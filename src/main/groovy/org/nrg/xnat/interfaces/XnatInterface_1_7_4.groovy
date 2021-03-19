@@ -1,6 +1,6 @@
 package org.nrg.xnat.interfaces
 
-class XnatInterface_1_7_4 extends XnatInterface_1_7_7 {
+class XnatInterface_1_7_4 extends XnatInterface_1_8_0 {
 
     @Override
     String readXnatCsrfToken() {

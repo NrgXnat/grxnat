@@ -1,19 +1,67 @@
 package org.nrg.xnat.pogo
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter
+import com.fasterxml.jackson.annotation.JsonAnySetter
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
+
+import static org.nrg.xnat.pogo.SiteConfigProps.*
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class SiteConfig {
 
-    public static final String AUTOARCHIVE_IDLE_TIME = 'sessionXmlRebuilderInterval'
-    public static final String AUTOARCHIVE_IDLE_SCHEDULE = 'sessionXmlRebuilderRepeat'
-    public static final String ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT = 'enableSitewideAnonymizationScript'
-    public static final String SITEWIDE_ANONYMIZATION_SCRIPT = 'sitewideAnonymizationScript'
-    public static final String LOGIN_REQUIRED = 'requireLogin'
-    public static final String AUTO_ENABLE = 'userRegistration'
-    public static final String REQUIRE_EMAIL_VERIFICATION = 'emailVerification'
-    public static final String ALLOW_NON_ADMIN_PROJECT_CREATION = 'uiAllowNonAdminProjectCreation'
-    public static final String RESTRICT_USER_LIST_TO_ADMIN = 'restrictUserListAccessToAdmins'
-    public static final String PASSWORD_COMPLEXITY = 'passwordComplexity'
-    public static final String PASSWORD_COMPLEXITY_MESSAGE = 'passwordComplexityMessage'
-    public static final String SESSION_TIMEOUT = 'sessionTimeout'
-    public static final String PREVENT_CROSS_MODALITY_MERGE = 'preventCrossModalityMerge'
+    @JsonProperty(AUTOARCHIVE_IDLE_TIME)
+    Integer sessionXmlRebuilderInterval
+
+    @JsonProperty(AUTOARCHIVE_IDLE_SCHEDULE)
+    Integer sessionXmlRebuilderSchedule
+
+    @JsonProperty(ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT)
+    Boolean enableSiteAnonScript
+
+    @JsonProperty(SITEWIDE_ANONYMIZATION_SCRIPT)
+    String siteAnonScript
+
+    @JsonProperty(LOGIN_REQUIRED)
+    Boolean requireLogin
+
+    @JsonProperty(AUTO_ENABLE)
+    Boolean autoEnableUsers
+
+    @JsonProperty(REQUIRE_EMAIL_VERIFICATION)
+    Boolean requireEmailVerification
+
+    @JsonProperty(ALLOW_NON_ADMIN_PROJECT_CREATION)
+    Boolean allowNonadminProjectCreation
+
+    @JsonProperty(RESTRICT_USER_LIST_TO_ADMIN)
+    Boolean restrictUserListToAdmins
+
+    @JsonProperty(PASSWORD_COMPLEXITY)
+    String passwordComplexityRegex
+
+    @JsonProperty(PASSWORD_COMPLEXITY_MESSAGE)
+    String passwordComplexityMessage
+
+    @JsonProperty(SESSION_TIMEOUT)
+    String sessionTimeout
+
+    @JsonProperty(PREVENT_CROSS_MODALITY_MERGE)
+    Boolean preventCrossModalityMerge
+
+    @JsonProperty(INITIALIZED)
+    Boolean initialized
+
+    Map<String, Object> untrackedProperties = [:]
+
+    @JsonAnyGetter
+    Map<String, Object> getUntrackedProperties() {
+        untrackedProperties
+    }
+
+    @JsonAnySetter
+    void add(String key, Object value) {
+        untrackedProperties.put(key, value);
+    }
 
 }

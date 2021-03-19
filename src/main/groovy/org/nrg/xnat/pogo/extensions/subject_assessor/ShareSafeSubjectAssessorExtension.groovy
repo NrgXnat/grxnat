@@ -7,12 +7,12 @@ import org.nrg.xnat.pogo.experiments.SubjectAssessor
 
 class ShareSafeSubjectAssessorExtension extends SubjectAssessorQueryPutExtension {
 
-    ShareSafeSubjectAssessorExtension(XnatInterface xnatInterface, SubjectAssessor subjectAssessor) {
-        super(xnatInterface, subjectAssessor)
+    ShareSafeSubjectAssessorExtension(SubjectAssessor subjectAssessor) {
+        super(subjectAssessor)
     }
 
     @Override
-    String url(Project project, Subject subject, SubjectAssessor subjectAssessor) {
+    String url(XnatInterface xnatInterface, Project project, Subject subject, SubjectAssessor subjectAssessor) {
         xnatInterface.formatRestUrl("/projects/${subjectAssessor.getPrimaryProject() ?: project}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${subjectAssessor.label}")
     }
 

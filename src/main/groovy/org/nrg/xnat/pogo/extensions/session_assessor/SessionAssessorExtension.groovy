@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.extensions.session_assessor
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
@@ -13,6 +14,6 @@ abstract class SessionAssessorExtension extends Extension<Experiment> {
         super(sessionAssessor)
     }
 
-    abstract void create(Project project, Subject subject, ImagingSession session)
+    abstract void create(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session)
 
 }

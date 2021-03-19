@@ -1,0 +1,137 @@
+package org.nrg.xnat.subinterfaces
+
+import com.jayway.restassured.path.json.JsonPath
+import com.jayway.restassured.response.Response
+import org.nrg.xnat.meta.RequireAdmin
+import org.nrg.xnat.pogo.AnonScript
+import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.SiteConfig
+
+import static com.jayway.restassured.http.ContentType.JSON
+
+class ConfigSubinterface extends XnatFunctionalitySubinterface {
+
+    @Override
+    List<String> getHandledEndpoints() {
+        [
+                '/config/edit/image/dicom/{RESOURCE}',
+                '/config/edit/projects/{PROJECT_ID}/image/dicom/{RESOURCE}',
+                '/xapi/siteConfig',
+                '/xapi/siteConfig/buildInfo'
+        ]
+    }
+
+    String getBuildInfo() {
+        final JsonPath buildPath = queryBase().get(formatXapiUrl('/siteConfig/buildInfo')).then().assertThat().statusCode(200).and().extract().jsonPath()
+        "Version ${buildPath.get('version')} (commit ${buildPath.get('commit')})"
+    }
+
+    @RequireAdmin
+    SiteConfig readSiteConfig() {
+        queryBase().contentType(JSON).get(formatXapiUrl('siteConfig')).as(SiteConfig)
+    }
+
+    void postToSiteConfig(Map configSettings) {
+        postToSiteConfigFrom(configSettings)
+    }
+
+    void postToSiteConfig(SiteConfig siteConfig) {
+        postToSiteConfigFrom(siteConfig)
+    }
+
+    @RequireAdmin
+    protected void postToSiteConfigFrom(Object siteConfig) {
+        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
+    }
+
+    void initializeXnat() {
+        postToSiteConfig(new SiteConfig(initialized: true))
+    }
+
+    void setLoginRequirement(boolean loginRequired) {
+        postToSiteConfig(new SiteConfig(requireLogin: loginRequired))
+    }
+
+    void openXnat() {
+        setLoginRequirement(false)
+    }
+
+    void closeXnat() {
+        setLoginRequirement(true)
+    }
+
+    void setSessionXmlRebuilderTimes(int interval, int schedule) {
+        postToSiteConfig(new SiteConfig(sessionXmlRebuilderInterval: interval, sessionXmlRebuilderSchedule: schedule))
+    }
+
+    void setNonadminProjectSetting(boolean allowed) {
+        postToSiteConfig(new SiteConfig(allowNonadminProjectCreation: allowed))
+    }
+
+    void setSiteUserListRestriction(boolean restricted) {
+        postToSiteConfig(new SiteConfig(restrictUserListToAdmins: restricted))
+    }
+
+    void setCrossModalityMergePreventionFlag(boolean status) {
+        postToSiteConfig(new SiteConfig(preventCrossModalityMerge: status))
+    }
+
+    private AnonScript readAnonScript(Response response) {
+        new AnonScript().contents(
+                response.then().assertThat().statusCode(200).and().extract().jsonPath().getString('ResultSet.Result.get(0).script')
+        )
+    }
+
+    String legacySiteAnonScriptUrl() {
+        formatRestUrl('config/edit/image/dicom/script')
+    }
+
+    AnonScript readSiteAnonScript() {
+        readAnonScript(jsonQuery().get(legacySiteAnonScriptUrl()))
+    }
+
+    void setSiteAnonScriptStatus(boolean status) {
+        postToSiteConfig(new SiteConfig(enableSiteAnonScript: status))
+    }
+
+    void disableSiteAnonScript() {
+        setSiteAnonScriptStatus(false)
+    }
+
+    void enableSiteAnonScript() {
+        setSiteAnonScriptStatus(true)
+    }
+
+    void setSiteAnonScript(AnonScript script) {
+        postToSiteConfig(new SiteConfig(siteAnonScript: script.getContents()))
+    }
+
+    String projectAnonScriptUrlBase(Project project) {
+        formatRestUrl("config/edit/projects/${project.id}/image/dicom")
+    }
+
+    String projectAnonScriptUrl(Project project) {
+        "${projectAnonScriptUrlBase(project)}/script"
+    }
+
+    AnonScript readProjectAnonScript(Project project) {
+        readAnonScript(jsonQuery().get(projectAnonScriptUrl(project)))
+    }
+
+    void setProjectAnonScript(Project project, AnonScript script) {
+        queryBase().body(script.getContents()).put(projectAnonScriptUrl(project)).then().assertThat().statusCode(200)
+    }
+
+    void setProjectAnonScriptStatus(Project project, boolean status) {
+        queryBase().queryParam('activate', status).put("${projectAnonScriptUrlBase(project)}/status").then().assertThat().statusCode(200)
+    }
+
+    void disableProjectAnonScript(Project project) {
+        setProjectAnonScriptStatus(project, false)
+    }
+
+    void enableProjectAnonScript(Project project) {
+        setProjectAnonScriptStatus(project, true)
+    }
+
+}

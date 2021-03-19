@@ -8,12 +8,12 @@ import org.nrg.xnat.pogo.experiments.SessionAssessor
 
 class ShareSafeSessionAssessorExtension extends SessionAssessorQueryPutExtension {
 
-    ShareSafeSessionAssessorExtension(XnatInterface xnatInterface, SessionAssessor sessionAssessor) {
-        super(xnatInterface, sessionAssessor)
+    ShareSafeSessionAssessorExtension(SessionAssessor sessionAssessor) {
+        super(sessionAssessor)
     }
 
     @Override
-    String url(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
+    String url(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
         xnatInterface.formatRestUrl("/projects/${sessionAssessor.getPrimaryProject() ?: project.id}/subjects/${xnatInterface.getAccessionNumber(subject)}/experiments/${xnatInterface.getAccessionNumber(session)}/assessors/${sessionAssessor.label}")
     }
 

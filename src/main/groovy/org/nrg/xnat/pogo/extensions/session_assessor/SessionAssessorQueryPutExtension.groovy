@@ -10,26 +10,23 @@ import org.nrg.xnat.rest.SerializationUtils
 
 class SessionAssessorQueryPutExtension extends SessionAssessorExtension {
 
-    protected XnatInterface xnatInterface
-
-    SessionAssessorQueryPutExtension(XnatInterface xnatInterface, SessionAssessor sessionAssessor) {
+    SessionAssessorQueryPutExtension(SessionAssessor sessionAssessor) {
         super(sessionAssessor)
-        this.xnatInterface = xnatInterface
     }
 
     @Override
-    void create(Project project, Subject subject, ImagingSession session) {
+    void create(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session) {
         if (parentObject.getDataType() == null) {
             throw new UnsupportedOperationException("SessionAssessor must have xsiType to pass to XNAT for this method")
         }
 
         parentObject.accessionNumber(
-                xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(url(project, subject, session, parentObject as SessionAssessor)).
+                xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).put(url(xnatInterface, project, subject, session, parentObject as SessionAssessor)).
                 then().assertThat().statusCode(Matchers.isOneOf(200, 201)).and().extract().response().asString().trim()
         )
     }
 
-    String url(Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
+    String url(XnatInterface xnatInterface, Project project, Subject subject, ImagingSession session, SessionAssessor sessionAssessor) {
         xnatInterface.sessionAssessorUrl(project, subject, session, sessionAssessor)
     }
 

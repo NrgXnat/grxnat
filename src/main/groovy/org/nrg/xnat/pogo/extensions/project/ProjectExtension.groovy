@@ -1,8 +1,8 @@
 package org.nrg.xnat.pogo.extensions.project
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.Project
-import org.nrg.xnat.pogo.users.User
 
 abstract class ProjectExtension extends Extension<Project> {
 
@@ -10,6 +10,6 @@ abstract class ProjectExtension extends Extension<Project> {
         super(project)
     }
 
-    abstract void create()
+    abstract void create(XnatInterface xnatInterface)
 
 }

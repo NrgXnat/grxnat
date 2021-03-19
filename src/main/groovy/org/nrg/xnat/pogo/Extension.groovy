@@ -20,7 +20,7 @@ abstract class Extension<X extends Extensible<X>> {
     }
 
     X getParentObject() {
-        return parentObject
+        parentObject
     }
 
 }

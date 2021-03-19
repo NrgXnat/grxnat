@@ -1,8 +1,15 @@
-package org.nrg.xnat.interfaces
+package org.nrg.xnat.subinterfaces
 
 import org.nrg.xnat.pogo.experiments.ImagingSession
+import org.nrg.xnat.versions.XnatVersion
+import org.nrg.xnat.versions.XnatVersionList
 
-class XnatInterface_1_7_7 extends XnatInterface_1_8_0 {
+class WorkflowSubinterface_1_7_7 extends WorkflowSubinterface {
+
+    @Override
+    List<Class<? extends XnatVersion>> supportedVersions() {
+        XnatVersionList.VERSIONS_BEFORE_1_8
+    }
 
     @Override
     void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {

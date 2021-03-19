@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.extensions.subject_assessor
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Extension
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
@@ -12,6 +13,6 @@ abstract class SubjectAssessorExtension extends Extension<Experiment> {
         super(subjectAssessor)
     }
 
-    abstract void create(Project project, Subject subject)
+    abstract void create(XnatInterface xnatInterface, Project project, Subject subject)
 
 }
