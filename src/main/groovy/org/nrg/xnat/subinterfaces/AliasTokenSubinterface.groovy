@@ -6,6 +6,8 @@ import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.PermissionsException
 import org.nrg.xnat.rest.XnatAliasToken
 
+import static org.testng.AssertJUnit.assertEquals
+
 class AliasTokenSubinterface extends XnatFunctionalitySubinterface {
 
     @Override
@@ -49,7 +51,7 @@ class AliasTokenSubinterface extends XnatFunctionalitySubinterface {
             case 404:
                 return false
             case 200:
-                response.then().body('valid', Matchers.equalTo(expectedUsername))
+                assertEquals(expectedUsername, response.then().extract().jsonPath().getString('valid'))
                 return true
             default:
                 throw new RuntimeException("Unknown response code for alias token validation: ${response.statusCode}")
