@@ -41,11 +41,15 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
     @RequireAdmin
     protected void postToSiteConfigFrom(Object siteConfig) {
+        performPostToSiteConfigFrom(siteConfig)
+    }
+
+    protected void performPostToSiteConfigFrom(Object siteConfig) {
         queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
     void initializeXnat() {
-        postToSiteConfig(new SiteConfig(initialized: true))
+        performPostToSiteConfigFrom(new SiteConfig(initialized: true)) // if we need to initialize, we can't do the admin check
     }
 
     void setLoginRequirement(boolean loginRequired) {
