@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
 class CommandSummaryForContext {
 
-    int commandId
+    long commandId
     String commandName
     String commandLabel
     String commandDescription
-    int wrapperId
+    long wrapperId
     String wrapperName
     String wrapperLabel
     String wrapperDescription

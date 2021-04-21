@@ -63,6 +63,7 @@ abstract class XnatInterface {
     @Delegate protected SubjectSubinterface subjectSubinterface
     @Delegate protected UserManagementSubinterface userManagementSubinterface
     @Delegate protected WorkflowSubinterface workflowSubinterface
+    @Delegate protected BatchLaunchSubinterface batchLaunchSubinterface
 
     protected XnatInterface() {}
 
@@ -90,6 +91,7 @@ abstract class XnatInterface {
         subjectSubinterface = constructSubinterface(SubjectSubinterface)
         userManagementSubinterface = constructSubinterface(UserManagementSubinterface)
         workflowSubinterface = constructSubinterface(WorkflowSubinterface)
+        batchLaunchSubinterface = constructSubinterface(BatchLaunchSubinterface)
         this
     }
 

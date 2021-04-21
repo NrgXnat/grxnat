@@ -12,6 +12,7 @@ import org.nrg.xnat.pogo.containers.Command
 import org.nrg.xnat.pogo.containers.CommandSummaryForContext
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
+import org.nrg.xnat.pogo.containers.Orchestration
 import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.rest.SerializationUtils
 
@@ -31,10 +32,15 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/docker/images/save',
                 '/xapi/docker/pull',
                 '/xapi/docker/server',
+                '/xapi/wrappers/{wrapperId}/enabled',
+                '/xapi/wrappers/{wrapperId}/disabled',
                 '/xapi/projects/{project}/wrappers/{wrapperId}/disabled',
                 '/xapi/projects/{project}/wrappers/{wrapperId}/enabled',
                 '/xapi/projects/{project}/wrappers/{wrapperId}/root/{rootElement}/bulklaunch',
-                '/xapi/projects/{project}/wrappers/{wrapperId}/root/{rootElement}/launch'
+                '/xapi/projects/{project}/wrappers/{wrapperId}/root/{rootElement}/launch',
+                '/xapi/orchestration',
+                '/xapi/orchestration/{id}',
+                '/xapi/orchestration/{id}/disable'
         ]
     }
 
@@ -120,7 +126,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         )
     }
 
-    XnatInterface setWrapperStatusOnProject(int wrapperId, Project project, boolean enable) {
+    XnatInterface setWrapperStatusOnProject(long wrapperId, Project project, boolean enable) {
         queryBase().put(formatXapiUrl('/projects', project.id, '/wrappers/', String.valueOf(wrapperId), enable ? 'enabled' : 'disabled')).then().assertThat().statusCode(200)
         xnatInterface
     }
@@ -133,7 +139,23 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         setWrapperStatusOnProject(availableCommand.wrapperId, project, enable)
     }
 
-    int launchContainer(Project project, int wrapperId, String rootElementName, String rootElementUri, Map<String, String> otherInputs = [:]) {
+    @RequireAdmin
+    XnatInterface setWrapperStatusOnSite(long wrapperId, boolean enable) {
+        queryBase().put(formatXapiUrl('/wrappers/', String.valueOf(wrapperId), enable ? 'enabled' : 'disabled')).then().assertThat().statusCode(200)
+        xnatInterface
+    }
+
+    @RequireAdmin
+    XnatInterface setWrapperStatusOnSite(Wrapper wrapper, boolean enable) {
+        setWrapperStatusOnSite(wrapper.id, enable)
+    }
+
+    @RequireAdmin
+    XnatInterface setWrapperStatusOnSite(CommandSummaryForContext availableCommand, Project project, boolean enable) {
+        setWrapperStatusOnSite(availableCommand.wrapperId, enable)
+    }
+
+    int launchContainer(Project project, long wrapperId, String rootElementName, String rootElementUri, Map<String, String> otherInputs = [:]) {
         final Map<String, String> params = otherInputs.clone() as Map<String, String>
         params.put(rootElementName, rootElementUri)
         issueContainerLaunchRequest(project, wrapperId, rootElementName, false, params).body('status', Matchers.equalTo('success')).extract().jsonPath().getInt('workflow-id')
@@ -147,7 +169,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         launchContainer(project, wrapper.wrapperId, wrapper.rootElementName, rootElementUri, otherInputs)
     }
 
-    XnatInterface bulkLaunchContainers(Project project, int wrapperId, String rootElementName, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
+    XnatInterface bulkLaunchContainers(Project project, long wrapperId, String rootElementName, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
         final Map<String, String> params = otherInputs.clone() as Map<String, String>
         params.put(rootElementName, '["' + rootElementUris.join('","') + '"]')
         issueContainerLaunchRequest(project, wrapperId, rootElementName, true, params).assertThat().
@@ -164,7 +186,34 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         bulkLaunchContainers(project, wrapper.wrapperId, wrapper.rootElementName, rootElementUris, otherInputs)
     }
 
-    protected ValidatableResponse issueContainerLaunchRequest(Project project, int wrapperId, String rootElementName, boolean isBulk, Map<String, String> allQueryParams) {
+    @RequireAdmin
+    Orchestration createOrUpdateOrchestration(Orchestration orchestration) {
+        queryBase().body(orchestration).contentType(JSON)
+                .post(formatXapiUrl('/orchestration'))
+                .then().assertThat().statusCode(200).extract().as(Orchestration)
+    }
+
+    Orchestration findOrchestration(Project project) {
+        queryBase().queryParam("project", project.id)
+                .get(formatXapiUrl('/orchestration'))
+                .then().assertThat().statusCode(200).extract().as(Orchestration)
+    }
+
+    @RequireAdmin
+    XnatInterface deleteOrchestration(Orchestration orchestration) {
+        queryBase().delete(formatXapiUrl('/orchestration', String.valueOf(orchestration.id)))
+                .then().assertThat().statusCode(200)
+        xnatInterface
+    }
+
+    @RequireAdmin
+    XnatInterface disableOrchestration(Orchestration orchestration) {
+        queryBase().put(formatXapiUrl('/orchestration', String.valueOf(orchestration.id), 'disable'))
+                .then().assertThat().statusCode(200)
+        xnatInterface
+    }
+
+    protected ValidatableResponse issueContainerLaunchRequest(Project project, long wrapperId, String rootElementName, boolean isBulk, Map<String, String> allQueryParams) {
         queryBase().body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
                 then().assertThat().statusCode(200).and()
     }

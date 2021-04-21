@@ -28,17 +28,39 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
         waitForWorkflowComplete(workflowId, maxTimeInSeconds)
     }
 
+    XnatInterface verifyNoWorkflow(ImagingSession session, String pipelineName, int timeToWait = 60) {
+        final StopWatch stopWatch = TimeUtils.launchStopWatch()
+        // ensure workflow doesn't run within timeToWait
+        while (!TimeUtils.maxTimeReached(stopWatch, timeToWait)) {
+            int status = jsonQuery().queryParams('experiment', xnatInterface.getAccessionNumber(session)).get(formatRestUrl("/services/workflows/${pipelineName}")).statusCode()
+
+            if (status != 404) {
+                throw new RuntimeException("${pipelineName} ran on ${session.getLabel()}.")
+            }
+            TimeUtils.sleep(1000)
+        }
+        xnatInterface
+    }
+
     XnatInterface waitForWorkflowComplete(int workflowId, int maxTimeInSeconds = 60) {
+        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WorkflowStatus.COMPLETE, WorkflowStatus.FAILED)
+    }
+
+    XnatInterface waitForWorkflowFailed(int workflowId, int maxTimeInSeconds = 60) {
+        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WorkflowStatus.FAILED, WorkflowStatus.COMPLETE)
+    }
+
+    XnatInterface waitForWorkflowStatus(int workflowId, int maxTimeInSeconds, WorkflowStatus desiredStatus, WorkflowStatus... exceptionStatuses) {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
         while (true) {
-            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} did not complete in allotted number of seconds: ${maxTimeInSeconds}")
+            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} status is not ${desiredStatus} in allotted number of seconds: ${maxTimeInSeconds}")
 
             final WorkflowStatus status = readWorkflowStatus(workflowId)
 
-            if (status == WorkflowStatus.COMPLETE) {
+            if (status == desiredStatus) {
                 return xnatInterface
-            } else if (status == WorkflowStatus.FAILED) {
-                throw new RuntimeException("Pipeline ${workflowId} failed.")
+            } else if (exceptionStatuses.length && exceptionStatuses.contains(status)) {
+                throw new RuntimeException("Workflow ${workflowId} has status ${status} rather than ${desiredStatus}.")
             }
             TimeUtils.sleep(1000)
         }
