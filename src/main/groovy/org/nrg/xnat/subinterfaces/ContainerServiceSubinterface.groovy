@@ -13,6 +13,7 @@ import org.nrg.xnat.pogo.containers.CommandSummaryForContext
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
 import org.nrg.xnat.pogo.containers.Orchestration
+import org.nrg.xnat.pogo.containers.OrchestrationProject
 import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.rest.SerializationUtils
 
@@ -40,7 +41,8 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/projects/{project}/wrappers/{wrapperId}/root/{rootElement}/launch',
                 '/xapi/orchestration',
                 '/xapi/orchestration/{id}',
-                '/xapi/orchestration/{id}/disable'
+                '/xapi/orchestration/project/{project}',
+                '/xapi/orchestration/{id}/enabled/{enabled}'
         ]
     }
 
@@ -193,10 +195,23 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 .then().assertThat().statusCode(200).extract().as(Orchestration)
     }
 
-    Orchestration findOrchestration(Project project) {
-        queryBase().queryParam("project", project.id)
-                .get(formatXapiUrl('/orchestration'))
-                .then().assertThat().statusCode(200).extract().as(Orchestration)
+    OrchestrationProject getProjectOrchestrationConfig(Project project) {
+        queryBase().contentType(JSON)
+                .get(formatXapiUrl('/orchestration', 'project', project.id))
+                .then().assertThat().statusCode(200).extract().as(OrchestrationProject)
+    }
+
+    XnatInterface setProjectOrchestration(Project project, Orchestration orchestration) {
+        queryBase().queryParam("orchestrationId", orchestration.getId())
+                .put(formatXapiUrl('/orchestration', 'project', project.id))
+                .then().assertThat().statusCode(200)
+        xnatInterface
+    }
+
+    XnatInterface removeProjectOrchestration(Project project) {
+        queryBase().delete(formatXapiUrl('/orchestration', 'project', project.id))
+                .then().assertThat().statusCode(200)
+        xnatInterface
     }
 
     @RequireAdmin
@@ -207,8 +222,8 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     @RequireAdmin
-    XnatInterface disableOrchestration(Orchestration orchestration) {
-        queryBase().put(formatXapiUrl('/orchestration', String.valueOf(orchestration.id), 'disable'))
+    XnatInterface enableOrDisableOrchestration(Orchestration orchestration, boolean enabled) {
+        queryBase().put(formatXapiUrl('/orchestration', String.valueOf(orchestration.id), 'enabled',String.valueOf(enabled)))
                 .then().assertThat().statusCode(200)
         xnatInterface
     }
