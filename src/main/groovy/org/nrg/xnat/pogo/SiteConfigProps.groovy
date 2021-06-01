@@ -6,6 +6,7 @@ class SiteConfigProps {
     public static final String AUTOARCHIVE_IDLE_SCHEDULE = 'sessionXmlRebuilderRepeat'
     public static final String ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT = 'enableSitewideAnonymizationScript'
     public static final String SITEWIDE_ANONYMIZATION_SCRIPT = 'sitewideAnonymizationScript'
+    public static final String PET_MR_SETTING = 'sitewidePetMr'
     public static final String LOGIN_REQUIRED = 'requireLogin'
     public static final String AUTO_ENABLE = 'userRegistration'
     public static final String REQUIRE_EMAIL_VERIFICATION = 'emailVerification'

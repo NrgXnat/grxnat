@@ -64,6 +64,7 @@ abstract class XnatInterface {
     @Delegate protected UserManagementSubinterface userManagementSubinterface
     @Delegate protected WorkflowSubinterface workflowSubinterface
     @Delegate protected BatchLaunchSubinterface batchLaunchSubinterface
+    @Delegate protected EventServiceSubinterface eventServiceSubinterface
 
     protected XnatInterface() {}
 
@@ -92,6 +93,7 @@ abstract class XnatInterface {
         userManagementSubinterface = constructSubinterface(UserManagementSubinterface)
         workflowSubinterface = constructSubinterface(WorkflowSubinterface)
         batchLaunchSubinterface = constructSubinterface(BatchLaunchSubinterface)
+        eventServiceSubinterface = constructSubinterface(EventServiceSubinterface)
         this
     }
 
@@ -260,7 +262,9 @@ abstract class XnatInterface {
         if (session != null) queryPararms.put('EXPT_LABEL', session.label)
 
         queryBase().multiPart(sessionZip).queryParameters(queryPararms).when().post(formatRestUrl('/services/import')).then().assertThat().statusCode(200)
-        getAccessionNumber(project, session)
+        if (session != null) {
+            getAccessionNumber(project, session)
+        }
     }
 
     void uploadToSessionZipImporter(File sessionZip, Project project) {

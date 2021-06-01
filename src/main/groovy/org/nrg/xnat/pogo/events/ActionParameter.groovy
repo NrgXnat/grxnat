@@ -6,12 +6,11 @@ import groovy.transform.EqualsAndHashCode
 
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
 @EqualsAndHashCode
-class EventFilter {
+class ActionParameter {
 
-    String name
-    String eventType
-    List<String> projectIds
-    EventStatus status
-    String payloadFilter
+    String description
+    ParameterType type
+    String defaultValue
+    boolean required
 
 }

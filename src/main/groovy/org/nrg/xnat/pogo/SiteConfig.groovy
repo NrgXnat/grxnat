@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.nrg.xnat.enums.PetMrProcessingSetting
 
 import static org.nrg.xnat.pogo.SiteConfigProps.*
 
@@ -21,6 +22,9 @@ class SiteConfig {
 
     @JsonProperty(SITEWIDE_ANONYMIZATION_SCRIPT)
     String siteAnonScript
+
+    @JsonProperty(PET_MR_SETTING)
+    String petMrSetting
 
     @JsonProperty(LOGIN_REQUIRED)
     Boolean requireLogin

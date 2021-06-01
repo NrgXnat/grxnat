@@ -2,6 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.response.Response
+import org.nrg.xnat.enums.PetMrProcessingSetting
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.Project
@@ -136,6 +137,22 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
     void enableProjectAnonScript(Project project) {
         setProjectAnonScriptStatus(project, true)
+    }
+
+    void setSitePetMrSetting(PetMrProcessingSetting petMrSetting) {
+        if (petMrSetting == PetMrProcessingSetting.DEFAULT_TO_SITE) {
+            throw new UnsupportedOperationException('Provided PET-MR setting not available at site level')
+        }
+        postToSiteConfig(new SiteConfig(petMrSetting: petMrSetting.apiValue))
+    }
+
+    void setProjectPetMrSetting(Project project, PetMrProcessingSetting petMrSetting) {
+        final String url = formatRestUrl('/projects', project.id, '/config/separatePETMR/config')
+        if (petMrSetting == PetMrProcessingSetting.DEFAULT_TO_SITE) {
+            queryBase().delete(url).then().assertThat().statusCode(200)
+        } else {
+            queryBase().queryParam('inbody', true).body(petMrSetting.apiValue).put(url).then().assertThat().statusCode(201)
+        }
     }
 
 }

@@ -3,15 +3,23 @@ package org.nrg.xnat.pogo.events
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
 @EqualsAndHashCode
-class EventFilter {
+@ToString
+class DeliveredEvent {
 
-    String name
+    long id
     String eventType
-    List<String> projectIds
-    EventStatus status
-    String payloadFilter
+    String timestamp
+    Subscription subscription
+    String user
+    String project
+    Trigger trigger
+    List<EventStep> status
+    String statusMessage
+    Payload payload
+    boolean error
 
 }

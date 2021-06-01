@@ -1,16 +1,22 @@
 package org.nrg.xnat.pogo.events
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+import groovy.transform.EqualsAndHashCode
 
+@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
+@EqualsAndHashCode
 class Subscription {
 
     public static final String COMMAND_ACTION_PROVIDER = 'org.nrg.containers.services.CommandActionProvider'
 
+    Integer id
     String name = ''
     boolean active = true
-    @JsonProperty('action-key') String actionKey
+    String actionKey
     Map<String, ?> attributes
-    @JsonProperty('event-filter') EventFilter eventFilter
-    @JsonProperty('act-as-event-user') boolean actAsEventUser = false
+    EventFilter eventFilter
+    boolean actAsEventUser = false
+    String subscriptionOwner
 
 }

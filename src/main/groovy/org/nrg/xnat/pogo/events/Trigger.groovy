@@ -1,17 +1,19 @@
 package org.nrg.xnat.pogo.events
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import groovy.transform.EqualsAndHashCode
 
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
 @EqualsAndHashCode
-class EventFilter {
+class Trigger {
 
-    String name
-    String eventType
-    List<String> projectIds
+    String eventName
     EventStatus status
-    String payloadFilter
+    String xnatType
+    String label
+    boolean isXsiType
+    @JsonProperty('URI') String uri
 
 }
