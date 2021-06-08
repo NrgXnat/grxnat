@@ -22,10 +22,10 @@ class SubjectXMLPutExtension extends SubjectExtension {
     void create(XnatInterface xnatInterface, Project project) {
         final String subjectResponse = xnatInterface.queryBase().queryParam('format', 'xml').contentType(ContentType.XML).
                 body(xmlFile.text).post(xnatInterface.projectSubjectsUrl(project)).then().assertThat().statusCode(200).and().extract().response().asString()
-
-        final Subject createdSubject = xnatInterface.readSubject((subjectResponse.split('/').last()))
+        final String subjectId = subjectResponse.split('/').last()
+        final Subject createdSubject = xnatInterface.readSubject(subjectId)
         if (parentObject == null) setParentObject(new Subject())
-        parentObject.accessionNumber(createdSubject.accessionNumber).label(createdSubject.label)
+        parentObject.accessionNumber(subjectId).label(createdSubject.label)
     }
 
 }
