@@ -208,7 +208,7 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
                     queryBase().contentType(ContentType.JSON).body(request).then().post(formatXapiUrl(subUrl)).as(List),
                     DeliveredEvent
             )
-            TimeUtils.checkStopWatch(timer, 60, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time)")
+            TimeUtils.checkStopWatch(timer, 60, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
             if (expectedNumEvents == null || expectedNumEvents == events.size()) {
                 final boolean eventsComplete = !events.any { event ->
                     event.status.last().status != EventStepStatus.ACTION_COMPLETE || event.status.last().message != event.statusMessage
