@@ -5,10 +5,10 @@ import com.jayway.restassured.response.Response
 import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.pogo.PaginatedRequest
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.events.Action
 import org.nrg.xnat.pogo.events.DeliveredEvent
-import org.nrg.xnat.pogo.events.DeliveredEventQueryRequest
 import org.nrg.xnat.pogo.events.Event
 import org.nrg.xnat.pogo.events.EventStepStatus
 import org.nrg.xnat.pogo.events.Subscription
@@ -139,11 +139,11 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
         deactivateSubscriptionAtUrl("/projects/${project}/events/subscription/${subscription.id}/deactivate", subscription)
     }
 
-    List<DeliveredEvent> queryDeliveredEvents(DeliveredEventQueryRequest request = new DeliveredEventQueryRequest(), Integer expectedNumEvents = null, boolean waitForEvents = true) {
+    List<DeliveredEvent> queryDeliveredEvents(PaginatedRequest request = new PaginatedRequest(), Integer expectedNumEvents = null, boolean waitForEvents = true) {
         queryDeliveredEventsAtUrl('/events/delivered', request, expectedNumEvents, waitForEvents)
     }
 
-    List<DeliveredEvent> queryProjectDeliveredEvents(Project project, DeliveredEventQueryRequest request = new DeliveredEventQueryRequest(), Integer expectedNumEvents = null, boolean waitForEvents = true) {
+    List<DeliveredEvent> queryProjectDeliveredEvents(Project project, PaginatedRequest request = new PaginatedRequest(), Integer expectedNumEvents = null, boolean waitForEvents = true) {
         queryDeliveredEventsAtUrl("/projects/${project}/events/delivered", request, expectedNumEvents, waitForEvents)
     }
 
@@ -201,11 +201,12 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
         xnatInterface
     }
 
-    private List<DeliveredEvent> queryDeliveredEventsAtUrl(String subUrl, DeliveredEventQueryRequest request, Integer expectedNumEvents, boolean waitForEventsComplete) {
+    private List<DeliveredEvent> queryDeliveredEventsAtUrl(String subUrl, PaginatedRequest request, Integer expectedNumEvents, boolean waitForEventsComplete) {
         final StopWatch timer = TimeUtils.launchStopWatch();
         while (true) {
             final List<DeliveredEvent> events = SerializationUtils.deserializeList(
-                    queryBase().contentType(ContentType.JSON).body(request).then().post(formatXapiUrl(subUrl)).as(List),
+                    queryBase().contentType(ContentType.JSON).body(request).post(formatXapiUrl(subUrl)).
+                            then().log().ifError().assertThat().statusCode(200).extract().as(List),
                     DeliveredEvent
             )
             TimeUtils.checkStopWatch(timer, 60, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")

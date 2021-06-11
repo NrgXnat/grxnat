@@ -52,8 +52,10 @@ abstract class XnatInterface {
     @Delegate protected AliasTokenSubinterface aliasTokenSubinterface
     @Delegate protected ConfigSubinterface configSubinterface
     @Delegate protected ContainerServiceSubinterface containerServiceSubinterface
+    @Delegate protected DicomSCPSubinterface dicomSCPSubinterface
     @Delegate protected ExperimentSubinterface experimentSubinterface
     @Delegate protected InvestigatorSubinterface investigatorSubinterface
+    @Delegate protected PrearchiveAndDirectArchiveSubinterface prearchiveAndDirectArchiveSubinterface
     @Delegate protected ProjectSubinterface projectSubinterface
     @Delegate protected ReconstructionSubinterface reconstructionSubinterface
     @Delegate protected ResourceSubinterface resourceSubinterface
@@ -81,8 +83,10 @@ abstract class XnatInterface {
         aliasTokenSubinterface = constructSubinterface(AliasTokenSubinterface)
         configSubinterface = constructSubinterface(ConfigSubinterface)
         containerServiceSubinterface = constructSubinterface(ContainerServiceSubinterface)
+        dicomSCPSubinterface = constructSubinterface(DicomSCPSubinterface)
         experimentSubinterface = constructSubinterface(ExperimentSubinterface)
         investigatorSubinterface = constructSubinterface(InvestigatorSubinterface)
+        prearchiveAndDirectArchiveSubinterface = constructSubinterface(PrearchiveAndDirectArchiveSubinterface)
         projectSubinterface = constructSubinterface(ProjectSubinterface)
         reconstructionSubinterface = constructSubinterface(ReconstructionSubinterface)
         resourceSubinterface = constructSubinterface(ResourceSubinterface)
