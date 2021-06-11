@@ -3,6 +3,7 @@ package org.nrg.xnat.rest
 import com.jayway.restassured.filter.Filter
 import com.jayway.restassured.filter.FilterContext
 import com.jayway.restassured.internal.RequestSpecificationImpl
+import com.jayway.restassured.internal.ValidatableResponseImpl
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.FilterableRequestSpecification
 import com.jayway.restassured.specification.FilterableResponseSpecification
@@ -48,19 +49,19 @@ class XnatSessionFilter implements Filter {
 
         if (response.statusCode in authIssueCodes || (response.statusCode == 200 && response.asString().contains('<!-- BEGIN xnat-templates/screens/Login.vm -->'))) {
             extractSessionId()
-            return issueRequest(request.sessionId(sessionId), ctx)
+            return addLogging(issueRequest(request.sessionId(sessionId), ctx))
         } else if (response.statusCode in serverIssueCodes) {
             println "Received an HTTP status code ${response.statusCode} from the XNAT server, indicating an issue with the server itself. The request will be repeated ${serverIssueRetryCount} more time${serverIssueRetryCount == 1 ? '' : 's'}."
             serverIssueRetryCount.times {
                 final Response repeatedResponse = ctx.send(request)
                 if (!(repeatedResponse.statusCode in serverIssueCodes)) {
-                    return repeatedResponse
+                    return addLogging(repeatedResponse)
                 } else {
                     sleep(WAIT_TIME)
                 }
             }
         }
-        response
+        addLogging(response)
     }
 
     String getXnatUrl() {
@@ -102,6 +103,10 @@ class XnatSessionFilter implements Filter {
 
     protected Response issueRequest(RequestSpecification request, FilterContext ctx) {
         ReflectionMethodInvoker.invoke(request, ctx.requestMethod.toString().toLowerCase(), URLDecoder.decode(ctx.requestPath, 'UTF-8')) as Response // TODO: this is a hack copied out of FilterContextImpl. It will likely need to be modified or thrown out when upgrading RestAssured
+    }
+
+    protected Response addLogging(Response response) {
+        (response instanceof ValidatableResponseImpl) ? response.then().log().ifValidationFails() as Response : response
     }
 
 }
