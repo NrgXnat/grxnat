@@ -1,4 +1,4 @@
-package org.nrg.xnat.pogo
+package org.nrg.xnat.pogo.paginated_api
 
 import com.fasterxml.jackson.annotation.JsonValue
 
@@ -8,16 +8,15 @@ class HibernateFilter extends QueryFilter {
     Object[] values
     Object lo
     Object hi
-    Operator operator
+    Operator operator = Operator.LIKE
     List<HibernateFilter> andFilters
     List<HibernateFilter> orFilters
-    String backend = "hibernate"
+    String backend = 'hibernate'
 
     HibernateFilter() {}
 
     HibernateFilter(Object value) {
         this.value = value
-        this.operator = Operator.LIKE
     }
 
     HibernateFilter not(boolean not) {
@@ -60,26 +59,21 @@ class HibernateFilter extends QueryFilter {
         return this
     }
 
-    public enum Operator {
-        EQ("eq"),
-        NE("ne"),
-        LT("lt"),
-        GT("gt"),
-        LE("le"),
-        GE("ge"),
-        LIKE("like"),
-        ILIKE("ilike"),
-        IN("in"),
-        BETWEEN("between");
-
-        String op;
-        Operator(String op) {
-            this.op = op;
-        }
+    enum Operator {
+        EQ,
+        NE,
+        LT,
+        GT,
+        LE,
+        GE,
+        LIKE,
+        ILIKE,
+        IN,
+        BETWEEN;
 
         @JsonValue
-        public String getOp() {
-            return op;
+        String getOp() {
+            name().toLowerCase()
         }
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.config.JsonConfig
+import com.jayway.restassured.config.LogConfig
 import com.jayway.restassured.config.RestAssuredConfig
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
 import com.jayway.restassured.path.json.config.JsonPathConfig
@@ -102,14 +103,17 @@ abstract class XnatInterface {
     }
 
     static XnatInterface authenticate(String xnatUrl, XnatAuthProvider userAuth, XnatConnectionConfig connectionConfig = new XnatConnectionConfig()) {
-        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory(
-                new Jackson2ObjectMapperFactory() {
-                    @Override
-                    ObjectMapper create(Class aClass, String s) {
-                        XNAT_REST_MAPPER
-                    }
-                }
-        )).jsonConfig(JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE))
+        RestAssured.config = RestAssuredConfig.config().
+                jsonConfig(JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE)).
+                logConfig(connectionConfig.logOnValidationFailure ? LogConfig.logConfig().enableLoggingOfRequestAndResponseIfValidationFails() : LogConfig.logConfig()).
+                objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory(
+                        new Jackson2ObjectMapperFactory() {
+                            @Override
+                            ObjectMapper create(Class aClass, String s) {
+                                XNAT_REST_MAPPER
+                            }
+                        }
+        ))
         if (connectionConfig.allowInsecureSSL) {
             RestAssured.useRelaxedHTTPSValidation() // TODO: make this not global
         }

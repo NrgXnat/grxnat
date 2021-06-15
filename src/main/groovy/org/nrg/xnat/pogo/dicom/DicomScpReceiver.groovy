@@ -6,19 +6,11 @@ class DicomScpReceiver {
     int port
     boolean enabled = true
     String host
-    String identifier = DicomObjectIdentifier.DEFAULT.getId()
+    String identifier = DicomObjectIdentifier.DEFAULT.id
     boolean customProcessing = false
     boolean directArchive = false
 
-    DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier) {
-        this.aeTitle = aeTitle
-        this.port = port
-        this.enabled = enabled
-        this.host = host
-        this.identifier = identifier
-    }
-
-    DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier, boolean customProcessing, boolean directArchive) {
+    DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier, boolean customProcessing = false, boolean directArchive = false) {
         this.aeTitle = aeTitle
         this.port = port
         this.enabled = enabled
@@ -31,7 +23,7 @@ class DicomScpReceiver {
     DicomScpReceiver() {}
 
     boolean usesDefaultIdentifier() {
-        return DicomObjectIdentifier.DEFAULT.getId() == identifier
+        DicomObjectIdentifier.DEFAULT.id == identifier
     }
 
     DicomScpReceiver aeTitle(String aeTitle) {
@@ -60,8 +52,7 @@ class DicomScpReceiver {
     }
 
     DicomScpReceiver identifier(DicomObjectIdentifier identifier) {
-        setIdentifier(identifier.getId())
-        return this
+        identifier(identifier.id)
     }
 
     DicomScpReceiver customProcessing(boolean customProcessing) {
@@ -75,7 +66,7 @@ class DicomScpReceiver {
     }
 
     String toString() {
-        return String.format("(aeTitle: %s, port: %d, enabled: %b, host: %s%s)", aeTitle, port, enabled, host, (!usesDefaultIdentifier()) ? ", identifier: " + identifier : "")
+        "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier})"
     }
 
 }

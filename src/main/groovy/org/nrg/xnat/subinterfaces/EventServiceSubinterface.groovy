@@ -5,7 +5,7 @@ import com.jayway.restassured.response.Response
 import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.interfaces.XnatInterface
-import org.nrg.xnat.pogo.PaginatedRequest
+import org.nrg.xnat.pogo.paginated_api.PaginatedRequest
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.events.Action
 import org.nrg.xnat.pogo.events.DeliveredEvent
@@ -206,7 +206,7 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
         while (true) {
             final List<DeliveredEvent> events = SerializationUtils.deserializeList(
                     queryBase().contentType(ContentType.JSON).body(request).post(formatXapiUrl(subUrl)).
-                            then().log().ifError().assertThat().statusCode(200).extract().as(List),
+                            then().assertThat().statusCode(200).extract().as(List),
                     DeliveredEvent
             )
             TimeUtils.checkStopWatch(timer, 60, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")

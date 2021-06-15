@@ -1,4 +1,4 @@
-package org.nrg.xnat.pogo
+package org.nrg.xnat.pogo.paginated_api
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
@@ -6,11 +6,10 @@ import com.fasterxml.jackson.annotation.JsonValue
 class PaginatedRequest {
 
     @JsonProperty('sort_col') Object sortColumn
-    @JsonProperty('sort_dir') SortDir sortDir;
+    @JsonProperty('sort_dir') SortDir sortDir
     int size
     int page
-    String id
-    Map<Object, QueryFilter> filters = new HashMap<>()
+    Map<Object, QueryFilter> filters = [:]
 
     PaginatedRequest page(int page) {
         this.page = page
@@ -39,23 +38,17 @@ class PaginatedRequest {
     }
 
     PaginatedRequest filter(Object key, QueryFilter filter) {
-        this.filters.put(key, filter)
+        filters.put(key, filter)
         return this
     }
 
-    public enum SortDir {
-        DESC("desc"),
-        ASC("asc");
-
-        String direction;
-
-        SortDir(String direction) {
-            this.direction = direction;
-        }
+    enum SortDir {
+        DESC,
+        ASC;
 
         @JsonValue
-        public String getDirection() {
-            return direction;
+        String getDirection() {
+            name().toLowerCase()
         }
     }
 }
