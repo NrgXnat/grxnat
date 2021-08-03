@@ -14,8 +14,8 @@ apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'io.freefair.aspectj.post-compile-weaving'
 
-def vBom = '3.0'
-def vTestUtils = '2.4'
+def vBom = '3.1-SNAPSHOT'
+def vTestUtils = '2.5-SNAPSHOT'
 
 buildscript {
     repositories {

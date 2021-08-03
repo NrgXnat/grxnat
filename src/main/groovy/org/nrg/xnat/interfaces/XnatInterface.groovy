@@ -68,6 +68,7 @@ abstract class XnatInterface {
     @Delegate protected WorkflowSubinterface workflowSubinterface
     @Delegate protected BatchLaunchSubinterface batchLaunchSubinterface
     @Delegate protected EventServiceSubinterface eventServiceSubinterface
+    @Delegate protected ImporterSubinterface importerSubinterface
 
     protected XnatInterface() {}
 
@@ -99,6 +100,7 @@ abstract class XnatInterface {
         workflowSubinterface = constructSubinterface(WorkflowSubinterface)
         batchLaunchSubinterface = constructSubinterface(BatchLaunchSubinterface)
         eventServiceSubinterface = constructSubinterface(EventServiceSubinterface)
+        importerSubinterface = constructSubinterface(ImporterSubinterface)
         this
     }
 
@@ -254,34 +256,6 @@ abstract class XnatInterface {
 
     String jsessionId() {
         sessionFilter.sessionId
-    }
-
-    void uploadToSessionZipImporter(File sessionZip, Project project, Subject subject, ImagingSession session) {
-        if (project == null) {
-            throw new IllegalArgumentException('Project cannot be null when uploading to zip importer.')
-        }
-
-        final Map<String, String> queryPararms = [:]
-        queryPararms.put('dest', '/archive')
-        queryPararms.put('PROJECT_ID', project.getId())
-        queryPararms.put('project', project.getId()) // ecat as a zip won't recognize PROJECT_ID
-
-        if (subject != null) queryPararms.put('SUBJECT_ID', subject.label)
-        if (session != null) queryPararms.put('EXPT_LABEL', session.label)
-
-        queryBase().multiPart(sessionZip).queryParameters(queryPararms).when().post(formatRestUrl('/services/import')).then().assertThat().statusCode(200)
-        if (session != null) {
-            getAccessionNumber(project, session)
-        }
-    }
-
-    void uploadToSessionZipImporter(File sessionZip, Project project) {
-        uploadToSessionZipImporter(sessionZip, project, null, null)
-    }
-
-    void uploadToSessionZipImporter(File sessionZip, ImagingSession session) {
-        if (session.primaryProject == null) throw new IllegalArgumentException('Session must have project object specified to use this shortcut method')
-        uploadToSessionZipImporter(sessionZip, session.primaryProject, session.subject, session)
     }
 
     List<XnatPlugin> readInstalledPlugins() {
