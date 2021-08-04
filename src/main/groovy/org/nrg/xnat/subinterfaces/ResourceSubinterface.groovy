@@ -102,6 +102,10 @@ class ResourceSubinterface extends XnatFunctionalitySubinterface {
         ).resourceFiles
     }
 
+    InputStream streamResourceFile(Resource resource, ResourceFile resourceFile) {
+        queryBase().get(resourceFileUrl(resource, resourceFile)).then().assertThat().statusCode(200).extract().asInputStream()
+    }
+
     void deleteResource(Resource resource) {
         queryBase().queryParam('removeFiles', true).delete(formatXnatUrl(resource.resourceUrl(), "resources/${resource.folder}")).then().assertThat().statusCode(200)
     }
