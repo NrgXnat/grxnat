@@ -3,12 +3,12 @@ package org.nrg.xnat.versions
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.interfaces.XnatInterface_1_8_0
 
-@Follows(Xnat_1_8_2_2)
-class Xnat_1_8_3 extends XnatVersion {
+@Follows(Xnat_1_8_2)
+class Xnat_1_8_2_2 extends XnatVersion {
 
     @Override
     List<String> getVersionKeys() {
-        ['1.8.3']
+        ['1.8.2.2']
     }
 
     @Override
