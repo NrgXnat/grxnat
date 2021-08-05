@@ -4,7 +4,8 @@ enum MergeBehavior {
 
     NONE ('none'),
     APPEND ('append'),
-    DELETE ('delete')
+    DELETE ('delete'),
+    TRUE ('true') // strange option, but seems to be supported. present here to test legacy calls
 
     String behaviorKey
 
