@@ -11,7 +11,7 @@ class XnatVersionList {
     public static final List<String> KNOWN_VERSION_KEYS = []
     public static final Map<String, Class<? extends XnatVersion>> KEY_TO_VERSION_MAP = [:]
     public static final MutableGraph<Class<? extends XnatVersion>> XNAT_VERSION_GRAPH = GraphBuilder.directed().allowsSelfLoops(false).build()
-    public static final List<Class<? extends XnatVersion>> VERSIONS_BEFORE_1_8 = [Xnat_1_7_7, Xnat_1_7_6, Xnat_1_7_5, Xnat_1_7_4, Xnat_1_7_3, Xnat_1_7_2, Xnat_1_7_1, Xnat_1_7_0, Xnat_1_6dev]
+    public static final List<Class<? extends XnatVersion>> VERSIONS_BEFORE_1_8 = [Xnat_1_7_7, Xnat_1_7_6, Xnat_1_7_5_2, Xnat_1_7_5, Xnat_1_7_4, Xnat_1_7_3, Xnat_1_7_2, Xnat_1_7_1, Xnat_1_7_0, Xnat_1_6dev]
     private static final Class<? extends XnatVersion> DEFAULT_VERSION = Xnat_1_8_0
 
     static {
