@@ -4,6 +4,7 @@ import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.enums.WorkflowStatus
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.pogo.Workflow
 import org.nrg.xnat.pogo.experiments.ImagingSession
 
 class WorkflowSubinterface extends XnatFunctionalitySubinterface {
@@ -16,10 +17,12 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
         ]
     }
 
-    WorkflowStatus readWorkflowStatus(int workflowId) {
-        WorkflowStatus.get(
-                jsonQuery().get(formatRestUrl("/workflows/${workflowId}")).then().assertThat().statusCode(200).and().extract().jsonPath().getString('items.data_fields.status')
-        )
+    Workflow readWorkflow(Object workflowId) {
+        jsonQuery().get(formatRestUrl("/workflows/${workflowId}")).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('items[0].data_fields', Workflow)
+    }
+
+    WorkflowStatus readWorkflowStatus(Object workflowId) {
+        readWorkflow(workflowId).status
     }
 
     XnatInterface waitForPipelineCompletion(ImagingSession session, String pipelineName, int maxTimeInSeconds = 60) {

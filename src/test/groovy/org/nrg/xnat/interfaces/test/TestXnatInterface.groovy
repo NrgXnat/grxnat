@@ -1,6 +1,6 @@
 package org.nrg.xnat.interfaces.test
 
-import org.nrg.xnat.interfaces.UnitTestXnatInterface
+import org.nrg.xnat.interfaces.SyntheticXnatInterface
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.PluginRegistry
 import org.nrg.xnat.pogo.Project
@@ -29,7 +29,7 @@ class TestXnatInterface {
         final String scanId = '1'
         final String reconstructionLabel = "${sessionLabel}_RECON1"
         final String sessionAssessorLabel = "${sessionLabel}_QC"
-        final XnatInterface xnatInterface = new UnitTestXnatInterface('https://xnat.myuniversity.edu', Xnat_1_8_0)
+        final XnatInterface xnatInterface = new SyntheticXnatInterface('https://xnat.myuniversity.edu', Xnat_1_8_0)
         final Project project = new Project(projectId)
         final Subject subject = new Subject(project, subjectLabel)
         final ImagingSession session = new MRSession(project, subject, sessionLabel)
@@ -52,29 +52,29 @@ class TestXnatInterface {
 
     @Test(expectedExceptions = UnsupportedOperationException)
     void testNonadminProtectedAccess() {
-        new UnitTestXnatInterface(false, [], Xnat_1_8_0).openXnat()
+        new SyntheticXnatInterface(false, [], Xnat_1_8_0).openXnat()
     }
 
     @Test(expectedExceptions = UnsupportedOperationException)
     void testMissingPluginAttemptedAccess() {
-        new UnitTestXnatInterface(true, [], Xnat_1_8_0).readImages()
+        new SyntheticXnatInterface(true, [], Xnat_1_8_0).readImages()
     }
 
     @Test(expectedExceptions = UnsupportedOperationException)
     void testNonadminAttemptedPluginAccess() {
-        new UnitTestXnatInterface(false, [PluginRegistry.CONTAINER_SERVICE], Xnat_1_8_0).pullImage('xnat/dcm2niix:latest')
+        new SyntheticXnatInterface(false, [PluginRegistry.CONTAINER_SERVICE], Xnat_1_8_0).pullImage('xnat/dcm2niix:latest')
     }
 
     @Test(expectedExceptions = UnsupportedOperationException)
     void testAdminMissingPluginAccess() {
-        new UnitTestXnatInterface(true, [], Xnat_1_8_0).pullImage('xnat/dcm2niix:latest')
+        new SyntheticXnatInterface(true, [], Xnat_1_8_0).pullImage('xnat/dcm2niix:latest')
     }
 
     @Test
     void testRestEndpointLookup() {
         assertEquals(
                 AliasTokenSubinterface,
-                new UnitTestXnatInterface(null, Xnat_1_8_0).lookupSubinterface('/services/tokens/{OPERATION}')
+                new SyntheticXnatInterface(null, Xnat_1_8_0).lookupSubinterface('/services/tokens/{OPERATION}')
         )
     }
 

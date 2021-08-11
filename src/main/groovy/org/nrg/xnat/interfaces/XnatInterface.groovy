@@ -21,7 +21,6 @@ import org.nrg.xnat.jackson.mappers.YamlObjectMapper
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.*
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
-import org.nrg.xnat.pogo.experiments.*
 import org.nrg.xnat.pogo.resources.*
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.SerializationUtils
