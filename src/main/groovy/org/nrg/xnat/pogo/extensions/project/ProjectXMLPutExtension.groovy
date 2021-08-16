@@ -6,7 +6,7 @@ import org.nrg.xnat.pogo.Project
 
 class ProjectXMLPutExtension extends ProjectExtension {
 
-    private File xmlFile
+    protected File xmlFile
 
     ProjectXMLPutExtension(Project project, File file) {
         super(project)
