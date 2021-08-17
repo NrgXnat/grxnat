@@ -6,6 +6,7 @@ enum WorkflowStatus {
     QUEUED    ('Queued'),
     RUNNING   ('Running'),
     COMPLETE  ('Complete'),
+    STAGING   ('Staging'),
     FAILED    ('Failed')
 
     final String status
