@@ -1,25 +1,13 @@
 package org.nrg.xnat.importer
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter
-import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.nrg.xnat.pogo.ArbitraryPropertySupport
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-trait XnatImportRequest<X extends XnatImportRequest<X>> {
+trait XnatImportRequest<X extends XnatImportRequest<X>> implements ArbitraryPropertySupport {
 
     @JsonProperty('import-handler') abstract String getImportHandler()
-    Map<String, Object> additionalParams = [:]
-
-    @JsonAnyGetter
-    Map<String, Object> getAdditionalParams() {
-        additionalParams
-    }
-
-    @JsonAnySetter
-    void add(String key, Object value) {
-        additionalParams.put(key, value);
-    }
 
     abstract void performValidation()
 

@@ -7,6 +7,7 @@ import org.nrg.xnat.importer.params.DestRequest
 import org.nrg.xnat.importer.params.FileRequest
 import org.nrg.xnat.importer.params.HttpSessionListenerRequest
 import org.nrg.xnat.importer.params.ManualRoutingRequest
+import org.nrg.xnat.importer.params.OverwriteRequest
 import org.nrg.xnat.importer.params.QuarantineRequest
 import org.nrg.xnat.importer.params.SessionRequest
 import org.nrg.xnat.importer.params.TriggerPipelinesRequest
@@ -19,9 +20,9 @@ class SessionImporterRequest implements
         TriggerPipelinesRequest<SessionImporterRequest>,
         QuarantineRequest<SessionImporterRequest>,
         ManualRoutingRequest<SessionImporterRequest>,
-        SessionRequest<SessionImporterRequest> {
+        SessionRequest<SessionImporterRequest>,
+        OverwriteRequest<SessionImporterRequest> {
 
-    MergeBehavior overwrite
     @JsonProperty('overwrite_files') Boolean overwriteFiles
 
     @Override
@@ -32,11 +33,6 @@ class SessionImporterRequest implements
     @Override
     void performValidation() {
         verifyData()
-    }
-
-    SessionImporterRequest overwrite(MergeBehavior behavior) {
-        setOverwrite(behavior)
-        this
     }
 
     SessionImporterRequest overwriteFiles(Boolean setting = true) {

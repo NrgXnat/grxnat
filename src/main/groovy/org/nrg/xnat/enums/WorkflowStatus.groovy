@@ -3,11 +3,16 @@ package org.nrg.xnat.enums
 import org.nrg.testing.CommonStringUtils
 
 enum WorkflowStatus {
-    QUEUED    ('Queued'),
-    RUNNING   ('Running'),
-    COMPLETE  ('Complete'),
-    STAGING   ('Staging'),
-    FAILED    ('Failed')
+    QUEUED     ('Queued'),
+    _QUEUED    ('_Queued'),
+    DIE        ('die'),
+    _DIE       ('_die'),
+    RUNNING    ('Running'),
+    COMPLETE   ('Complete'),
+    STAGING    ('Staging'),
+    CREATED    ('Created'),
+    FINALIZING ('Finalizing'),
+    FAILED     ('Failed')
 
     final String status
 

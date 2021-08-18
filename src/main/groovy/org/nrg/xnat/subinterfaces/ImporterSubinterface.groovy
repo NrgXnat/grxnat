@@ -1,14 +1,16 @@
 package org.nrg.xnat.subinterfaces
 
 import com.jayway.restassured.builder.MultiPartSpecBuilder
-import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.RequestSpecification
+import org.nrg.xnat.enums.MergeBehavior
 import org.nrg.xnat.importer.ImportException
+import org.nrg.xnat.importer.XnatArchivalRequest
 import org.nrg.xnat.importer.XnatImportRequest
 import org.nrg.xnat.importer.importers.DefaultImporterRequest
 import org.nrg.xnat.importer.importers.SessionImporterRequest
 import org.nrg.xnat.importer.params.FileRequest
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.ImagingSession
@@ -35,7 +37,7 @@ class ImporterSubinterface extends XnatFunctionalitySubinterface {
         }
     }
 
-    void uploadToSessionZipImporter(File sessionZip, Project project, Subject subject = null, ImagingSession session = null) throws ImportException {
+    XnatInterface uploadToSessionZipImporter(File sessionZip, Project project, Subject subject = null, ImagingSession session = null) throws ImportException {
         if (project == null) {
             throw new IllegalArgumentException('Project cannot be null when uploading to zip importer.')
         }
@@ -52,11 +54,17 @@ class ImporterSubinterface extends XnatFunctionalitySubinterface {
         if (session != null) {
             xnatInterface.getAccessionNumber(project, session)
         }
+        xnatInterface
     }
 
-    void uploadToSessionZipImporter(File sessionZip, ImagingSession session) throws ImportException {
+    XnatInterface uploadToSessionZipImporter(File sessionZip, ImagingSession session) throws ImportException {
         if (session.primaryProject == null) throw new IllegalArgumentException('Session must have project object specified to use this shortcut method')
         uploadToSessionZipImporter(sessionZip, session.primaryProject, session.subject, session)
+    }
+
+    String requestArchival(XnatArchivalRequest archivalRequest) {
+        queryBase().queryParams(SerializationUtils.serializeToMap(archivalRequest)).
+                post(formatRestUrl('services/archive')).then().assertThat().statusCode(200).and().extract().asString().trim()
     }
 
 }

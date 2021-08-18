@@ -1,15 +1,12 @@
 package org.nrg.xnat.pogo
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter
-import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.nrg.xnat.enums.PetMrProcessingSetting
 
 import static org.nrg.xnat.pogo.SiteConfigProps.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class SiteConfig {
+class SiteConfig implements ArbitraryPropertySupport {
 
     @JsonProperty(AUTOARCHIVE_IDLE_TIME)
     Integer sessionXmlRebuilderInterval
@@ -55,17 +52,5 @@ class SiteConfig {
 
     @JsonProperty(INITIALIZED)
     Boolean initialized
-
-    Map<String, Object> untrackedProperties = [:]
-
-    @JsonAnyGetter
-    Map<String, Object> getUntrackedProperties() {
-        untrackedProperties
-    }
-
-    @JsonAnySetter
-    void add(String key, Object value) {
-        untrackedProperties.put(key, value);
-    }
 
 }
