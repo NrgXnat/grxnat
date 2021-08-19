@@ -3,7 +3,6 @@ package org.nrg.xnat.subinterfaces
 import com.jayway.restassured.builder.MultiPartSpecBuilder
 import com.jayway.restassured.response.Response
 import com.jayway.restassured.specification.RequestSpecification
-import org.nrg.xnat.enums.MergeBehavior
 import org.nrg.xnat.importer.ImportException
 import org.nrg.xnat.importer.XnatArchivalRequest
 import org.nrg.xnat.importer.XnatImportRequest
@@ -62,9 +61,10 @@ class ImporterSubinterface extends XnatFunctionalitySubinterface {
         uploadToSessionZipImporter(sessionZip, session.primaryProject, session.subject, session)
     }
 
-    String requestArchival(XnatArchivalRequest archivalRequest) {
+    XnatInterface requestArchival(XnatArchivalRequest archivalRequest) {
         queryBase().queryParams(SerializationUtils.serializeToMap(archivalRequest)).
-                post(formatRestUrl('services/archive')).then().assertThat().statusCode(200).and().extract().asString().trim()
+                post(formatRestUrl('services/archive')).then().assertThat().statusCode(200)
+        xnatInterface
     }
 
 }
