@@ -1,16 +1,24 @@
 package org.nrg.xnat.subinterfaces
 
+import com.jayway.restassured.http.ContentType
 import com.jayway.restassured.path.json.JsonPath
 import com.jayway.restassured.response.Response
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers
 import org.nrg.xnat.enums.PetMrProcessingSetting
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.AnonScript
+import org.nrg.xnat.pogo.ConfigServiceObject
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.SiteConfig
+import org.nrg.xnat.rest.SerializationUtils
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static com.jayway.restassured.http.ContentType.*
 
 class ConfigSubinterface extends XnatFunctionalitySubinterface {
+
+    private static final Matcher CONFIG_PUT_OK = Matchers.isOneOf(200, 201)
 
     @Override
     List<String> getHandledEndpoints() {
@@ -43,10 +51,6 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
     @RequireAdmin
     protected void postToSiteConfigFrom(Object siteConfig) {
         performPostToSiteConfigFrom(siteConfig)
-    }
-
-    protected void performPostToSiteConfigFrom(Object siteConfig) {
-        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
     void initializeXnat() {
@@ -153,6 +157,68 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         } else {
             queryBase().queryParam('inbody', true).body(petMrSetting.apiValue).put(url).then().assertThat().statusCode(201)
         }
+    }
+
+    String configServiceUrl(Project project = null, String tool = null, String path = null) {
+        final List<String> urlFragments = []
+        if (project != null) {
+            urlFragments << '/projects/' + project.id
+        }
+        urlFragments << '/config'
+        if (tool != null) {
+            urlFragments << tool
+        }
+        if (path != null) {
+            urlFragments << path
+        }
+        formatRestUrl(urlFragments.toArray([] as String[]))
+    }
+
+    List<String> listConfigTools(Project project = null) {
+        jsonQuery().get(configServiceUrl(project)).jsonPath().getList("ResultSet.Result.tool")
+    }
+
+    List<ConfigServiceObject> readConfigTool(Project project, String tool) {
+        SerializationUtils.deserializeList(jsonQuery().get(configServiceUrl(project, tool)).jsonPath().getList('ResultSet.Result'), ConfigServiceObject)
+    }
+
+    ConfigServiceObject readConfigToolPath(Project project, String tool, String path, Integer version = null) {
+        final JsonPath jsonPath = jsonQuery().queryParams(version == null ? [:] : ['version': version]).get(configServiceUrl(project, tool, path)).
+                jsonPath().setRoot('ResultSet.Result')
+        if (jsonPath.getInt('size()') > 1) {
+            throw new RuntimeException('Unexpected response from config service.')
+        }
+        jsonPath.getObject('get(0)', ConfigServiceObject)
+    }
+
+    ConfigServiceObject readConfigToolPath(String tool, String path, Integer version = null) {
+        readConfigToolPath(null, tool, path, version)
+    }
+
+    List<ConfigServiceObject> readConfigTool(String tool) {
+        readConfigTool(null, tool)
+    }
+
+    XnatInterface putConfig(Project project, String tool, String path, String content) {
+        queryBase().contentType(TEXT).body(content).put(configServiceUrl(project, tool, path)).then().assertThat().statusCode(CONFIG_PUT_OK)
+        xnatInterface
+    }
+
+    XnatInterface putConfig(String tool, String path, String content) {
+        putConfig(null, tool, path, content)
+    }
+
+    XnatInterface putConfig(Project project, String tool, String path, ConfigServiceObject configServiceObject) {
+        queryBase().contentType(JSON).body(configServiceObject).put(configServiceUrl(project, tool, path)).then().assertThat().statusCode(CONFIG_PUT_OK)
+        xnatInterface
+    }
+
+    XnatInterface putConfig(String tool, String path, ConfigServiceObject configServiceObject) {
+        putConfig(null, tool, path, configServiceObject)
+    }
+
+    protected void performPostToSiteConfigFrom(Object siteConfig) {
+        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
 }

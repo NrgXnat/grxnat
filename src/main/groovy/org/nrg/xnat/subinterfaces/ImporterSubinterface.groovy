@@ -20,6 +20,7 @@ class ImporterSubinterface extends XnatFunctionalitySubinterface {
     @Override
     List<String> getHandledEndpoints() {
         [
+                '/services/archive',
                 '/services/import'
         ]
     }

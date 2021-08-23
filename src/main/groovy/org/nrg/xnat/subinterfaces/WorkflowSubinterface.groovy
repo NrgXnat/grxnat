@@ -2,12 +2,15 @@ package org.nrg.xnat.subinterfaces
 
 import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.TimeUtils
-import org.nrg.xnat.enums.WorkflowStatus
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Workflow
 import org.nrg.xnat.pogo.experiments.ImagingSession
 
 class WorkflowSubinterface extends XnatFunctionalitySubinterface {
+
+    public static final String WORKFLOW_COMPLETE = 'Complete'
+    public static final String WORKFLOW_FAILED = 'Failed'
+    public static final String WORKFLOW_QUEUED = 'Queued'
 
     @Override
     List<String> getHandledEndpoints() {
@@ -21,7 +24,7 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
         jsonQuery().get(formatRestUrl("/workflows/${workflowId}")).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('items[0].data_fields', Workflow)
     }
 
-    WorkflowStatus readWorkflowStatus(Object workflowId) {
+    String readWorkflowStatus(Object workflowId) {
         readWorkflow(workflowId).status
     }
 
@@ -46,19 +49,19 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
     }
 
     XnatInterface waitForWorkflowComplete(int workflowId, int maxTimeInSeconds = 60) {
-        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WorkflowStatus.COMPLETE, WorkflowStatus.FAILED)
+        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WORKFLOW_COMPLETE, WORKFLOW_FAILED)
     }
 
     XnatInterface waitForWorkflowFailed(int workflowId, int maxTimeInSeconds = 60) {
-        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WorkflowStatus.FAILED, WorkflowStatus.COMPLETE)
+        waitForWorkflowStatus(workflowId, maxTimeInSeconds, WORKFLOW_FAILED, WORKFLOW_COMPLETE)
     }
 
-    XnatInterface waitForWorkflowStatus(int workflowId, int maxTimeInSeconds, WorkflowStatus desiredStatus, WorkflowStatus... exceptionStatuses) {
+    XnatInterface waitForWorkflowStatus(int workflowId, int maxTimeInSeconds, String desiredStatus, String... exceptionStatuses) {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
         while (true) {
             TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} status is not ${desiredStatus} in allotted number of seconds: ${maxTimeInSeconds}")
 
-            final WorkflowStatus status = readWorkflowStatus(workflowId)
+            final String status = readWorkflowStatus(workflowId)
 
             if (status == desiredStatus) {
                 return xnatInterface
