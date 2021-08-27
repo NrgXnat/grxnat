@@ -1,10 +1,11 @@
 package org.nrg.xnat.subinterfaces
 
 import org.nrg.testing.CommonStringUtils
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.paginated_api.HibernateFilter
 import org.nrg.xnat.pogo.paginated_api.PaginatedRequest
 import org.nrg.xnat.pogo.Project
-import org.nrg.xnat.pogo.dicom.SessionData
+import org.nrg.xnat.prearchive.SessionData
 import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.rest.SerializationUtils
 
@@ -22,16 +23,25 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
     }
     
     int getPrearchiveEntryCountForProject(Project project) {
-        jsonQuery().get(projectPrearchiveUrl(project)).jsonPath().
-                getInt('ResultSet.Result.size()')
+        getPrearchiveEntriesForProject(project).size()
     }
 
     List<SessionData> getPrearchiveEntriesForProjectWithSessionLabel(Project project, ImagingSession session) {
+        getPrearchiveEntriesForProject(project).findAll { entry ->
+            entry.name == session.label
+        }
+    }
+
+    List<SessionData> getPrearchiveEntriesForProject(Project project) {
         deserialize(
                 jsonQuery().get(projectPrearchiveUrl(project)).
                         then().assertThat().statusCode(200).and().extract().jsonPath().
-                        getList("ResultSet.Result.findAll { it.name == '${session.label}' }")
+                        getList('ResultSet.Result')
         )
+    }
+
+    List<SessionData> getUnassignedPrearchiveEntries() {
+        getPrearchiveEntriesForProject(new Project('Unassigned'))
     }
 
     List<String> getPrearchiveLogMessages(Project project, SessionData session) {
@@ -51,6 +61,18 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
     
     String projectPrearchiveUrl(Project project) {
         formatRestUrl('prearchive', 'projects', project.id)
+    }
+
+    XnatInterface movePrearchiveSession(String src, Project project, Boolean async = true) {
+        final Map<String, Object> params = [
+                'src' : src,
+                'newProject' : project.id
+        ]
+        if (async != null) {
+            params.put('async', async)
+        }
+        queryBase().queryParams(params).post(formatRestUrl('/services/prearchive/move')).then().assertThat().statusCode(200)
+        xnatInterface
     }
 
     protected List<SessionData> deserialize(List response) {

@@ -5,12 +5,11 @@ import org.nrg.testing.TimeUtils
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Workflow
 import org.nrg.xnat.pogo.experiments.ImagingSession
+import org.nrg.xnat.rest.SerializationUtils
+
+import static org.nrg.xnat.pogo.Workflow.*
 
 class WorkflowSubinterface extends XnatFunctionalitySubinterface {
-
-    public static final String WORKFLOW_COMPLETE = 'Complete'
-    public static final String WORKFLOW_FAILED = 'Failed'
-    public static final String WORKFLOW_QUEUED = 'Queued'
 
     @Override
     List<String> getHandledEndpoints() {
@@ -73,5 +72,10 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
     }
 
     void waitForAutoRun(ImagingSession session, int maxTimeInSeconds = 60) {}
+
+    XnatInterface putWorkflow(Workflow workflow) {
+        queryBase().queryParams(SerializationUtils.serializeToMap(workflow)).put(formatRestUrl('workflows')).then().assertThat().statusCode(200)
+        xnatInterface
+    }
 
 }

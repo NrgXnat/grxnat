@@ -20,7 +20,7 @@ class ConfigServiceObject {
 
     enum Status {
         ENABLED,
-        STATUS
+        DISABLED
 
         @JsonValue
         @Override

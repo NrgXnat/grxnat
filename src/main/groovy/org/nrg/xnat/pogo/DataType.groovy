@@ -29,7 +29,8 @@ class DataType {
     public static final DataType MR_SCAN = makeScanDataType('mr').associatedScanClass(MRScan)
     public static final DataType PET_SCAN = makeScanDataType('pet').associatedScanClass(PETScan)
     public static final DataType CT_SCAN = makeScanDataType('ct').associatedScanClass(CTScan)
-    public static final DataType FREESURFER = new DataType('fs:fsData', null, 'Freesurfer', 'Freesurfers')
+    public static final DataType FREESURFER = new DataType('fs:fsData', null, 'Freesurfer')
+    public static final DataType WORKFLOW = new DataType('wrk:workflowData', null, 'Workflow')
     // Abstract types
     public static final DataType SUBJECT_ASSESSOR = new DataType('xnat:subjectAssessorData', null, null, null)
     public static final DataType IMAGE_SESSION = new DataType('xnat:imageSessionData', null, null, null)

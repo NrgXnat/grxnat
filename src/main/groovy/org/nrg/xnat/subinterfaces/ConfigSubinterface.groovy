@@ -183,7 +183,7 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
     }
 
     ConfigServiceObject readConfigToolPath(Project project, String tool, String path, Integer version = null) {
-        final JsonPath jsonPath = jsonQuery().queryParams(version == null ? [:] : ['version': version]).get(configServiceUrl(project, tool, path)).
+        final JsonPath jsonPath = jsonQuery().queryParams(makeVersionQueryParams(version)).get(configServiceUrl(project, tool, path)).
                 jsonPath().setRoot('ResultSet.Result')
         if (jsonPath.getInt('size()') > 1) {
             throw new RuntimeException('Unexpected response from config service.')
@@ -193,6 +193,16 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
     ConfigServiceObject readConfigToolPath(String tool, String path, Integer version = null) {
         readConfigToolPath(null, tool, path, version)
+    }
+
+    String readConfigToolPathContents(Project project, String tool, String path, Integer version = null) {
+        final Map<String, Object> queryParams = makeVersionQueryParams(version)
+        queryParams.put('contents', true)
+        queryBase().queryParams(queryParams).get(configServiceUrl(project, tool, path)).then().assertThat().statusCode(200).and().extract().asString()
+    }
+
+    String readConfigToolPathContents(String tool, String path, Integer version = null) {
+        readConfigToolPathContents(null, tool, path, version)
     }
 
     List<ConfigServiceObject> readConfigTool(String tool) {
@@ -217,8 +227,21 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         putConfig(null, tool, path, configServiceObject)
     }
 
+    XnatInterface setConfigStatus(Project project, String tool, String path, ConfigServiceObject.Status status) {
+        queryBase().queryParam('status', status).put(configServiceUrl(project, tool, path)).then().assertThat().statusCode(200)
+        xnatInterface
+    }
+
+    XnatInterface setConfigStatus(String tool, String path, ConfigServiceObject.Status status) {
+        setConfigStatus(null, tool, path, status)
+    }
+
     protected void performPostToSiteConfigFrom(Object siteConfig) {
         queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
+    }
+
+    protected Map<String, Object> makeVersionQueryParams(Integer version) {
+        version == null ? [:] : ['version': version]
     }
 
 }

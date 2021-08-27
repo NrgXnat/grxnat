@@ -1,27 +1,26 @@
 package org.nrg.xnat.pogo
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+import org.nrg.xnat.jackson.naming.OverrideFieldBase
+import org.nrg.xnat.jackson.naming.WorkflowNamer
 
+@JsonNaming(WorkflowNamer)
 class Workflow {
 
-    @JsonProperty('launch_time') String launchTime
+    public static final String WORKFLOW_COMPLETE = 'Complete'
+    public static final String WORKFLOW_FAILED = 'Failed'
+    public static final String WORKFLOW_QUEUED = 'Queued'
+
+    String launchTime
     String comments
-    @JsonProperty('ExternalID') String externalId
-    @JsonProperty('data_type') DataType dataType
+    @OverrideFieldBase('ExternalID') String externalId
+    String dataType
     String justification
-    @JsonProperty('ID') String id
+    @OverrideFieldBase('ID') String id
     String category
     String type
-    @JsonProperty('wrk_workflowData_id') int workflowDataId
-    @JsonProperty('pipeline_name') String pipelineName
+    @OverrideFieldBase('wrk_workflowData_id') int workflowDataId
+    String pipelineName
     String status
-
-    void setDataType(String dataType) {
-        setDataType(DataType.lookup(dataType))
-    }
-
-    void setDataType(DataType dataType) {
-        this.dataType = dataType
-    }
 
 }

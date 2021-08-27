@@ -1,0 +1,29 @@
+package org.nrg.xnat.enums
+
+enum PrearchiveStatus {
+
+    ARCHIVING,
+    BUILDING,
+    CONFLICT,
+    DELETING,
+    ERROR,
+    MOVING,
+    READY,
+    RECEIVING,
+    RECEIVING_INTERRUPT,
+    SEPARATING,
+    QUEUED_ARCHIVING,
+    QUEUED_BUILDING,
+    QUEUED_DELETING,
+    QUEUED_MOVING,
+    QUEUED_SEPARATING,
+    _ARCHIVING,
+    _BUILDING,
+    _CONFLICT,
+    _DELETING,
+    _MOVING,
+    _RECEIVING,
+    _RECEIVING_INTERRUPT,
+    _SEPARATING
+
+}
