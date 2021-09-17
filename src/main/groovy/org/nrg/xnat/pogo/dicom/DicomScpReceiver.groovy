@@ -9,6 +9,7 @@ class DicomScpReceiver {
     String identifier = DicomObjectIdentifier.DEFAULT.id
     boolean customProcessing = false
     boolean directArchive = false
+    Integer id
 
     DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier, boolean customProcessing = false, boolean directArchive = false) {
         this.aeTitle = aeTitle
