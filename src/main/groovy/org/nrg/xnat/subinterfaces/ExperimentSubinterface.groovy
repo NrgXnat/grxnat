@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.Response
+import io.restassured.response.Response
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.experiments.Experiment
 

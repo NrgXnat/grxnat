@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.Response
+import io.restassured.response.Response
 import groovyx.gpars.GParsPool
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share

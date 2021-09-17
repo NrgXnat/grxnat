@@ -1,3 +1,5 @@
+import org.gradle.api.artifacts.DependencyResolveDetails
+
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
 def buildVersion = '1.19-SNAPSHOT'
@@ -41,7 +43,6 @@ dependencyManagement {
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
     maven { url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release' }
     maven { url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot' }
 }
@@ -50,11 +51,20 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 configurations {
-     compile.extendsFrom(compileAndInclude)
+    compile.extendsFrom(compileAndInclude)
+
+    all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.codehaus.groovy') {
+                details.useVersion dependencyManagement.importedProperties['vGroovy']
+                details.because "needed by rest-assured>=4.3"
+            }
+        }
+    }
 }
 
 dependencies {
-    compile('org.codehaus.groovy:groovy-all')
+    compile(group: 'org.codehaus.groovy', name: 'groovy-all', version: dependencyManagement.importedProperties['vGroovy'], ext: 'pom')
     compileAndInclude('org.apache.commons:commons-lang3')
     compileAndInclude('commons-io:commons-io')
     compileAndInclude('com.fasterxml.jackson.core:jackson-annotations')
@@ -64,7 +74,7 @@ dependencies {
     compileAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
     compileAndInclude('org.hibernate:hibernate-core')
     compileAndInclude('org.reflections:reflections')
-    compileAndInclude('com.jayway.restassured:rest-assured') {
+    compileAndInclude('io.rest-assured:rest-assured') {
         exclude(group: 'org.codehaus.groovy', module: '*')
     }
     compileAndInclude('org.slf4j:slf4j-log4j12')

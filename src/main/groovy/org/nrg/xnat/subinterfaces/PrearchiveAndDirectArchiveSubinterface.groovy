@@ -9,7 +9,7 @@ import org.nrg.xnat.prearchive.SessionData
 import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.rest.SerializationUtils
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.JSON
 
 class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterface {
 

@@ -1,8 +1,8 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.http.ContentType
-import com.jayway.restassured.path.json.JsonPath
-import com.jayway.restassured.response.Response
+import io.restassured.http.ContentType
+import io.restassured.path.json.JsonPath
+import io.restassured.response.Response
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import org.nrg.xnat.enums.PetMrProcessingSetting
@@ -14,7 +14,7 @@ import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.rest.SerializationUtils
 
-import static com.jayway.restassured.http.ContentType.*
+import static io.restassured.http.ContentType.*
 
 class ConfigSubinterface extends XnatFunctionalitySubinterface {
 

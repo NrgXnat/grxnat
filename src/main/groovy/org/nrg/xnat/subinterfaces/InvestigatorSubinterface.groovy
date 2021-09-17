@@ -2,7 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import org.nrg.xnat.pogo.Investigator
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.JSON
 
 class InvestigatorSubinterface extends XnatFunctionalitySubinterface {
 

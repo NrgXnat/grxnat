@@ -1,13 +1,14 @@
 package org.nrg.xnat.rest
 
-import com.jayway.restassured.filter.Filter
-import com.jayway.restassured.filter.FilterContext
-import com.jayway.restassured.internal.RequestSpecificationImpl
-import com.jayway.restassured.internal.ValidatableResponseImpl
-import com.jayway.restassured.response.Response
-import com.jayway.restassured.specification.FilterableRequestSpecification
-import com.jayway.restassured.specification.FilterableResponseSpecification
-import com.jayway.restassured.specification.RequestSpecification
+import io.restassured.filter.Filter
+import io.restassured.filter.FilterContext
+import io.restassured.internal.RequestSpecificationImpl
+import io.restassured.internal.ValidatableResponseImpl
+import io.restassured.internal.filter.FilterContextImpl
+import io.restassured.response.Response
+import io.restassured.specification.FilterableRequestSpecification
+import io.restassured.specification.FilterableResponseSpecification
+import io.restassured.specification.RequestSpecification
 import org.apache.commons.lang3.time.StopWatch
 import org.codehaus.groovy.runtime.ReflectionMethodInvoker
 import org.nrg.testing.CommonStringUtils
@@ -102,7 +103,8 @@ class XnatSessionFilter implements Filter {
     }
 
     protected Response issueRequest(RequestSpecification request, FilterContext ctx) {
-        ReflectionMethodInvoker.invoke(request, ctx.requestMethod.toString().toLowerCase(), URLDecoder.decode(ctx.requestPath, 'UTF-8')) as Response // TODO: this is a hack copied out of FilterContextImpl. It will likely need to be modified or thrown out when upgrading RestAssured
+        ctx.internalRequestUri = URLDecoder.decode(ctx.internalRequestUri, 'UTF-8') // TODO: hack that will need to be revisited when upgrading REST-assured. I'm sorry, Johan
+        ctx.send(request)
     }
 
 }

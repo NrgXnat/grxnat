@@ -1,7 +1,7 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.http.ContentType
-import com.jayway.restassured.response.Response
+import io.restassured.http.ContentType
+import io.restassured.response.Response
 import org.apache.commons.lang3.time.StopWatch
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.interfaces.XnatInterface

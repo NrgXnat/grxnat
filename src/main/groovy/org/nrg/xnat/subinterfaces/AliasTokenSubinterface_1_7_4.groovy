@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.Response
+import io.restassured.response.Response
 import org.nrg.xnat.versions.XnatVersion
 import org.nrg.xnat.versions.Xnat_1_6dev
 import org.nrg.xnat.versions.Xnat_1_7_0

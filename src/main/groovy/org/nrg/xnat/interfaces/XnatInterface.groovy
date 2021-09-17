@@ -2,14 +2,14 @@ package org.nrg.xnat.interfaces
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
-import com.jayway.restassured.RestAssured
-import com.jayway.restassured.config.JsonConfig
-import com.jayway.restassured.config.LogConfig
-import com.jayway.restassured.config.RestAssuredConfig
-import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory
-import com.jayway.restassured.path.json.config.JsonPathConfig
-import com.jayway.restassured.response.Response
-import com.jayway.restassured.specification.RequestSpecification
+import io.restassured.RestAssured
+import io.restassured.config.JsonConfig
+import io.restassured.config.LogConfig
+import io.restassured.config.RestAssuredConfig
+import io.restassured.path.json.config.JsonPathConfig
+import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory
+import io.restassured.response.Response
+import io.restassured.specification.RequestSpecification
 import org.hamcrest.Matchers
 import org.nrg.testing.CommonStringUtils
 import org.nrg.testing.DicomUtils
@@ -31,10 +31,12 @@ import org.nrg.xnat.versions.XnatVersion
 import org.nrg.xnat.versions.XnatVersionList
 import org.nrg.xnat.versions.Xnat_1_6dev
 
-import static com.jayway.restassured.RestAssured.given
-import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig
-import static com.jayway.restassured.http.ContentType.JSON
-import static com.jayway.restassured.http.ContentType.URLENC
+import java.lang.reflect.Type
+
+import static io.restassured.RestAssured.given
+import static io.restassured.config.ObjectMapperConfig.objectMapperConfig
+import static io.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.URLENC
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
 @SuppressWarnings(['GroovyUnusedDeclaration'])
@@ -110,7 +112,7 @@ abstract class XnatInterface {
                 objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory(
                         new Jackson2ObjectMapperFactory() {
                             @Override
-                            ObjectMapper create(Class aClass, String s) {
+                            ObjectMapper create(Type type, String s) {
                                 XNAT_REST_MAPPER
                             }
                         }
@@ -268,7 +270,7 @@ abstract class XnatInterface {
     void setDicomRoutingConfig(RoutingRulesType routingRulesType, String contents) {
         final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
         final Map<String, String> params = [status : 'enabled', 'contents' : contents]
-        queryBase().contentType(JSON).body(params).put(url).then().assertThat().statusCode(Matchers.isOneOf(200, 201))
+        queryBase().contentType(JSON).body(params).put(url).then().assertThat().statusCode(Matchers.oneOf(200, 201))
     }
 
     void setProjectDicomRoutingConfig(String contents) {

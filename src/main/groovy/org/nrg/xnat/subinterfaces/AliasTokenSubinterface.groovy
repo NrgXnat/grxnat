@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.Response
+import io.restassured.response.Response
 import org.hamcrest.Matchers
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.PermissionsException

@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.ValidatableResponse
+import io.restassured.response.ValidatableResponse
 import org.hamcrest.Matchers
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.meta.RequireAdmin
@@ -17,7 +17,7 @@ import org.nrg.xnat.pogo.containers.OrchestrationProject
 import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.rest.SerializationUtils
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.JSON
 
 @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
 class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {

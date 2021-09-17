@@ -3,7 +3,7 @@ package org.nrg.xnat.subinterfaces
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.dicom.DicomScpReceiver
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.JSON
 
 class DicomSCPSubinterface extends XnatFunctionalitySubinterface {
 
@@ -33,6 +33,11 @@ class DicomSCPSubinterface extends XnatFunctionalitySubinterface {
 
     DicomScpReceiver updateDefaultDicomSCPInstance(DicomScpReceiver receiver) {
         updateDicomScpReceiver(receiver, 1)
+    }
+
+    @RequireAdmin
+    DicomScpReceiver createDicomScpReceiver(DicomScpReceiver receiver) {
+        queryBase().contentType(JSON).body(receiver).post(formatXapiUrl('dicomscp')).then().assertThat().statusCode(200).extract().as(DicomScpReceiver)
     }
 
 }

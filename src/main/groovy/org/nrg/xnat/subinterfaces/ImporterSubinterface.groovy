@@ -1,8 +1,8 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.builder.MultiPartSpecBuilder
-import com.jayway.restassured.response.Response
-import com.jayway.restassured.specification.RequestSpecification
+import io.restassured.builder.MultiPartSpecBuilder
+import io.restassured.response.Response
+import io.restassured.specification.RequestSpecification
 import org.nrg.xnat.importer.ImportException
 import org.nrg.xnat.importer.XnatArchivalRequest
 import org.nrg.xnat.importer.XnatImportRequest

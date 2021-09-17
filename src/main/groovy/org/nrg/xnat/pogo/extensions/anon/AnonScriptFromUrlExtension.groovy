@@ -1,6 +1,6 @@
 package org.nrg.xnat.pogo.extensions.anon
 
-import com.jayway.restassured.RestAssured
+import io.restassured.RestAssured
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.Credentials

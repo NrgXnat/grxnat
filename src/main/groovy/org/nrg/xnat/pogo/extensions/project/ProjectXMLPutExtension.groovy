@@ -1,6 +1,6 @@
 package org.nrg.xnat.pogo.extensions.project
 
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.Project
 

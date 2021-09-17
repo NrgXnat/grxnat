@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.path.json.JsonPath
+import io.restassured.path.json.JsonPath
 import groovyx.gpars.GParsPool
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
@@ -13,7 +13,7 @@ import org.nrg.xnat.pogo.users.CustomUserGroup
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.pogo.users.UserGroup
 
-import static com.jayway.restassured.http.ContentType.URLENC
+import static io.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
 
 class ProjectSubinterface extends XnatFunctionalitySubinterface {

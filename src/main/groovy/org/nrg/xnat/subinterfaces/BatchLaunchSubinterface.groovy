@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.meta.RequirePlugin
 import org.nrg.xnat.pogo.DataType

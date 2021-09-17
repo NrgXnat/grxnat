@@ -1,12 +1,12 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.response.Response
+import io.restassured.response.Response
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.PermissionsException
 
-import static com.jayway.restassured.http.ContentType.JSON
+import static io.restassured.http.ContentType.JSON
 
 class UserManagementSubinterface extends XnatFunctionalitySubinterface {
 

@@ -1,11 +1,11 @@
 package org.nrg.xnat.rest
 
-import com.jayway.restassured.filter.FilterContext
-import com.jayway.restassured.internal.RequestSpecificationImpl
-import com.jayway.restassured.response.Response
-import com.jayway.restassured.specification.FilterableRequestSpecification
-import com.jayway.restassured.specification.FilterableResponseSpecification
-import com.jayway.restassured.specification.RequestSpecification
+import io.restassured.filter.FilterContext
+import io.restassured.internal.RequestSpecificationImpl
+import io.restassured.response.Response
+import io.restassured.specification.FilterableRequestSpecification
+import io.restassured.specification.FilterableResponseSpecification
+import io.restassured.specification.RequestSpecification
 
 class AliasTokenSessionFilter extends XnatSessionFilter {
 

@@ -1,6 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
-import com.jayway.restassured.http.ContentType
+import io.restassured.http.ContentType
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.SiteConfig
