@@ -109,7 +109,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 constraint.setId(null)
             }
         }
-        queryBase().content(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
+        queryBase().body(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
         xnatInterface
     }
 
