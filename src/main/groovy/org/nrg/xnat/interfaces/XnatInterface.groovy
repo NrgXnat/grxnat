@@ -43,6 +43,7 @@ import static org.nrg.testing.CommonStringUtils.formatUrl
 abstract class XnatInterface {
 
     boolean readResources = true
+    boolean readExtendedMetadata = true
     User authUser
     public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
     protected Class<? extends XnatVersion> versionClass
@@ -166,6 +167,17 @@ abstract class XnatInterface {
         subinterface
     }
 
+    XnatInterface registerExternalSubinterface(Class<? extends XnatFunctionalitySubinterface> subinterfaceClass) {
+        constructSubinterface(subinterfaceClass)
+        this
+    }
+
+    def <X extends XnatFunctionalitySubinterface> X getSubinterface(Class<X> subinterfaceClass) {
+        subinterfaces.find { subinterface ->
+            subinterfaceClass.isInstance(subinterface)
+        } as X
+    }
+
     /**
      * Searches for the {@link XnatFunctionalitySubinterface} subclass which implements the provided REST endpoint
      * @param restEndpoint the XNAT REST path, exactly as written in xnat-web's XNATApplication.java (or XnatRestlet-annotated class) for restlet APIs, and exactly as listed in Swagger for XAPIs with /xapi prefixed (e.g. "/xapi/siteConfig")
@@ -183,6 +195,14 @@ abstract class XnatInterface {
 
     void enableResourceReading() {
         readResources = true
+    }
+
+    void disableReadingExtendedMetadata() {
+        readExtendedMetadata = false
+    }
+
+    void enableReadingExtendedMetadata() {
+        readExtendedMetadata = true
     }
 
     void logout() {

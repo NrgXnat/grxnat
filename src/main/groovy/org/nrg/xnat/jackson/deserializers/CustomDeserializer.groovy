@@ -113,7 +113,13 @@ abstract class CustomDeserializer<T> extends StdDeserializer<T> {
     }
 
     protected <X> List<X> readObjectList(JsonNode parentNode, String field, ObjectCodec codec, Class<X> objectClass) {
-        fieldNonnull(parentNode, field) ? (codec as ObjectMapper).readerFor(objectClass).readValues(parentNode.get(field).toString()).readAll() : [] as List<X>
+        if (fieldNonnull(parentNode, field)) {
+            parentNode.get(field).collect { childNode ->
+                (codec as ObjectMapper).readerFor(objectClass).readValue(childNode.toString())
+            } as List<X>
+        } else {
+            []
+        }
     }
 
     protected <X extends Enum> X readEnumByName(String representation, Class<X> enumClass) {

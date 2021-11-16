@@ -1,5 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
+import io.restassured.path.json.JsonPath
 import io.restassured.response.Response
 import groovyx.gpars.GParsPool
 import org.nrg.xnat.pogo.Project
@@ -13,11 +14,15 @@ import static org.nrg.testing.CommonStringUtils.formatUrl
 
 class SubjectSubinterface extends XnatFunctionalitySubinterface {
 
+    private static final String FIELD_JSONPATH = subfieldJsonpath('fields/field')
+    private static final String SHARING_JSONPATH = subfieldJsonpath('sharing/share')
+
     @Override
     List<String> getHandledEndpoints() {
         [
                 '/projects/{PROJECT_ID}/subjects',
-                '/projects/{PROJECT_ID}/subjects/{SUBJECT_ID}'
+                '/projects/{PROJECT_ID}/subjects/{SUBJECT_ID}',
+                '/subjects/{SUBJECT_ID}'
         ]
     }
 
@@ -46,15 +51,19 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
     }
 
     Subject readSubject(String accessionNumber) {
-        final Response response = jsonQuery().get(formatRestUrl('subjects', accessionNumber))
-        final Subject subject = response.jsonPath().getObject("items.get(0).children.find { it.field == 'demographics' }.items.get(0).data_fields", Subject.class)
-        subject.label(response.jsonPath().getString('items.get(0).data_fields.label'))
+        final JsonPath subjectJsonPath = readSubjectJsonPath(accessionNumber)
+        final Subject subject = subjectJsonPath.getObject("children.find { it.field == 'demographics' }.items[0].data_fields", Subject)
+        extractSubjectData(subject, subjectJsonPath)
+        subject
     }
 
     List<Subject> readSubjects(Project project) {
         final List<Subject> subjects = subjectQuery(project, true)
 
         subjects.each { subject ->
+            if (xnatInterface.readExtendedMetadata) {
+                extractSubjectData(subject, readSubjectJsonPath(subject.accessionNumber))
+            }
             if (xnatInterface.readResources) {
                 subject.resources(xnatInterface.readResources(new SubjectResource().project(project).subject(subject)))
             }
@@ -148,6 +157,28 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
 
     void deleteSubject(Subject subject) {
         deleteSubject(subject.project, subject)
+    }
+
+    protected JsonPath readSubjectJsonPath(String subjectId) {
+        jsonQuery().get(formatRestUrl('subjects', subjectId)).jsonPath().setRootPath('items[0]')
+    }
+
+    protected void extractSubjectData(Subject subject, JsonPath subjectJsonPath) {
+        subject.label(subjectJsonPath.getString('data_fields.label'))
+        if (subjectJsonPath.get(FIELD_JSONPATH) != null) {
+            subjectJsonPath.getList(FIELD_JSONPATH + '.items.data_fields').each { fieldObject ->
+                subject.fields.put(fieldObject['name'], fieldObject['field'])
+            }
+        }
+        if (subjectJsonPath.get(SHARING_JSONPATH) != null) {
+            subjectJsonPath.getList(SHARING_JSONPATH + '.items.data_fields').each { shareObject ->
+                subject.shares << new Share(shareObject['project'], shareObject['label'])
+            }
+        }
+    }
+
+    protected static String subfieldJsonpath(String fieldName) {
+        "children.find { it.field == '${fieldName}' }"
     }
 
 }
