@@ -21,12 +21,6 @@ import static org.testng.AssertJUnit.assertEquals
 class TestXnatInterface {
 
     @Test
-    void testTemp() {
-        final XnatInterface xnatInterface = XnatInterface.authenticate('http://10.100.100.17', 'admin', 'admin')
-        xnatInterface.readInstalledPlugins()
-    }
-
-    @Test
     void testUrls() {
         final String baseUrl = 'https://xnat.myuniversity.edu'
         final String projectId = 'MY_STUDY_A'
