@@ -23,6 +23,7 @@ import org.nrg.xnat.pogo.*
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.*
 import org.nrg.xnat.pogo.users.User
+import org.nrg.xnat.rest.AnonymousAuth
 import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAuthProvider
 import org.nrg.xnat.rest.XnatSessionFilter
@@ -75,9 +76,13 @@ abstract class XnatInterface {
     protected XnatInterface() {}
 
     protected XnatInterface withFilter(XnatSessionFilter sessionFilter) {
-        xnatUrl = sessionFilter.xnatUrl
-        authUser = sessionFilter.user
+        authUser = sessionFilter?.user
         this.sessionFilter = sessionFilter
+        this
+    }
+
+    protected XnatInterface atUrl(String url) {
+        xnatUrl = url
         this
     }
 
@@ -124,7 +129,7 @@ abstract class XnatInterface {
 
         switch (given().get(formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode) {
             case 200:
-                return performLogin(xnatUrl, userAuth, connectionConfig)
+                return userAuth.isAnonymous() ? guestLogin(xnatUrl, connectionConfig) : performLogin(xnatUrl, userAuth, connectionConfig)
             case 302:
                 throw new RuntimeException('Attempting to check availability of XNAT login page returned a 302 status code. Is the provided protocol (http versus https) correct?')
             default:
@@ -136,21 +141,36 @@ abstract class XnatInterface {
         authenticate(xnatUrl, new User(username).password(password), connectionConfig)
     }
 
+    static XnatInterface authenticateAsGuest(String xnatUrl, XnatConnectionConfig connectionConfig = new XnatConnectionConfig()) {
+        authenticate(xnatUrl, new AnonymousAuth(), connectionConfig)
+    }
+
+    protected static XnatInterface guestLogin(String xnatUrl, XnatConnectionConfig connectionConfig) {
+        if (!connectionConfig.skipAuth && given().get(formatUrl(xnatUrl, '/data/projects')).statusCode != 200) {
+            throw new RuntimeException("Specified XNAT instance doesn't appear to support anonymous access.")
+        }
+        formInterface(xnatUrl, null, connectionConfig)
+    }
+
     protected static XnatInterface performLogin(String xnatUrl, XnatAuthProvider userAuth, XnatConnectionConfig connectionConfig) {
         final XnatSessionFilter sessionFilter = userAuth.createSessionFilter(xnatUrl, connectionConfig.allowInsecureSSL)
-        if (!connectionConfig.skipAuth && given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode != 200) {
+        if (!connectionConfig.skipAuth && addFilter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode != 200) {
             throw new RuntimeException("Provided credentials don't appear to be valid.")
         }
+        formInterface(xnatUrl, sessionFilter, connectionConfig)
+    }
+
+    protected static XnatInterface formInterface(String xnatUrl, XnatSessionFilter sessionFilter, XnatConnectionConfig connectionConfig) {
         final Class<? extends XnatVersion> versionClass = connectionConfig.versionClass ?: determineVersionClass(xnatUrl, sessionFilter)
-        versionClass.newInstance().interfaceClass.newInstance().withFilter(sessionFilter).fromVersion(versionClass)
+        versionClass.newInstance().interfaceClass.newInstance().withFilter(sessionFilter).atUrl(xnatUrl).fromVersion(versionClass)
     }
 
     protected static Class<? extends XnatVersion> determineVersionClass(String xnatUrl, XnatSessionFilter sessionFilter) {
-        final Response oldResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
+        final Response oldResponse = addFilter(sessionFilter).get(formatUrl(xnatUrl, '/data/version'))
         if (oldResponse.statusCode == 200 && !oldResponse.asString().contains('<!')) {
             Xnat_1_6dev
         } else {
-            final Response newResponse = given().filter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
+            final Response newResponse = addFilter(sessionFilter).get(formatUrl(xnatUrl, '/xapi/siteConfig/buildInfo'))
             if (newResponse.statusCode == 200 && newResponse.getContentType().contains('json')) {
                 final String version = newResponse.jsonPath().getString('version')
                 XnatVersionList.lookup(version)
@@ -158,6 +178,10 @@ abstract class XnatInterface {
                 XnatVersionList.lookup('unknown')
             }
         }
+    }
+
+    protected static RequestSpecification addFilter(XnatSessionFilter filter) {
+        filter == null ? given() : given().filter(filter)
     }
 
     protected <X extends XnatFunctionalitySubinterface> X constructSubinterface(Class<X> subinterfaceClass) {
@@ -244,7 +268,7 @@ abstract class XnatInterface {
     }
 
     RequestSpecification queryBase() {
-        given().filter(sessionFilter)
+        addFilter(sessionFilter)
     }
 
     RequestSpecification jsonQuery() {

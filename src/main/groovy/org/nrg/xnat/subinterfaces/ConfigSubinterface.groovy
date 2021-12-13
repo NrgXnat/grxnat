@@ -1,6 +1,5 @@
 package org.nrg.xnat.subinterfaces
 
-import io.restassured.http.ContentType
 import io.restassured.path.json.JsonPath
 import io.restassured.response.Response
 import org.hamcrest.Matcher
@@ -12,6 +11,8 @@ import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.ConfigServiceObject
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.SiteConfig
+import org.nrg.xnat.pogo.Uptime
+import org.nrg.xnat.rest.PermissionsException
 import org.nrg.xnat.rest.SerializationUtils
 
 import static io.restassured.http.ContentType.*
@@ -26,7 +27,9 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
                 '/config/edit/image/dicom/{RESOURCE}',
                 '/config/edit/projects/{PROJECT_ID}/image/dicom/{RESOURCE}',
                 '/xapi/siteConfig',
-                '/xapi/siteConfig/buildInfo'
+                '/xapi/siteConfig/{property}',
+                '/xapi/siteConfig/buildInfo',
+                '/xapi/siteConfig/uptime'
         ]
     }
 
@@ -35,9 +38,28 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         "Version ${buildPath.get('version')} (commit ${buildPath.get('commit')})"
     }
 
-    @RequireAdmin
+    Uptime readUptime() {
+        queryBase().get(formatXapiUrl("/siteConfig/uptime")).as(Uptime)
+    }
+
     SiteConfig readSiteConfig() {
-        queryBase().contentType(JSON).get(formatXapiUrl('siteConfig')).as(SiteConfig)
+        retrieveSiteConfig().as(SiteConfig)
+    }
+
+    Map<String, Object> readSiteConfigAsMap() {
+        retrieveSiteConfig().as(Map)
+    }
+
+    String readSiteConfigPreference(String preference) {
+        final Response response = queryBase().get(formatXapiUrl("/siteConfig/${preference}"))
+        switch (response.statusCode()) {
+            case 200:
+                return response.asString()
+            case [401, 403]:
+                throw new PermissionsException('Could not read preference')
+            default:
+                throw new RuntimeException("Unexpected status code in reading preference: ${response.statusCode()}")
+        }
     }
 
     void postToSiteConfig(Map configSettings) {
@@ -51,6 +73,11 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
     @RequireAdmin
     protected void postToSiteConfigFrom(Object siteConfig) {
         performPostToSiteConfigFrom(siteConfig)
+    }
+
+    @RequireAdmin
+    void postSiteConfigProperty(String propName, Object propValue) {
+        queryBase().contentType(TEXT).body(propValue).post(formatXapiUrl("/siteConfig/${propName}")).then().assertThat().statusCode(statusCodeValidatorWithPermissionsException(200))
     }
 
     void initializeXnat() {
@@ -236,8 +263,12 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         setConfigStatus(null, tool, path, status)
     }
 
+    protected Response retrieveSiteConfig() {
+        queryBase().contentType(JSON).get(formatXapiUrl('siteConfig'))
+    }
+
     protected void performPostToSiteConfigFrom(Object siteConfig) {
-        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
+        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(statusCodeValidatorWithPermissionsException(200))
     }
 
     protected Map<String, Object> makeVersionQueryParams(Integer version) {

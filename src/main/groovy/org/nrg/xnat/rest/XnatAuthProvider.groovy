@@ -1,7 +1,11 @@
 package org.nrg.xnat.rest
 
-interface XnatAuthProvider {
+trait XnatAuthProvider {
 
-    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL)
+    abstract XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL)
+
+    boolean isAnonymous() {
+        false
+    }
 
 }
