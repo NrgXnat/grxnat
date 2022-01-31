@@ -13,5 +13,7 @@ class EventFilter {
     List<String> projectIds
     EventStatus status
     String payloadFilter
+    String schedule
+    String scheduleDescription
 
 }

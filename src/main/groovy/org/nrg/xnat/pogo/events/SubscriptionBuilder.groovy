@@ -14,6 +14,8 @@ class SubscriptionBuilder {
     private List<String> projects
     private EventStatus status
     private String payloadFilter
+    private String eventSchedule
+    private String scheduleDescription
 
     SubscriptionBuilder name(String name) {
         this.name = name
@@ -41,6 +43,16 @@ class SubscriptionBuilder {
 
     SubscriptionBuilder actAsEventUser() {
         actAsEventUser = true
+        this
+    }
+
+    SubscriptionBuilder eventSchedule(String schedule) {
+        this.eventSchedule = schedule
+        this
+    }
+
+    SubscriptionBuilder scheduleDescription(String description){
+        this.scheduleDescription = description
         this
     }
 
@@ -89,6 +101,8 @@ class SubscriptionBuilder {
                 attributes: attributes,
                 actAsEventUser: actAsEventUser,
                 eventFilter: new EventFilter(
+                        schedule: eventSchedule,
+                        scheduleDescription: scheduleDescription,
                         eventType: eventType,
                         projectIds: projects,
                         status: status,
