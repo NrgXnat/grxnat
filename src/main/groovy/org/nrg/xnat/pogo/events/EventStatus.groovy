@@ -5,5 +5,5 @@ enum EventStatus {
     CREATED,
     DELETED,
     UPDATED,
-    SCHEDULED
+    CRON
 }

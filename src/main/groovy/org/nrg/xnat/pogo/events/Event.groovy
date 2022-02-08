@@ -15,6 +15,7 @@ class Event {
     public static final String PROJECT_ASSET_TYPE = 'org.nrg.xnat.eventservice.events.ProjectAssetEvent'
     public static final String IMAGE_ASSESSOR_TYPE = 'org.nrg.xnat.eventservice.events.ImageAssessorEvent'
     public static final String SCAN_EVENT_TYPE = 'org.nrg.xnat.eventservice.events.ScanEvent'
+    public static final String SCHEDULED_EVENT = 'org.nrg.xnat.eventservice.events.ScheduledEvent'
 
     String type
     List<EventStatus> statuses = []
