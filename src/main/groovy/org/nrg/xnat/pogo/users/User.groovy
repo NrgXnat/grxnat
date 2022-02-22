@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo.users
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.pogo.Extensible
 import org.nrg.xnat.pogo.Extension
@@ -97,8 +98,8 @@ class User extends Extensible<User> implements XnatAuthProvider {
     }
 
     @Override
-    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL) {
-        new XnatSessionFilter(this, xnatUrl, allowInsecureSSL)
+    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL, ObjectMapper xnatRestMapper) {
+        new XnatSessionFilter(this, xnatUrl, allowInsecureSSL, xnatRestMapper)
     }
 
 }

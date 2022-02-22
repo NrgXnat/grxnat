@@ -3,6 +3,7 @@ package org.nrg.xnat.jackson.mappers
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.nrg.xnat.jackson.modules.XnatRestWriteSerializationModule
 
+@Deprecated
 class XnatRestWriteObjectMapper extends ObjectMapper {
 
     XnatRestWriteObjectMapper() {

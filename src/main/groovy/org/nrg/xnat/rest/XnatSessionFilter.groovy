@@ -1,19 +1,21 @@
 package org.nrg.xnat.rest
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.restassured.RestAssured
+import io.restassured.config.ObjectMapperConfig
 import io.restassured.filter.Filter
 import io.restassured.filter.FilterContext
 import io.restassured.internal.RequestSpecificationImpl
-import io.restassured.internal.ValidatableResponseImpl
-import io.restassured.internal.filter.FilterContextImpl
+import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory
 import io.restassured.response.Response
 import io.restassured.specification.FilterableRequestSpecification
 import io.restassured.specification.FilterableResponseSpecification
 import io.restassured.specification.RequestSpecification
 import org.apache.commons.lang3.time.StopWatch
-import org.codehaus.groovy.runtime.ReflectionMethodInvoker
 import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.pogo.users.User
 
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 class XnatSessionFilter implements Filter {
@@ -22,6 +24,7 @@ class XnatSessionFilter implements Filter {
     private final User user
     private String sessionId
     private final boolean allowInsecureSSL
+    private ObjectMapper xnatRestMapper
     private final int[] authIssueCodes = [302, 401]
     private final int[] serverIssueCodes = [502, 503, 504]
     private int serverIssueRetryCount = 1
@@ -29,10 +32,11 @@ class XnatSessionFilter implements Filter {
     private static final int WAIT_TIME = 10000
     private static final int SESSION_TIMEOUT = 15 * 60 // Could pull and parse this from the site config. Not worth it for now
 
-    XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL) {
+    XnatSessionFilter(User user, String xnatUrl, boolean allowInsecureSSL, ObjectMapper xnatRestMapper) {
         this.user = user
         this.xnatUrl = xnatUrl
         this.allowInsecureSSL = allowInsecureSSL
+        this.xnatRestMapper = xnatRestMapper
         stopWatch.start()
         extractSessionId()
     }
@@ -99,7 +103,21 @@ class XnatSessionFilter implements Filter {
     }
 
     protected RequestSpecificationImpl preprocessRequest(RequestSpecification requestSpec) {
-        ((allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec).sessionId(sessionId) as RequestSpecificationImpl
+        final RequestSpecification requestSpecWithHttpsSetting = (allowInsecureSSL) ? requestSpec.relaxedHTTPSValidation() : requestSpec
+        requestSpecWithHttpsSetting.
+                config(RestAssured.config().objectMapperConfig(formObjectMapperConfig())).
+                sessionId(sessionId) as RequestSpecificationImpl
+    }
+
+    protected ObjectMapperConfig formObjectMapperConfig() {
+        new ObjectMapperConfig().jackson2ObjectMapperFactory(
+                new Jackson2ObjectMapperFactory() {
+                    @Override
+                    ObjectMapper create(Type type, String s) {
+                        xnatRestMapper
+                    }
+                }
+        )
     }
 
     protected Response issueRequest(RequestSpecification request, FilterContext ctx) {

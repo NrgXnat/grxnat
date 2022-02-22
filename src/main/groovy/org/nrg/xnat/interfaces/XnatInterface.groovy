@@ -46,7 +46,8 @@ abstract class XnatInterface {
     boolean readResources = true
     boolean readExtendedMetadata = true
     User authUser
-    public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
+    ObjectMapper xnatRestMapper
+    @Deprecated public static final ObjectMapper XNAT_REST_MAPPER = new XnatRestReadWriteObjectMapper()
     protected Class<? extends XnatVersion> versionClass
     protected XnatSessionFilter sessionFilter
     protected String xnatUrl
@@ -89,6 +90,7 @@ abstract class XnatInterface {
     protected XnatInterface fromVersion(Class<? extends XnatVersion> versionClass) {
         this.versionClass = versionClass
         subinterfaces.clear()
+        xnatRestMapper = new XnatRestReadWriteObjectMapper(versionClass)
         aliasTokenSubinterface = constructSubinterface(AliasTokenSubinterface)
         configSubinterface = constructSubinterface(ConfigSubinterface)
         containerServiceSubinterface = constructSubinterface(ContainerServiceSubinterface)

@@ -1,5 +1,7 @@
 package org.nrg.xnat.rest
 
+import com.fasterxml.jackson.databind.ObjectMapper
+
 class XnatAliasToken implements XnatAuthProvider {
 
     String alias
@@ -13,8 +15,8 @@ class XnatAliasToken implements XnatAuthProvider {
     XnatAliasToken() {}
 
     @Override
-    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL) {
-        new AliasTokenSessionFilter(this, xnatUrl, allowInsecureSSL)
+    XnatSessionFilter createSessionFilter(String xnatUrl, boolean allowInsecureSSL, ObjectMapper xnatRestMapper) {
+        new AliasTokenSessionFilter(this, xnatUrl, allowInsecureSSL, xnatRestMapper)
     }
 
 }

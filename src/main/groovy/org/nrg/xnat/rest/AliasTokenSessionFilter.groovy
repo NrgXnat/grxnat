@@ -1,5 +1,6 @@
 package org.nrg.xnat.rest
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.restassured.filter.FilterContext
 import io.restassured.internal.RequestSpecificationImpl
 import io.restassured.response.Response
@@ -11,8 +12,8 @@ class AliasTokenSessionFilter extends XnatSessionFilter {
 
     private XnatAliasToken aliasToken
 
-    AliasTokenSessionFilter(XnatAliasToken aliasToken, String xnatUrl, boolean allowInsecureSSL) {
-        super(null, xnatUrl, allowInsecureSSL)
+    AliasTokenSessionFilter(XnatAliasToken aliasToken, String xnatUrl, boolean allowInsecureSSL, ObjectMapper xnatRestMapper) {
+        super(null, xnatUrl, allowInsecureSSL, xnatRestMapper)
         this.aliasToken = aliasToken
     }
 

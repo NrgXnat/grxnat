@@ -3,10 +3,11 @@ package org.nrg.xnat.jackson.serializers
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import org.apache.commons.lang3.StringUtils
+import org.nrg.xnat.jackson.XnatSerializationProvider
 import org.nrg.xnat.pogo.resources.Resource
 
 @SuppressWarnings("GrMethodMayBeStatic")
-abstract class CustomSerializer<T> extends StdSerializer<T> {
+abstract class CustomSerializer<T> extends StdSerializer<T> implements XnatSerializationProvider {
 
     protected CustomSerializer(Class<T> aClass) {
         super(aClass)

@@ -11,14 +11,14 @@ class XnatSerializationProviderManager {
             Map<Class<? extends XnatVersion>, Class<? extends XnatSerializationProvider>>
             > REGISTRY = [:]
 
-    static <X extends XnatSerializationProvider> Class<X> getProviderFor(Class<X> baseProviderClass, Class<XnatVersion> versionClass) {
+    static <X extends XnatSerializationProvider> Class<? extends X> getProviderFor(Class<X> baseProviderClass, Class<XnatVersion> versionClass) {
         if (!REGISTRY.containsKey(baseProviderClass)) {
             final Set<Class<? extends X>> subClasses = new Reflections('org.nrg.xnat.jackson').getSubTypesOf(baseProviderClass)
             REGISTRY.put(baseProviderClass, XnatVersionList.XNAT_VERSION_GRAPH.nodes().collectEntries { xnatVersion ->
                 [(xnatVersion) : subClasses.find { xnatVersion in it.newInstance().handledVersions } ?: baseProviderClass]
             })
         }
-        REGISTRY[baseProviderClass][versionClass] as Class<X>
+        REGISTRY[baseProviderClass][versionClass] as Class<? extends X>
     }
 
 }

@@ -10,11 +10,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.apache.commons.lang3.StringUtils
+import org.nrg.xnat.jackson.XnatSerializationProvider
 import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.Resource
 
 @SuppressWarnings("GrMethodMayBeStatic")
-abstract class CustomDeserializer<T> extends StdDeserializer<T> {
+abstract class CustomDeserializer<T> extends StdDeserializer<T> implements XnatSerializationProvider {
 
     public static final TypeReference STRING_OBJECT_MAP = new TypeReference<Map<String, Object>>() {}
     public static final TypeReference NESTED_STRING_MAP = new TypeReference<Map<String, Map<String, String>>>() {}

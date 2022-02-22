@@ -2,6 +2,7 @@ package org.nrg.xnat.jackson.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
+import org.nrg.xnat.jackson.XnatSerializationProvider
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
 
