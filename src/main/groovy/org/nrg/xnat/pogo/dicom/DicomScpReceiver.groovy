@@ -1,24 +1,37 @@
 package org.nrg.xnat.pogo.dicom
 
+import org.testng.collections.Lists
+
 class DicomScpReceiver {
 
-    String aeTitle
     int port
-    boolean enabled = true
+    String aeTitle
     String host
-    String identifier = DicomObjectIdentifier.DEFAULT.id
-    boolean customProcessing = false
-    boolean directArchive = false
+    String identifier            = DicomObjectIdentifier.DEFAULT.id
+    boolean enabled              = true
+    boolean customProcessing     = false
+    boolean directArchive        = false
+    boolean anonymizationEnabled = true
+    boolean whitelistEnabled     = false
+    List<String> whitelist       = []
     Integer id
 
-    DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier, boolean customProcessing = false, boolean directArchive = false) {
-        this.aeTitle = aeTitle
-        this.port = port
-        this.enabled = enabled
-        this.host = host
-        this.identifier = identifier
-        this.customProcessing = customProcessing
-        this.directArchive = directArchive
+    DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier,
+                     boolean customProcessing     = false,
+                     boolean directArchive        = false,
+                     boolean whitelistEnabled     = false,
+                     boolean anonymizationEnabled = true,
+                     List<String> whitelist       = new ArrayList<>()) {
+        this.aeTitle              = aeTitle
+        this.port                 = port
+        this.enabled              = enabled
+        this.host                 = host
+        this.identifier           = identifier
+        this.customProcessing     = customProcessing
+        this.directArchive        = directArchive
+        this.anonymizationEnabled = anonymizationEnabled
+        this.whitelistEnabled   = whitelistEnabled
+        this.whitelist.addAll(whitelist)
     }
 
     DicomScpReceiver() {}
@@ -66,8 +79,23 @@ class DicomScpReceiver {
         return this
     }
 
+    DicomScpReceiver anonymizationEnabled(boolean anonymizationEnabled) {
+        setAnonymizationEnabled(anonymizationEnabled)
+        return this
+    }
+
+    DicomScpReceiver whitelistEnabled(boolean whitelistEnabled) {
+        setWhitelistEnabled(whitelistEnabled)
+        return this
+    }
+
+    DicomScpReceiver whitelist(List<String> whitelist) {
+        setWhitelist(whitelist)
+        return this
+    }
+
     String toString() {
-        "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier})"
+        "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier}, anonymizationEnabled: ${anonymizationEnabled}, whitelistEnabled: ${whitelistEnabled}, whitelist: ${whitelist.join(',')})"
     }
 
 }

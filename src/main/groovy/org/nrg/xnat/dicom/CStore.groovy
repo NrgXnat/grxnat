@@ -23,15 +23,23 @@ class CStore {
         new CStore(receiver)
     }
 
+    static CStore to(DicomScpReceiver receiver, String callingAETitle) {
+        new CStore(receiver, callingAETitle)
+    }
+
     static CStore to(String aeTitle, String host, int port) {
         to(new DicomScpReceiver().aeTitle(aeTitle).host(host).port(port))
     }
 
-    CStore(DicomScpReceiver receiver) {
+    static CStore to(String aeTitle, String host, int port, String callingAETitle) {
+        to(new DicomScpReceiver().aeTitle(aeTitle).host(host).port(port), callingAETitle)
+    }
+
+    CStore(DicomScpReceiver receiver, final String callingAETitle = "GRXNAT") {
         setReceiver(receiver)
         final Device localDevice = new Device('GRXNAT')
         final Connection connection = new Connection()
-        final ApplicationEntity localAE = new ApplicationEntity('GRXNAT')
+        final ApplicationEntity localAE = new ApplicationEntity(callingAETitle)
         localDevice.addApplicationEntity(localAE)
         localDevice.addConnection(connection)
         localAE.addConnection(connection)
