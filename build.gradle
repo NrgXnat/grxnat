@@ -9,7 +9,6 @@ version buildVersion
 
 apply plugin: 'groovy'
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
@@ -23,7 +22,6 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
@@ -51,7 +49,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 configurations {
-    compile.extendsFrom(compileAndInclude)
+    implementation.extendsFrom(compileAndInclude)
 
     all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
@@ -64,7 +62,7 @@ configurations {
 }
 
 dependencies {
-    compile(group: 'org.codehaus.groovy', name: 'groovy-all', version: dependencyManagement.importedProperties['vGroovy'], ext: 'pom')
+    implementation(group: 'org.codehaus.groovy', name: 'groovy-all', version: dependencyManagement.importedProperties['vGroovy'], ext: 'pom')
     compileAndInclude('org.apache.commons:commons-lang3')
     compileAndInclude('commons-io:commons-io')
     compileAndInclude('com.fasterxml.jackson.core:jackson-annotations')
@@ -84,7 +82,7 @@ dependencies {
     compileAndInclude('org.aspectj:aspectjweaver')
     compileAndInclude('org.aspectj:aspectjrt')
 
-    testCompile 'org.testng:testng'
+    testImplementation 'org.testng:testng'
 }
 
 test {
@@ -93,6 +91,8 @@ test {
 
 jar {
     from sourceSets.main.allSource
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 publishing {
