@@ -1,7 +1,5 @@
 package org.nrg.xnat.pogo.dicom
 
-import org.testng.collections.Lists
-
 class DicomScpReceiver {
 
     int port
