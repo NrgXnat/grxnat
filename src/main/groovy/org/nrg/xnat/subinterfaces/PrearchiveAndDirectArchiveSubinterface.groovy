@@ -17,7 +17,6 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
     List<String> getHandledEndpoints() {
         [
                 '/prearchive/projects/{PROJECT_ID}',
-                '/prearchive/projects/{PROJECT_ID}/{SESSION_TIMESTAMP}/{SESSION_LABEL}/logs',
                 '/xapi/direct-archive'
         ]
     }

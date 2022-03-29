@@ -20,13 +20,18 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
     List<String> getHandledEndpoints() {
         [
                 '/xapi/events/allactions',
+                '/xapi/events/delivered',
+                '/xapi/events/delivered/{id}',
                 '/xapi/events/events',
+                '/xapi/events/prefs',
                 '/xapi/events/subscription',
                 '/xapi/events/subscriptions',
                 '/xapi/events/subscription/{id}',
                 '/xapi/events/subscription/{id}/activate',
                 '/xapi/events/subscription/{id}/deactivate',
                 '/xapi/projects/{project}/events/actionsbyevent',
+                '/xapi/projects/{project}/events/delivered',
+                '/xapi/projects/{project}/events/delivered/{id}',
                 '/xapi/projects/{project}/events/events',
                 '/xapi/projects/{project}/events/subscription',
                 '/xapi/projects/{project}/events/subscriptions',
@@ -152,7 +157,7 @@ class EventServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     DeliveredEvent readProjectDeliveredEvent(Project project, long id) {
-        readDeliveredEventAtUrl("/projects/${project}/events/subscription/${id}")
+        readDeliveredEventAtUrl("/projects/${project}/events/delivered/${id}")
     }
 
     private List<Event> readEventsAtUrl(String subUrl) {

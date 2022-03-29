@@ -15,6 +15,7 @@ class AliasTokenSubinterface extends XnatFunctionalitySubinterface {
         [
                 '/services/tokens/{OPERATION}',
                 '/services/tokens/{OPERATION}/user/{USERNAME}',
+                '/services/tokens/{OPERATION}/{TOKEN}',
                 '/services/tokens/{OPERATION}/{TOKEN}/{SECRET}'
         ]
     }
@@ -24,7 +25,7 @@ class AliasTokenSubinterface extends XnatFunctionalitySubinterface {
     }
 
     void invalidateAliasToken(XnatAliasToken aliasToken) {
-        queryBase().get(formatRestUrl("/services/tokens/invalidate/${aliasToken.alias}/${aliasToken.secret}")).then().assertThat().statusCode(200)
+        queryBase().get(formatRestUrl("/services/tokens/invalidate/${aliasToken.alias}")).then().assertThat().statusCode(200)
     }
 
     String issueAliasTokenUrl(User tokenUser = null) {

@@ -23,8 +23,7 @@ class UserManagementSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/users/{username}/enabled/{flag}',
                 '/xapi/users/{username}/groups',
                 '/xapi/users/{username}/roles',
-                '/xapi/users/{username}/verified/{flag}',
-
+                '/xapi/users/{username}/verified/{flag}'
         ]
     }
 
