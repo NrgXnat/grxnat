@@ -5,13 +5,17 @@ class DicomScpReceiver {
     int port
     String aeTitle
     String host
-    String identifier            = DicomObjectIdentifier.DEFAULT.id
-    boolean enabled              = true
-    boolean customProcessing     = false
-    boolean directArchive        = false
-    boolean anonymizationEnabled = true
-    boolean whitelistEnabled     = false
-    List<String> whitelist       = []
+    String identifier                 = DicomObjectIdentifier.DEFAULT.id
+    boolean enabled                   = true
+    boolean customProcessing          = false
+    boolean directArchive             = false
+    boolean anonymizationEnabled      = true
+    boolean whitelistEnabled          = false
+    List<String> whitelist            = []
+    boolean routingExpressionsEnabled = false
+    String projectRoutingExpression
+    String subjectRoutingExpression
+    String sessionRoutingExpression
     Integer id
 
     DicomScpReceiver(String aeTitle, int port, boolean enabled, String host, String identifier,
@@ -19,7 +23,11 @@ class DicomScpReceiver {
                      boolean directArchive        = false,
                      boolean whitelistEnabled     = false,
                      boolean anonymizationEnabled = true,
-                     List<String> whitelist       = new ArrayList<>()) {
+                     List<String> whitelist       = new ArrayList<>(),
+                     boolean routingExpressionsEnabled = false,
+                     String projectRoutingExpression = "",
+                     String subjectRoutingExpression = "",
+                     String sessionRoutingExpression = "") {
         this.aeTitle              = aeTitle
         this.port                 = port
         this.enabled              = enabled
@@ -30,6 +38,10 @@ class DicomScpReceiver {
         this.anonymizationEnabled = anonymizationEnabled
         this.whitelistEnabled   = whitelistEnabled
         this.whitelist.addAll(whitelist)
+        this.routingExpressionsEnabled = routingExpressionsEnabled
+        this.projectRoutingExpression = projectRoutingExpression
+        this.subjectRoutingExpression = subjectRoutingExpression
+        this.sessionRoutingExpression = sessionRoutingExpression
     }
 
     DicomScpReceiver() {}
@@ -92,8 +104,28 @@ class DicomScpReceiver {
         return this
     }
 
+    DicomScpReceiver routingExpressionsEnabled(boolean routingExpressionsEnabled) {
+        setRoutingExpressionsEnabled(routingExpressionsEnabled)
+        return this
+    }
+
+    DicomScpReceiver projectRoutingExpression(String projectRoutingExpression) {
+        setProjectRoutingExpression(projectRoutingExpression)
+        return this
+    }
+
+    DicomScpReceiver subjectRoutingExpression(String subjectRoutingExpression) {
+        setSubjectRoutingExpression(subjectRoutingExpression)
+        return this
+    }
+
+    DicomScpReceiver sessionRoutingExpression(String sessionRoutingExpression) {
+        setSessionRoutingExpression(sessionRoutingExpression)
+        return this
+    }
+
     String toString() {
-        "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier}, anonymizationEnabled: ${anonymizationEnabled}, whitelistEnabled: ${whitelistEnabled}, whitelist: ${whitelist.join(',')})"
+        "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier}, anonymizationEnabled: ${anonymizationEnabled}, whitelistEnabled: ${whitelistEnabled}, whitelist: ${whitelist.join(',')}, routingExpressionEnabled: ${routingExpressionsEnabled}, projectRoutingExpression: ${projectRoutingExpression}, subjectRoutingExpression: ${subjectRoutingExpression}, sessionRoutingExpression: ${sessionRoutingExpression})"
     }
 
 }
