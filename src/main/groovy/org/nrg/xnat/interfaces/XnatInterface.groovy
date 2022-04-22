@@ -72,6 +72,8 @@ abstract class XnatInterface {
     @Delegate protected BatchLaunchSubinterface batchLaunchSubinterface
     @Delegate protected EventServiceSubinterface eventServiceSubinterface
     @Delegate protected ImporterSubinterface importerSubinterface
+    @Delegate protected BatchShareSubinterface batchShareSubinterface
+    @Delegate protected EventTrackingSubinterface eventTrackingSubinterface
 
     protected XnatInterface() {}
 
@@ -108,6 +110,8 @@ abstract class XnatInterface {
         batchLaunchSubinterface = constructSubinterface(BatchLaunchSubinterface)
         eventServiceSubinterface = constructSubinterface(EventServiceSubinterface)
         importerSubinterface = constructSubinterface(ImporterSubinterface)
+        batchShareSubinterface = constructSubinterface(BatchShareSubinterface)
+        eventTrackingSubinterface = constructSubinterface(EventTrackingSubinterface)
         this
     }
 
