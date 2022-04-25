@@ -58,9 +58,9 @@ class WorkflowSubinterface extends XnatFunctionalitySubinterface {
     XnatInterface waitForWorkflowStatus(int workflowId, int maxTimeInSeconds, String desiredStatus, String... exceptionStatuses) {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
         while (true) {
-            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} status is not ${desiredStatus} in allotted number of seconds: ${maxTimeInSeconds}")
-
             final String status = readWorkflowStatus(workflowId)
+
+            TimeUtils.checkStopWatch(stopWatch, maxTimeInSeconds, "Workflow ${workflowId} status is not ${desiredStatus} in allotted number of seconds: ${maxTimeInSeconds}. The last known status of the workflow is: ${status}.")
 
             if (status == desiredStatus) {
                 return xnatInterface
