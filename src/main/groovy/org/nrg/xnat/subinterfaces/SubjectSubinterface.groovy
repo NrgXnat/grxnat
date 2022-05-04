@@ -58,7 +58,16 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
     }
 
     List<Subject> readSubjects(Project project) {
-        final List<Subject> subjects = subjectQuery(project, true)
+        subjectQuery(project, true)
+    }
+
+    List<Subject> readSecondarySubjects(Project project) {
+        subjectQuery(project, false)
+    }
+
+    private List<Subject> subjectQuery(Project project, boolean primary) {
+        final List<Subject> subjects = jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
+                get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project ${primary ? '=' : '!'}= '${project.id}' }", Subject[])
 
         subjects.each { subject ->
             if (xnatInterface.readExtendedMetadata) {
@@ -72,17 +81,6 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
             )
         }
         subjects
-        // TODO: shares
-    }
-
-    List<Subject> readSecondarySubjects(Project project) {
-        subjectQuery(project, false)
-        // TODO: fully populate secondary subject objects. Issue: how to handle setting project objects for other projects (i.e. when the project is not the variable "project"). Could make empty project objects, but then attempting to access them later gives incomplete objects.
-    }
-
-    private List<Subject> subjectQuery(Project project, boolean primary) {
-        jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
-                get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project ${primary ? '=' : '!'}= '${project.id}' }", Subject[])
     }
 
     void createSubject(Project project, Subject subject, boolean suppressAssessors = false) {

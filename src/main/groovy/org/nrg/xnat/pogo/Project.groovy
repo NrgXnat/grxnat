@@ -362,6 +362,10 @@ class Project extends Extensible<Project> implements HasUri {
         subjects.find { it.label == label }
     }
 
+    Subject findSecondarySubject(String label) {
+        secondarySubjects.find { it.label == label }
+    }
+
     private Map<UserGroup, List<User>> constructDefaultUserMap() {
         final Map<UserGroup, List<User>> userMap = [:]
         userMap.put(UserGroups.OWNER, [])
