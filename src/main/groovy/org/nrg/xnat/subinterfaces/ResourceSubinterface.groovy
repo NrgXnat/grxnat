@@ -1,5 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
+import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.extensions.SimpleResourceFileExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.resources.ResourceFile
@@ -59,15 +60,7 @@ class ResourceSubinterface extends XnatFunctionalitySubinterface {
         queryBase().queryParams(SerializationUtils.serializeToMap(resource)).put(formatXnatUrl("${resource.resourceUrl()}/resources/${resource.folder}")).then().assertThat().statusCode(200)
 
         resource.resourceFiles.each { file ->
-            if (file.extension == null) {
-                final File possibleFile = new File(file.getName())
-                if (possibleFile != null && possibleFile.exists() && possibleFile.isFile()) {
-                    file.extension(new SimpleResourceFileExtension(file, possibleFile))
-                } else {
-                    throw new UnsupportedOperationException('ResourceFile must have extension set in order to locate file for upload.')
-                }
-            }
-            file.extension.uploadTo(xnatInterface, resource)
+            uploadResourceFile(resource, file)
         }
 
         final Resource responseResource = jsonQuery().get(formatXnatUrl(resource.resourceUrl(), 'resources')).then().assertThat().statusCode(200).
@@ -108,6 +101,23 @@ class ResourceSubinterface extends XnatFunctionalitySubinterface {
 
     void deleteResource(Resource resource) {
         queryBase().queryParam('removeFiles', true).delete(formatXnatUrl(resource.resourceUrl(), "resources/${resource.folder}")).then().assertThat().statusCode(200)
+    }
+
+    protected void uploadResourceFile(Resource resource, ResourceFile file) {
+        if (file.extension == null) {
+            final File possibleFile = new File(file.getName())
+            if (possibleFile != null && possibleFile.exists() && possibleFile.isFile()) {
+                file.extension(new SimpleResourceFileExtension(file, possibleFile))
+            } else {
+                throw new UnsupportedOperationException('ResourceFile must have extension set in order to locate file for upload.')
+            }
+        }
+        file.extension.uploadTo(xnatInterface, resource)
+    }
+
+    XnatInterface overwriteResourceFile(Resource resource, ResourceFile file) {
+        uploadResourceFile(resource, file.overwrite(true))
+        xnatInterface
     }
 
 }

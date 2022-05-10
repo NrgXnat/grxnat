@@ -11,6 +11,9 @@ class ResourceFileSerializer extends CustomSerializer<ResourceFile> {
         gen.writeStartObject()
 
         gen.writeBooleanField('extract', value.unzip)
+        if (value.overwrite != null) {
+            gen.writeBooleanField('overwrite', value.overwrite)
+        }
         writeContentField(value, gen)
 
         gen.writeEndObject()

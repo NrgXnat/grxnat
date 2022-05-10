@@ -12,6 +12,7 @@ class ResourceFile extends Extensible<ResourceFile> {
     String content
     String format
     String uri
+    Boolean overwrite
     @JsonProperty('digest') String md5
 
     ResourceFile(Resource resourceFolder, String name) {
@@ -75,6 +76,11 @@ class ResourceFile extends Extensible<ResourceFile> {
 
     ResourceFile md5(String md5) {
         setMd5(md5)
+        this
+    }
+
+    ResourceFile overwrite(boolean overwrite) {
+        setOverwrite(overwrite)
         this
     }
 
