@@ -6,6 +6,7 @@ class XnatPlugin {
     String mavenGroupId
     String mavenArtifactId
     String sourceUrl
+    String version
 
     XnatPlugin(String id, String name, String mavenGroupId, String mavenArtifactId, String sourceUrl) {
         setId(id)
