@@ -1,8 +1,10 @@
 package org.nrg.xnat.pogo.containers
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import groovy.transform.EqualsAndHashCode
 import org.nrg.xnat.enums.ContainerType
 
+@EqualsAndHashCode(includes = ['user', 'name', 'version'])
 class Image {
 
     String user
