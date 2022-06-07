@@ -1,11 +1,14 @@
 package org.nrg.xnat.subinterfaces
 
-import org.hamcrest.BaseMatcher
-import org.hamcrest.Description
+import io.restassured.RestAssured
+import io.restassured.config.FailureConfig
+import io.restassured.specification.RequestSpecification
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers
 import org.hamcrest.collection.IsIn
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.rest.CustomExceptionFailureListener
+import org.nrg.xnat.rest.ForbiddenListener
+import org.nrg.xnat.rest.NotFoundListener
 import org.nrg.xnat.rest.PermissionsException
 import org.nrg.xnat.versions.XnatVersion
 
@@ -23,6 +26,9 @@ abstract class XnatFunctionalitySubinterface {
     List<Class<? extends XnatVersion>> supportedVersions() {
         []
     }
+
+    public static final CustomExceptionFailureListener NOT_FOUND_404 = new NotFoundListener()
+    public static final CustomExceptionFailureListener FORBIDDEN_403 = new ForbiddenListener()
 
     protected void notSupported() {
         throw new UnsupportedOperationException('REST call not supported in this version of XNAT.')
@@ -44,6 +50,10 @@ abstract class XnatFunctionalitySubinterface {
                 super.matches(o)
             }
         }
+    }
+
+    protected RequestSpecification queryBaseWithStatusCodeListeners(List<CustomExceptionFailureListener> listeners) {
+        queryBase().config(RestAssured.config().failureConfig(FailureConfig.failureConfig().with().failureListeners(listeners)))
     }
 
     abstract List<String> getHandledEndpoints()

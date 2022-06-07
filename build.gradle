@@ -90,6 +90,10 @@ test {
     useTestNG {}
 }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     from sourceSets.main.allSource
 
