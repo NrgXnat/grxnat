@@ -37,7 +37,7 @@ class CustomFieldSubinterface extends XnatFunctionalitySubinterface {
     }
 
     Map<String, Object> readCustomFields(CustomFieldScope fieldScope, List<String> fieldSubset = null) {
-        final Map<String, Object> queryParams = (fieldSubset != null) ? ['keys': fieldSubset.join(',')] : [:]
+        final Map<String, Object> queryParams = (fieldSubset != null) ? ['fieldNames': fieldSubset.join(',')] : [:]
         queryBaseWithStatusCodeListeners([NOT_FOUND_404]).queryParams(queryParams).get(formatXapiUrl(fieldScope.buildUriFragment(), 'fields')).then().
                 assertThat().statusCode(200).and().extract().as(Map)
     }

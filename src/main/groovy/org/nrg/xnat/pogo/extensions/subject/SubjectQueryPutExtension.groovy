@@ -14,9 +14,12 @@ class SubjectQueryPutExtension extends SubjectExtension {
 
     @Override
     void create(XnatInterface xnatInterface, Project project) {
-        xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).
-                put(xnatInterface.subjectUrl(project, parentObject as Subject)).
-                then().assertThat().statusCode(Matchers.isOneOf(200, 201))
+        parentObject.accessionNumber(
+                xnatInterface.queryBase().queryParams(SerializationUtils.serializeToMap(parentObject)).
+                        put(xnatInterface.subjectUrl(project, parentObject as Subject)).
+                        then().assertThat().statusCode(Matchers.isOneOf(200, 201)).
+                        and().extract().response().asString().trim()
+        )
     }
 
 }
