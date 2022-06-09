@@ -74,6 +74,8 @@ abstract class XnatInterface {
     @Delegate protected ImporterSubinterface importerSubinterface
     @Delegate protected BatchShareSubinterface batchShareSubinterface
     @Delegate protected EventTrackingSubinterface eventTrackingSubinterface
+    @Delegate protected FeaturesSubinterface featuresSubinterface
+    @Delegate protected CustomFieldSubinterface customFieldSubinterface
 
     protected XnatInterface() {}
 
@@ -112,6 +114,8 @@ abstract class XnatInterface {
         importerSubinterface = constructSubinterface(ImporterSubinterface)
         batchShareSubinterface = constructSubinterface(BatchShareSubinterface)
         eventTrackingSubinterface = constructSubinterface(EventTrackingSubinterface)
+        featuresSubinterface = constructSubinterface(FeaturesSubinterface)
+        customFieldSubinterface = constructSubinterface(CustomFieldSubinterface)
         this
     }
 
