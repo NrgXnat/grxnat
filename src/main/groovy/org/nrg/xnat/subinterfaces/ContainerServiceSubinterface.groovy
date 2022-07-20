@@ -97,6 +97,11 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         saveCommandsFromLabels(image.toString())
     }
 
+    @RequireAdmin
+    int addCommand(File commandJson) {
+        queryBase().contentType(JSON).body(commandJson).post(formatXapiUrl('/commands')).then().assertThat().statusCode(201).extract().as(Integer)
+    }
+
     DockerServer readDockerServer() {
         queryBase().get(formatXapiUrl('/docker/server')).then().assertThat().statusCode(200).extract().as(DockerServer)
     }
@@ -123,7 +128,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
         }
 
         SerializationUtils.deserializeList(
-                queryBase().queryParams(queryParams).get(formatXapiUrl(urlComponents.join('/'))).then().assertThat().statusCode(200).and().extract().jsonPath().getList('$'),
+                queryBaseWithStatusCodeListeners([FORBIDDEN_403]).queryParams(queryParams).get(formatXapiUrl(urlComponents.join('/'))).then().assertThat().statusCode(200).and().extract().jsonPath().getList('$'),
                 CommandSummaryForContext
         )
     }

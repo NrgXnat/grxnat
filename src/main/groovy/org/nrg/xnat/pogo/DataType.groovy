@@ -36,6 +36,7 @@ class DataType {
     public static final DataType IMAGE_SESSION = new DataType('xnat:imageSessionData', null, null, null)
     public static final DataType IMAGE_SCAN = new DataType('xnat:imageScanData', null, null, null)
     public static final DataType IMAGE_ASSESSOR = new DataType('xnat:imageAssessorData', null, null, null)
+    public static final DataType PROJECT_ASSET = new DataType('xnat:abstractProjectAsset', null, null, null)
 
     String xsiType
     String code

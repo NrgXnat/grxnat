@@ -1,12 +1,13 @@
 package org.nrg.xnat.pogo.containers
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.nrg.xnat.util.ListUtils
 
 class Command {
 
     String name
     int id
-    final private List<Wrapper> wrappers = []
+    @JsonProperty('xnat') final private List<Wrapper> wrappers = []
 
     List<Wrapper> getWrappers() {
         wrappers
