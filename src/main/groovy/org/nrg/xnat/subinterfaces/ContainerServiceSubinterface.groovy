@@ -60,6 +60,13 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
 
     @RequireAdmin
     XnatInterface deleteImage(Image image, boolean force = false) {
+        if (image.imageId == null) {
+            image.setImageId(
+                    readImages().find { possibleMatch ->
+                        possibleMatch == image
+                    }.imageId
+            )
+        }
         deleteImage(image.imageId, force)
     }
 
