@@ -25,7 +25,7 @@ class Image {
     void setNames(List<String> names) {
         if (names != null && !names.isEmpty()) {
             final List<String> slashDivided = names[0].split('/')
-            setUser(slashDivided[0..-1].join('/'))
+            setUser(slashDivided[0..<-1].join('/'))
             final List<String> colonDivided = slashDivided[-1].split(':')
             setName(colonDivided[0])
             setVersion(colonDivided[1])

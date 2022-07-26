@@ -241,7 +241,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     protected ValidatableResponse issueContainerLaunchRequest(Project project, long wrapperId, String rootElementName, boolean isBulk, Map<String, String> allQueryParams) {
-        queryBase().body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
+        queryBaseWithStatusCodeListeners([FORBIDDEN_403]).body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
                 then().assertThat().statusCode(200).and()
     }
 
