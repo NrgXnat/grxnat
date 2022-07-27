@@ -170,7 +170,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     int launchContainer(Project project, long wrapperId, String rootElementName, String rootElementUri, Map<String, String> otherInputs = [:]) {
-        final Map<String, String> params = otherInputs.clone() as Map<String, String>
+        final Map<String, String> params = new HashMap<>(otherInputs)
         params.put(rootElementName, rootElementUri)
         issueContainerLaunchRequest(project, wrapperId, rootElementName, false, params).body('status', Matchers.equalTo('success')).extract().jsonPath().getInt('workflow-id')
     }
@@ -184,7 +184,7 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     XnatInterface bulkLaunchContainers(Project project, long wrapperId, String rootElementName, Collection<String> rootElementUris, Map<String, String> otherInputs = [:]) {
-        final Map<String, String> params = otherInputs.clone() as Map<String, String>
+        final Map<String, String> params = new HashMap<>(otherInputs)
         params.put(rootElementName, '["' + rootElementUris.join('","') + '"]')
         issueContainerLaunchRequest(project, wrapperId, rootElementName, true, params).assertThat().
                 body('successes', Matchers.hasSize(rootElementUris.size())).
