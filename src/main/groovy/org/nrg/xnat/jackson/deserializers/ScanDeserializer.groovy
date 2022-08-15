@@ -30,6 +30,7 @@ class ScanDeserializer extends CustomDeserializer<Scan> {
         setStringIfNonempty(node, 'type', scan.&setType)
         setStringIfNonempty(node, 'note', scan.&setNote)
         setStringIfNonnull(node, 'quality', scan.&setQuality)
+        setStringIfNonnull(node, 'UID', scan.&setUid)
 
         scan
     }

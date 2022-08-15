@@ -19,7 +19,7 @@ import static io.restassured.http.ContentType.*
 
 class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
-    private static final Matcher CONFIG_PUT_OK = Matchers.isOneOf(200, 201)
+    private static final Matcher CONFIG_PUT_OK = Matchers.oneOf(200, 201)
 
     @Override
     List<String> getHandledEndpoints() {
@@ -182,7 +182,7 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         if (petMrSetting == PetMrProcessingSetting.DEFAULT_TO_SITE) {
             queryBase().delete(url).then().assertThat().statusCode(200)
         } else {
-            queryBase().queryParam('inbody', true).body(petMrSetting.apiValue).put(url).then().assertThat().statusCode(201)
+            queryBase().queryParam('inbody', true).body(petMrSetting.apiValue).put(url).then().assertThat().statusCode(CONFIG_PUT_OK)
         }
     }
 
