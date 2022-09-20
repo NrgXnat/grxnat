@@ -83,6 +83,23 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     }
 
     @RequireAdmin
+    XnatInterface deleteCommand(Command command) {
+        deleteCommand(command.id)
+    }
+
+    @RequireAdmin
+    XnatInterface deleteCommand(int commandId) {
+        queryBase().delete(formatXapiUrl('commands', String.valueOf(commandId))).then().assertThat().statusCode(204)
+        xnatInterface
+    }
+
+    @RequireAdmin
+    XnatInterface deleteAllCommands() {
+        readCommands().forEach(this::deleteCommand)
+        xnatInterface
+    }
+
+    @RequireAdmin
     XnatInterface pullImage(String fullImageTag, boolean saveCommands = true) {
         queryBase().queryParam('save-commands', saveCommands).queryParam('image', fullImageTag).post(formatXapiUrl('/docker/pull')).then().assertThat().statusCode(200)
         xnatInterface
@@ -106,6 +123,15 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
 
     @RequireAdmin
     int addCommand(File commandJson) {
+        _addCommand(commandJson)
+    }
+
+    @RequireAdmin
+    int addCommand(String commandJson) {
+        _addCommand(commandJson)
+    }
+
+    private int _addCommand(Object commandJson) {
         queryBase().contentType(JSON).body(commandJson).post(formatXapiUrl('/commands')).then().assertThat().statusCode(201).extract().as(Integer)
     }
 
@@ -245,4 +271,18 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 then().assertThat().statusCode(200).and()
     }
 
+    String readContainerLog(String containerId, ContainerLog log) {
+        queryBase().get(formatXapiUrl("containers", containerId, "logs", log.name().toLowerCase()))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .asString()
+    }
+
+    enum ContainerLog {
+        STDOUT,
+        STDERR
+    }
 }
