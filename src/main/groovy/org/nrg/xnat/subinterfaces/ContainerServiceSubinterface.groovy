@@ -10,6 +10,7 @@ import org.nrg.xnat.pogo.PluginRegistry
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.containers.Command
 import org.nrg.xnat.pogo.containers.CommandSummaryForContext
+import org.nrg.xnat.pogo.containers.Container
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
 import org.nrg.xnat.pogo.containers.Orchestration
@@ -28,6 +29,8 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/commands',
                 '/xapi/commands/available',
                 '/xapi/commands/available/site',
+                '/xapi/containers/{id}',
+                '/xapi/containers/{id}/logs/{log}',
                 '/xapi/docker/image-summaries',
                 '/xapi/docker/images',
                 '/xapi/docker/images/save',
@@ -269,6 +272,24 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
     protected ValidatableResponse issueContainerLaunchRequest(Project project, long wrapperId, String rootElementName, boolean isBulk, Map<String, String> allQueryParams) {
         queryBaseWithStatusCodeListeners([FORBIDDEN_403]).body(allQueryParams).contentType(JSON).post(formatXapiUrl('/projects', project.id, 'wrappers', String.valueOf(wrapperId), 'root', rootElementName, isBulk ? 'bulklaunch' : 'launch')).
                 then().assertThat().statusCode(200).and()
+    }
+
+    Container getContainer(long dbId) {
+        _getContainer(String.valueOf(dbId))
+    }
+
+    Container getContainer(String containerId) {
+        _getContainer(containerId)
+    }
+
+    Container _getContainer(String id) {
+        queryBase().get(formatXapiUrl('containers', id))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(Container)
     }
 
     String readContainerLog(String containerId, ContainerLog log) {
