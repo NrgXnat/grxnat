@@ -39,6 +39,7 @@ import static io.restassured.config.ObjectMapperConfig.objectMapperConfig
 import static io.restassured.http.ContentType.JSON
 import static io.restassured.http.ContentType.URLENC
 import static org.nrg.testing.CommonStringUtils.formatUrl
+import static org.testng.AssertJUnit.fail
 
 @SuppressWarnings(['GroovyUnusedDeclaration'])
 abstract class XnatInterface {
@@ -344,7 +345,16 @@ abstract class XnatInterface {
     @RequireAdmin
     void disableDicomRoutingConfig(RoutingRulesType routingRulesType) {
         final String url = formatRestUrl('config', 'dicom', routingRulesType.configPath)
-        queryBase().queryParam('status', 'disabled').put(url).then().assertThat().statusCode(200)
+        final Response response = queryBase().queryParam('status', 'disabled').put(url)
+        switch (response.statusCode()) {
+            case 200:
+                break
+            case 500:
+                if (response.asString().contains("Couldn't find the site configuration for tool dicom and path ${routingRulesType.configPath}")) {
+                    break // if we take a call to disable it, but it has never been set, the API will return this as an error
+                }
+            fail("Unexpected status code: ${response.statusCode()}")
+        }
     }
 
     void disableProjectDicomRoutingConfig() {

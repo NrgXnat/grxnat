@@ -75,8 +75,8 @@ class DicomScpReceiver {
         return this
     }
 
-    DicomScpReceiver identifier(DicomObjectIdentifier identifier) {
-        identifier(identifier.id)
+    DicomScpReceiver identifier(DicomObjectIdentifier dicomObjectIdentifier) {
+        identifier(dicomObjectIdentifier.id)
     }
 
     DicomScpReceiver customProcessing(boolean customProcessing) {

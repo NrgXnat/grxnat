@@ -3,6 +3,7 @@ package org.nrg.xnat.subinterfaces
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.dicom.DicomScpReceiver
+import org.nrg.xnat.rest.SerializationUtils
 
 import static io.restassured.http.ContentType.JSON
 
@@ -24,6 +25,14 @@ class DicomSCPSubinterface extends XnatFunctionalitySubinterface {
 
     DicomScpReceiver getDefaultDicomSCPInstance() {
         readDicomScpReceiver(1)
+    }
+
+    @RequireAdmin
+    List<DicomScpReceiver> readAllDicomScpReceivers() {
+        SerializationUtils.deserializeList(
+                queryBase().get(formatXapiUrl('dicomscp')).then().assertThat().statusCode(200).extract().jsonPath().getList(''),
+                DicomScpReceiver
+        )
     }
 
     @RequireAdmin
