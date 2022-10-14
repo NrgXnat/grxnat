@@ -1,5 +1,7 @@
 package org.nrg.xnat.subinterfaces
 
+import io.restassured.response.ExtractableResponse
+import io.restassured.response.Response
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.extensions.SimpleResourceFileExtension
 import org.nrg.xnat.pogo.resources.Resource
@@ -95,8 +97,16 @@ class ResourceSubinterface extends XnatFunctionalitySubinterface {
         ).resourceFiles
     }
 
+    private ExtractableResponse<Response> extractResourceResponse(Resource resource, ResourceFile resourceFile) {
+        queryBase().get(resourceFileUrl(resource, resourceFile)).then().assertThat().statusCode(200).extract()
+    }
+
+    String readResourceFile(Resource resource, ResourceFile resourceFile) {
+        extractResourceResponse(resource, resourceFile).asString()
+    }
+
     InputStream streamResourceFile(Resource resource, ResourceFile resourceFile) {
-        queryBase().get(resourceFileUrl(resource, resourceFile)).then().assertThat().statusCode(200).extract().asInputStream()
+        extractResourceResponse(resource, resourceFile).asInputStream()
     }
 
     void deleteResource(Resource resource) {
