@@ -51,7 +51,6 @@ class ScanSubinterface extends XnatFunctionalitySubinterface {
         scan.uid(jsonQuery().get(scanUrl(project, subject, session, scan)).jsonPath().getString('items[0].data_fields.UID'))
     }
 
-
     void createScan(Project project, Subject subject, ImagingSession session, Scan scan) {
         if (scan.xsiType == null) {
             throw new UnsupportedOperationException("scan must have an xsiType")

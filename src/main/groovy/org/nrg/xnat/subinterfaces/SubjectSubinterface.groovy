@@ -3,6 +3,7 @@ package org.nrg.xnat.subinterfaces
 import io.restassured.path.json.JsonPath
 import io.restassured.response.Response
 import groovyx.gpars.GParsPool
+import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.Subject
@@ -57,15 +58,15 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
         subject
     }
 
-    List<Subject> readSubjects(Project project) {
-        subjectQuery(project, true)
+    List<Subject> readSubjects(Project project, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
+        subjectQuery(project, true, recursion)
     }
 
-    List<Subject> readSecondarySubjects(Project project) {
-        subjectQuery(project, false)
+    List<Subject> readSecondarySubjects(Project project, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
+        subjectQuery(project, false, recursion)
     }
 
-    private List<Subject> subjectQuery(Project project, boolean primary) {
+    private List<Subject> subjectQuery(Project project, boolean primary, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
         final List<Subject> subjects = jsonQuery().queryParam('columns', 'label,project,gender,handedness,education,race,ethnicity,group,yob,dob,age,height,weight,src').
                 get(projectSubjectsUrl(project)).jsonPath().getObject("ResultSet.Result.findAll { it.project ${primary ? '=' : '!'}= '${project.id}' }", Subject[])
 
@@ -76,9 +77,11 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
             if (xnatInterface.readResources) {
                 subject.resources(xnatInterface.readResources(new SubjectResource().project(project).subject(subject)))
             }
-            subject.experiments(
-                    xnatInterface.readSubjectAssessors(project, subject)
-            )
+            if (recursion.readSubjectAssessors) {
+                subject.experiments(
+                        xnatInterface.readSubjectAssessors(project, subject, recursion)
+                )
+            }
         }
         subjects
     }

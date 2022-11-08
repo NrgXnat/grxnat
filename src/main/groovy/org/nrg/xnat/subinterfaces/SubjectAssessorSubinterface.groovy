@@ -2,6 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import groovyx.gpars.GParsPool
 import org.hamcrest.Matchers
+import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.Subject
@@ -129,7 +130,7 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
         getAccessionNumber(subjectAssessor.primaryProject, subjectAssessor)
     }
 
-    List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject) {
+    List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
         List imagingMaps, nonimagingMaps
 
         (imagingMaps, nonimagingMaps) = jsonQuery().queryParam('columns', 'note,date,label,ID').
@@ -149,10 +150,19 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
         }
 
         imagingSessions.each { session ->
-            session.scans(xnatInterface.readScans(project, subject, session))
-            session.assessors(xnatInterface.readSessionAssessors(project, subject, session))
+            if (recursion.readScans) {
+                session.scans(xnatInterface.readScans(project, subject, session))
+            }
+            if (recursion.readSessionAssessors) {
+                session.assessors(xnatInterface.readSessionAssessors(project, subject, session))
+            }
         }
         subject.experiments
+    }
+
+    int countSubjectAssessorsInProject(Project project) {
+        jsonQuery().get(projectExperimentsUrl(project)).then().assertThat().statusCode(200).and()
+                .extract().jsonPath().getInt('ResultSet.totalRecords')
     }
 
     void shareSubjectAssessor(SubjectAssessor subjectAssessor, Share share) {

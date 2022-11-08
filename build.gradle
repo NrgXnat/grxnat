@@ -16,7 +16,7 @@ apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'io.freefair.aspectj.post-compile-weaving'
 
-def vBom = '3.1'
+def vBom = '3.2-SNAPSHOT'
 def vTestUtils = '2.5'
 
 buildscript {
@@ -82,6 +82,7 @@ dependencies {
     apiAndInclude('org.dcm4che.tool:dcm4che-tool-storescu')
     apiAndInclude('org.aspectj:aspectjweaver')
     apiAndInclude('org.aspectj:aspectjrt')
+    apiAndInclude('org.awaitility:awaitility-groovy')
 
     testImplementation 'org.testng:testng'
 }
@@ -123,9 +124,12 @@ publishing {
                 def developers = root.appendNode('developers')
 
                 def charlie = developers.appendNode('developer')
-                charlie.appendNode('id', 'grepStar')
+                charlie.appendNode('id', 'charlie')
                 charlie.appendNode('name', 'Charlie Moore')
-                charlie.appendNode('email', 'moore.c@wustl.edu')
+
+                def kate = developers.appendNode('developer')
+                charlie.appendNode('id', 'kate')
+                charlie.appendNode('name', 'Kate Alpert')
             }
         }
     }

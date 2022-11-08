@@ -42,6 +42,7 @@ class PrearchiveResultFilter {
         results
     }
 
+    @Deprecated
     SessionData findUniqueResult(List<SessionData> results) {
         final List<SessionData> filtered = filter(results)
         if (filtered.size() != 1) {

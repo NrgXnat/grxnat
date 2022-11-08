@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath
 import groovyx.gpars.GParsPool
 import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
+import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
@@ -70,7 +71,7 @@ class ProjectSubinterface extends XnatFunctionalitySubinterface {
         project.accessibility
     }
 
-    Project readProject(String projectID) {
+    Project readProject(String projectID, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
         final JsonPath projectCall = jsonQuery().get(projectUrl(new Project(projectID))).then().
                 assertThat().statusCode(200).and().extract().jsonPath().setRoot('items')
 
@@ -117,8 +118,10 @@ class ProjectSubinterface extends XnatFunctionalitySubinterface {
             project.resources(xnatInterface.readResources(new ProjectResource().project(project)))
         }
 
-        project.subjects(xnatInterface.readSubjects(project))
-        project.secondarySubjects(xnatInterface.readSecondarySubjects(project))
+        if (recursion.readSubjects) {
+            project.subjects(xnatInterface.readSubjects(project, recursion))
+            project.secondarySubjects(xnatInterface.readSecondarySubjects(project, recursion))
+        }
         // TODO: anon scripts
     }
 
