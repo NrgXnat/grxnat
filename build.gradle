@@ -128,8 +128,8 @@ publishing {
                 charlie.appendNode('name', 'Charlie Moore')
 
                 def kate = developers.appendNode('developer')
-                charlie.appendNode('id', 'kate')
-                charlie.appendNode('name', 'Kate Alpert')
+                kate.appendNode('id', 'kate')
+                kate.appendNode('name', 'Kate Alpert')
             }
         }
     }
