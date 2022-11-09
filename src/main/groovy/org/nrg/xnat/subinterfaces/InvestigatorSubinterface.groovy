@@ -16,7 +16,7 @@ class InvestigatorSubinterface extends XnatFunctionalitySubinterface {
     }
 
     void createInvestigators(List<Investigator> investigators) {
-        if (investigators == null || investigators.isEmpty()) {
+        if (!investigators) {
             return
         }
         final List<Investigator> knownInvestigators = readInvestigators()
