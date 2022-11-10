@@ -77,6 +77,7 @@ abstract class XnatInterface {
     @Delegate protected EventTrackingSubinterface eventTrackingSubinterface
     @Delegate protected FeaturesSubinterface featuresSubinterface
     @Delegate protected CustomFieldSubinterface customFieldSubinterface
+    @Delegate protected SearchSubinterface searchSubinterface
 
     protected XnatInterface() {}
 
@@ -117,6 +118,7 @@ abstract class XnatInterface {
         eventTrackingSubinterface = constructSubinterface(EventTrackingSubinterface)
         featuresSubinterface = constructSubinterface(FeaturesSubinterface)
         customFieldSubinterface = constructSubinterface(CustomFieldSubinterface)
+        searchSubinterface = constructSubinterface(SearchSubinterface)
         this
     }
 
