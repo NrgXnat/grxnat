@@ -81,11 +81,24 @@ class ResourceSubinterface extends XnatFunctionalitySubinterface {
                 and().extract().response().jsonPath().getList('ResultSet.Result')
         final List<Resource> resources = SerializationUtils.deserializeList(resourceResp, dummyResource.class)
         resources.each { resource ->
-            if (dummyResource.project != null) resource.project(dummyResource.project)
-            if (dummyResource.subject != null) resource.subject(dummyResource.subject)
-            if (dummyResource.subjectAssessor != null) resource.subjectAssessor(dummyResource.subjectAssessor)
-            if (dummyResource.scan != null) resource.scan(dummyResource.scan)
-            if (dummyResource.sessionAssessor != null) resource.sessionAssessor(dummyResource.sessionAssessor)
+            if (dummyResource.project != null) {
+                resource.project(dummyResource.project)
+            }
+            if (dummyResource.subject != null) {
+                resource.subject(dummyResource.subject)
+            }
+            if (dummyResource.subjectAssessor != null) {
+                resource.subjectAssessor(dummyResource.subjectAssessor)
+            }
+            if (dummyResource.scan != null) {
+                resource.scan(dummyResource.scan)
+            }
+            if (dummyResource.sessionAssessor != null) {
+                resource.sessionAssessor(dummyResource.sessionAssessor)
+            }
+            if (dummyResource.sessionData != null) {
+                resource.sessionData(dummyResource.sessionData)
+            }
             readResourceFiles(resource)
         }
         resources

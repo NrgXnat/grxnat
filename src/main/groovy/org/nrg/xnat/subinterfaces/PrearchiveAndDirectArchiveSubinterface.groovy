@@ -2,9 +2,11 @@ package org.nrg.xnat.subinterfaces
 
 import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.paginated_api.HibernateFilter
 import org.nrg.xnat.pogo.paginated_api.PaginatedRequest
 import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.resources.PrearcScanResource
 import org.nrg.xnat.prearchive.PrearchiveQuery
 import org.nrg.xnat.prearchive.PrearchiveQueryScope
 import org.nrg.xnat.prearchive.PrearchiveResultExpectations
@@ -119,6 +121,15 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
 
     XnatInterface archiveSession(SessionData sessionData) {
         archiveSession(sessionData.url)
+    }
+
+    List<Scan> readScansForPrearchiveSession(SessionData sessionData) {
+        jsonQuery().get(formatRestUrl(sessionData.url, 'scans')).then().assertThat().statusCode(200).and().extract().jsonPath().getObject('ResultSet.Result', Scan[]).collect { scan ->
+            if (xnatInterface.readResources) {
+                scan.scanResources(xnatInterface.readResources(new PrearcScanResource(sessionData, scan)))
+            }
+            scan
+        }
     }
 
     protected List<SessionData> deserialize(List response) {

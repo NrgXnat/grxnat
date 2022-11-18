@@ -8,6 +8,7 @@ import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.experiments.SessionAssessor
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
+import org.nrg.xnat.prearchive.SessionData
 import org.nrg.xnat.util.ListUtils
 
 abstract class Resource extends Extensible<Resource> {
@@ -17,6 +18,7 @@ abstract class Resource extends Extensible<Resource> {
     Scan scan
     SessionAssessor sessionAssessor
     Reconstruction reconstruction
+    SessionData sessionData
     String folder
     String format
     int fileCount
@@ -71,6 +73,11 @@ abstract class Resource extends Extensible<Resource> {
 
     Resource reconstruction(Reconstruction reconstruction) {
         setReconstruction(reconstruction)
+        this
+    }
+
+    Resource sessionData(SessionData sessionData) {
+        setSessionData(sessionData)
         this
     }
 
