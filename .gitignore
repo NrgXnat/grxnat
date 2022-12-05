@@ -6,8 +6,7 @@
 xnat_test.log*
 local.properties
 *.DS_Store
-.gradle
 build/
+.gradle
 Sandbox.groovy
-gradle*
 lib/
