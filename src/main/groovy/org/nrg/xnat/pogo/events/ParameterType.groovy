@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue
 enum ParameterType {
 
     BOOLEAN,
-    STRING
+    STRING,
+    TEXT
 
     @JsonValue
     String jsonRep() {
