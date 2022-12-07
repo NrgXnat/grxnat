@@ -112,6 +112,10 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         postToSiteConfig(new SiteConfig(preventCrossModalityMerge: status))
     }
 
+    void setUseSopInstanceUidToUniquelyIdentifyDicom(boolean useUid) {
+        postToSiteConfig(new SiteConfig(useSopInstanceUidToUniquelyIdentifyDicom: useUid))
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
                 response.then().assertThat().statusCode(200).and().extract().jsonPath().getString('ResultSet.Result.get(0).script')

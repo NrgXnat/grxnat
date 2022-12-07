@@ -50,7 +50,9 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(PREVENT_CROSS_MODALITY_MERGE)
     Boolean preventCrossModalityMerge
 
+    @JsonProperty(USE_SOP_INSTANCE_UID_TO_UNIQUELY_ID_DICOM)
+    Boolean useSopInstanceUidToUniquelyIdentifyDicom
+
     @JsonProperty(INITIALIZED)
     Boolean initialized
-
 }
