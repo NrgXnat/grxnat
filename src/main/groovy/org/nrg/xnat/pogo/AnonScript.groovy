@@ -1,5 +1,6 @@
 package org.nrg.xnat.pogo
 
+import org.apache.commons.lang3.StringUtils
 import org.nrg.xnat.enums.DicomEditVersion
 import org.nrg.xnat.pogo.extensions.anon.AnonScriptExtension
 
@@ -7,6 +8,7 @@ class AnonScript extends Extensible<AnonScript> {
 
     private String contents
     DicomEditVersion version
+    private static final String NEW_LINE = System.getProperty("line.separator")
 
     AnonScript(String contents, DicomEditVersion version) {
         setContents(contents)
@@ -49,6 +51,22 @@ class AnonScript extends Extensible<AnonScript> {
 
     AnonScript extension(AnonScriptExtension extension) {
         setExtension(extension)
+        return this
+    }
+
+    /**
+     * addStatement
+     * Enable scripts to be built from individual statements. Enforce statements to be newLine delimited.
+     *
+     * @param statement is the statement to concatenate to the script contents
+     * @return this AnonScript
+     */
+    AnonScript addStatement( String statement) {
+        if( statement != null) {
+            String s = StringUtils.appendIfMissing(statement, NEW_LINE)
+            String c = StringUtils.isBlank(contents)? contents : StringUtils.appendIfMissing(contents, NEW_LINE)
+            contents = StringUtils.isBlank(c)? s : c.concat(s)
+        }
         return this
     }
 
