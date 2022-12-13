@@ -116,6 +116,10 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         postToSiteConfig(new SiteConfig(useSopInstanceUidToUniquelyIdentifyDicom: useUid))
     }
 
+    void updateDicomFileNamer(String newTemplate) {
+        postToSiteConfig(new SiteConfig(dicomFileNameTemplate: newTemplate))
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
                 response.then().assertThat().statusCode(200).and().extract().jsonPath().getString('ResultSet.Result.get(0).script')
