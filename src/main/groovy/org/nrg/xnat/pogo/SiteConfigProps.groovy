@@ -17,6 +17,7 @@ class SiteConfigProps {
     public static final String SESSION_TIMEOUT = 'sessionTimeout'
     public static final String PREVENT_CROSS_MODALITY_MERGE = 'preventCrossModalityMerge'
     public static final String USE_SOP_INSTANCE_UID_TO_UNIQUELY_ID_DICOM = 'useSopInstanceUidToUniquelyIdentifyDicom'
+    public static final String DICOM_FILE_NAME_TEMPLATE = 'dicomFileNameTemplate'
     public static final String INITIALIZED = 'initialized'
 
 }

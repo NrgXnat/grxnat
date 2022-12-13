@@ -53,6 +53,9 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(USE_SOP_INSTANCE_UID_TO_UNIQUELY_ID_DICOM)
     Boolean useSopInstanceUidToUniquelyIdentifyDicom
 
+    @JsonProperty(DICOM_FILE_NAME_TEMPLATE)
+    String dicomFileNameTemplate
+
     @JsonProperty(INITIALIZED)
     Boolean initialized
 }
