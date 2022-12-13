@@ -11,6 +11,7 @@ import org.nrg.xnat.pogo.AnonScript
 import org.nrg.xnat.pogo.ConfigServiceObject
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.SiteConfig
+import org.nrg.xnat.pogo.SiteConfigProps
 import org.nrg.xnat.pogo.Uptime
 import org.nrg.xnat.rest.PermissionsException
 import org.nrg.xnat.rest.SerializationUtils
@@ -114,6 +115,10 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
     void setUseSopInstanceUidToUniquelyIdentifyDicom(boolean useUid) {
         postToSiteConfig(new SiteConfig(useSopInstanceUidToUniquelyIdentifyDicom: useUid))
+    }
+
+    String readDicomFileNamer() {
+        readSiteConfigPreference(SiteConfigProps.DICOM_FILE_NAME_TEMPLATE)
     }
 
     void updateDicomFileNamer(String newTemplate) {
