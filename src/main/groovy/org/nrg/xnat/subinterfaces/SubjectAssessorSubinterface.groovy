@@ -6,11 +6,7 @@ import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
 import org.nrg.xnat.pogo.Subject
-import org.nrg.xnat.pogo.experiments.ImagingSession
-import org.nrg.xnat.pogo.experiments.NonimagingAssessor
-import org.nrg.xnat.pogo.experiments.Scan
-import org.nrg.xnat.pogo.experiments.SessionAssessor
-import org.nrg.xnat.pogo.experiments.SubjectAssessor
+import org.nrg.xnat.pogo.experiments.*
 import org.nrg.xnat.pogo.extensions.subject_assessor.SessionImportExtension
 import org.nrg.xnat.pogo.extensions.subject_assessor.SubjectAssessorQueryPutExtension
 import org.nrg.xnat.pogo.resources.SubjectAssessorResource
@@ -50,6 +46,10 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
 
     String projectExperimentsUrl(Project project) {
         formatRestUrl("/projects/${project.id}/experiments")
+    }
+
+    String destinationProjectUrl(SubjectAssessor subjectAssessor, Project destinationProject) {
+        formatUrl(subjectAssessorUrl(subjectAssessor), "/projects/${destinationProject.id}")
     }
 
     void createSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor, boolean suppressAssessors = false) {
@@ -200,6 +200,11 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
         queryBase().queryParam('subject_ID', destinationSubject.label).put(subjectAssessorUrl(subjectAssessor)).then().assertThat().statusCode(200)
         subjectAssessor.subject.removeExperiment(subjectAssessor)
         subjectAssessor.setSubject(destinationSubject)
+    }
+
+    void moveSubjectAssessorToOtherProject(SubjectAssessor subjectAssessor, Project destinationProject) {
+        queryBase().queryParam('primary', true).put(destinationProjectUrl(subjectAssessor, destinationProject)).then().assertThat().statusCode(200)
+        xnatInterface.shareSubject(subjectAssessor.primaryProject, subjectAssessor.subject, new Share(destinationProject.getId(), subjectAssessor.subject.getLabel()))
     }
 
     void deleteSubjectAssessor(Project project, Subject subject, SubjectAssessor subjectAssessor) {

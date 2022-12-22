@@ -1,8 +1,7 @@
 package org.nrg.xnat.subinterfaces
 
-import io.restassured.path.json.JsonPath
-import io.restassured.response.Response
 import groovyx.gpars.GParsPool
+import io.restassured.path.json.JsonPath
 import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Share
@@ -64,6 +63,13 @@ class SubjectSubinterface extends XnatFunctionalitySubinterface {
 
     List<Subject> readSecondarySubjects(Project project, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
         subjectQuery(project, false, recursion)
+    }
+
+    List<Subject> readPrimaryAndSecondarySubjects(Project project, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
+        List<Subject> subjects = new ArrayList<>()
+        subjects.addAll(readSubjects(project, recursion))
+        subjects.addAll(readSecondarySubjects(project, recursion))
+        return subjects
     }
 
     private List<Subject> subjectQuery(Project project, boolean primary, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
