@@ -2,6 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import org.nrg.testing.CommonStringUtils
 import org.nrg.xnat.interfaces.XnatInterface
+import org.nrg.xnat.pogo.ArchiveParams
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.paginated_api.HibernateFilter
 import org.nrg.xnat.pogo.paginated_api.PaginatedRequest
@@ -114,13 +115,13 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
         rebuildSession(sessionData.url, async)
     }
 
-    XnatInterface archiveSession(String src) {
-        queryBase().formParam('src', src).post(formatRestUrl('/services/archive')).then().assertThat().statusCode(200)
+    XnatInterface archiveSession(String src, ArchiveParams archiveParams = new ArchiveParams()) {
+        queryBase().formParams(archiveParams.formParams(src)).post(formatRestUrl('/services/archive')).then().assertThat().statusCode(200)
         xnatInterface
     }
 
-    XnatInterface archiveSession(SessionData sessionData) {
-        archiveSession(sessionData.url)
+    XnatInterface archiveSession(SessionData sessionData, ArchiveParams archiveParams = new ArchiveParams()) {
+        archiveSession(sessionData.url, archiveParams)
     }
 
     List<Scan> readScansForPrearchiveSession(SessionData sessionData) {
