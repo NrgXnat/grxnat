@@ -79,6 +79,7 @@ abstract class XnatInterface {
     @Delegate protected CustomFieldSubinterface customFieldSubinterface
     @Delegate protected SearchSubinterface searchSubinterface
     @Delegate protected DqrSubinterface dqrSubinterface
+    @Delegate protected CatalogRefreshSubinterface catalogRefreshSubinterface
 
     protected XnatInterface() {}
 
@@ -121,6 +122,7 @@ abstract class XnatInterface {
         customFieldSubinterface = constructSubinterface(CustomFieldSubinterface)
         searchSubinterface = constructSubinterface(SearchSubinterface)
         dqrSubinterface = constructSubinterface(DqrSubinterface)
+        catalogRefreshSubinterface = constructSubinterface(CatalogRefreshSubinterface)
         this
     }
 

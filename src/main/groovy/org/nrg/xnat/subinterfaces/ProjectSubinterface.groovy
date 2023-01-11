@@ -120,8 +120,12 @@ class ProjectSubinterface extends XnatFunctionalitySubinterface {
 
         if (recursion.readSubjects) {
             project.subjects(xnatInterface.readSubjects(project, recursion))
+            project.subjects.each { subject ->
+                subject.project(project)
+            }
             project.secondarySubjects(xnatInterface.readSecondarySubjects(project, recursion))
         }
+        project
         // TODO: anon scripts
     }
 

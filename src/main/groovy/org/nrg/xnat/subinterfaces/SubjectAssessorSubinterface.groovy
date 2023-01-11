@@ -131,6 +131,13 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
     }
 
     List<SubjectAssessor> readSubjectAssessors(Project project, Subject subject, XnatRecursionLevel recursion = XnatRecursionLevel.FULL_RECURSION) {
+        // we need the primary project of the session, but if we ask for "project" in the same call as "label", XNAT
+        // just always lists the "current" project
+        final Map<String, String> sessionProjectMap = jsonQuery().queryParam('columns', 'project,ID')
+                .get(subjectAssessorsForSubjectUrl(project, subject)).then().assertThat().statusCode(200)
+                .and().extract().response().jsonPath().getList('ResultSet.Result')
+                .collectEntries { [(it['ID']) : it['project']] }
+
         List imagingMaps, nonimagingMaps
 
         (imagingMaps, nonimagingMaps) = jsonQuery().queryParam('columns', 'note,date,label,ID').
@@ -144,6 +151,11 @@ class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
         subject.experiments(nonimagingSubjectAssessors + imagingSessions)
 
         subject.experiments.each { assessor ->
+            final String primaryProject = sessionProjectMap.get(assessor.accessionNumber)
+            if (primaryProject == project.id) {
+                assessor.setPrimaryProject(project)
+            }
+            assessor.setSubject(subject)
             if (xnatInterface.readResources) {
                 assessor.resources(xnatInterface.readResources(new SubjectAssessorResource().project(project).subject(subject).subjectAssessor(assessor)))
             }
