@@ -56,6 +56,12 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(DICOM_FILE_NAME_TEMPLATE)
     String dicomFileNameTemplate
 
+    @JsonProperty(BACKUP_DELETED_TO_CACHE)
+    Boolean backupDeletedToCache
+
+    @JsonProperty(MAINTAIN_FILE_HISTORY)
+    Boolean maintainFileHistory
+
     @JsonProperty(INITIALIZED)
     Boolean initialized
 }

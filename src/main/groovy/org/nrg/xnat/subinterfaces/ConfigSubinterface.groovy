@@ -125,6 +125,10 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         postToSiteConfig(new SiteConfig(dicomFileNameTemplate: newTemplate))
     }
 
+    void setSiteBackupSettings(boolean backupDeletedToCache, boolean maintainFileHistory) {
+        postToSiteConfig(new SiteConfig(backupDeletedToCache: backupDeletedToCache, maintainFileHistory: maintainFileHistory))
+    }
+
     private AnonScript readAnonScript(Response response) {
         new AnonScript().contents(
                 response.then().assertThat().statusCode(200).and().extract().jsonPath().getString('ResultSet.Result.get(0).script')

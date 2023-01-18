@@ -19,5 +19,7 @@ class SiteConfigProps {
     public static final String USE_SOP_INSTANCE_UID_TO_UNIQUELY_ID_DICOM = 'useSopInstanceUidToUniquelyIdentifyDicom'
     public static final String DICOM_FILE_NAME_TEMPLATE = 'dicomFileNameTemplate'
     public static final String INITIALIZED = 'initialized'
+    public static final String BACKUP_DELETED_TO_CACHE = 'backupDeletedToCache'
+    public static final String MAINTAIN_FILE_HISTORY = 'maintainFileHistory'
 
 }
