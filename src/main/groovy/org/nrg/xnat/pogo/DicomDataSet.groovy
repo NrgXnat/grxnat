@@ -56,11 +56,11 @@ class DicomDataSet {
         return attributes.getString(tag)
     }
 
-    DicomDataSet setTag(int[] tags, String value) {
-        return setTag(tags[0..-1], value)
+    DicomDataSet setTagArray(int[] tags, String value) {
+        return setTagList(tags[0..-1], value)
     }
 
-    DicomDataSet setTag(List<Integer> tags, String value) {
+    DicomDataSet setTagList(List<Integer> tags, String value) {
         setString(tags, attributes, value)
         return this
     }
