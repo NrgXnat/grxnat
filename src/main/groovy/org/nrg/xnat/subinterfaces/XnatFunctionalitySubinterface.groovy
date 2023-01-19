@@ -53,7 +53,16 @@ abstract class XnatFunctionalitySubinterface {
     }
 
     protected RequestSpecification queryBaseWithStatusCodeListeners(List<CustomExceptionFailureListener> listeners) {
-        queryBase().config(RestAssured.config().failureConfig(FailureConfig.failureConfig().with().failureListeners(listeners)))
+        addStatusCodeListeners(queryBase(), listeners)
+    }
+
+    protected RequestSpecification jsonQueryWithStatusCodeListeners(List<CustomExceptionFailureListener> listeners) {
+        addStatusCodeListeners(jsonQuery(), listeners)
+    }
+
+    @SuppressWarnings('GrMethodMayBeStatic')
+    protected RequestSpecification addStatusCodeListeners(RequestSpecification requestSpecification, List<CustomExceptionFailureListener> listeners) {
+        requestSpecification.config(RestAssured.config().failureConfig(FailureConfig.failureConfig().with().failureListeners(listeners)))
     }
 
     abstract List<String> getHandledEndpoints()

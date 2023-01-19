@@ -39,12 +39,22 @@ class ScanSubinterface extends XnatFunctionalitySubinterface {
     }
 
     List<Scan> readScans(Project project, Subject subject, ImagingSession session) {
-        jsonQuery().queryParam('columns', 'ID,type,quality,xsiType,note,series_description,URI,UID').get(sessionScansUrl(project, subject, session)).jsonPath().getObject('ResultSet.Result', Scan[]).collect { scan ->
-            if (xnatInterface.readResources) {
-                scan.scanResources(xnatInterface.readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)))
-            }
-            scan.session(session)
-        }
+        jsonQueryWithStatusCodeListeners([NOT_FOUND_404])
+                .queryParam('columns', 'ID,type,quality,xsiType,note,series_description,URI,UID')
+                .get(sessionScansUrl(project, subject, session))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .jsonPath()
+                .getObject('ResultSet.Result', Scan[])
+                .collect { scan ->
+                    if (xnatInterface.readResources) {
+                        scan.scanResources(xnatInterface.readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)))
+                    }
+                    scan.session(session)
+                }
     }
 
     Scan readAdditionalScanMetadata(Project project, Subject subject, ImagingSession session, Scan scan) {
