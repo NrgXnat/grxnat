@@ -47,4 +47,19 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
         xnatInterface
     }
 
+    @RequireAdmin
+    XnatInterface deletePacsConnection(PacsConnection pacs) {
+        deletePacsConnection(pacs.id)
+    }
+
+    @RequireAdmin
+    XnatInterface deletePacsConnection(int pacsId) {
+        queryBase()
+                .delete(formatXapiUrl("pacs/${pacsId}"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+        xnatInterface
+    }
+
 }
