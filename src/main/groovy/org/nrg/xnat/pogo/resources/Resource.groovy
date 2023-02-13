@@ -22,6 +22,7 @@ abstract class Resource extends Extensible<Resource> {
     String folder
     String format
     int fileCount
+    int xnatAbstractResourceId
     long fileSize
     protected final List<ResourceFile> resourceFiles = []
     protected Extension<Resource> extension

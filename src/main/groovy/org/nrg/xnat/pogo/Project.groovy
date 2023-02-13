@@ -4,6 +4,8 @@ import org.nrg.xnat.enums.Accessibility
 import org.nrg.xnat.enums.PrearchiveCode
 import org.nrg.xnat.pogo.custom_variable.CustomVariableSet
 import org.nrg.xnat.pogo.events.Subscription
+import org.nrg.xnat.pogo.experiments.ImagingSession
+import org.nrg.xnat.pogo.experiments.SubjectAssessor
 import org.nrg.xnat.pogo.extensions.project.ProjectExtension
 import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.pogo.users.CustomUserGroup
@@ -364,6 +366,22 @@ class Project extends Extensible<Project> implements HasUri {
 
     Subject findSecondarySubject(String label) {
         secondarySubjects.find { it.label == label }
+    }
+
+    SubjectAssessor findSubjectAssessor(String label) {
+        final List<SubjectAssessor> experiments = subjects*.experiments.flatten() as List<SubjectAssessor>
+        experiments.find { experiment ->
+            experiment.label == label
+        }
+    }
+
+    ImagingSession findSession(String label) {
+        final SubjectAssessor experiment = findSubjectAssessor(label)
+        if (experiment instanceof ImagingSession) {
+            experiment
+        } else {
+            throw new UnsupportedOperationException("Found a subject assessor with label '${label}', but it does not seem to be an image session.")
+        }
     }
 
     private Map<UserGroup, List<User>> constructDefaultUserMap() {

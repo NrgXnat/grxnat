@@ -60,6 +60,10 @@ abstract class XnatFunctionalitySubinterface {
         addStatusCodeListeners(jsonQuery(), listeners)
     }
 
+    protected RequestSpecification queryBaseWithCommonStatusCodeListeners() {
+        queryBaseWithStatusCodeListeners([FORBIDDEN_403, NOT_FOUND_404])
+    }
+
     @SuppressWarnings('GrMethodMayBeStatic')
     protected RequestSpecification addStatusCodeListeners(RequestSpecification requestSpecification, List<CustomExceptionFailureListener> listeners) {
         requestSpecification.config(RestAssured.config().failureConfig(FailureConfig.failureConfig().with().failureListeners(listeners)))

@@ -80,6 +80,7 @@ abstract class XnatInterface {
     @Delegate protected SearchSubinterface searchSubinterface
     @Delegate protected DqrSubinterface dqrSubinterface
     @Delegate protected CatalogRefreshSubinterface catalogRefreshSubinterface
+    @Delegate protected ResourceMitigationSubinterface resourceMitigationSubinterface
 
     protected XnatInterface() {}
 
@@ -123,6 +124,7 @@ abstract class XnatInterface {
         searchSubinterface = constructSubinterface(SearchSubinterface)
         dqrSubinterface = constructSubinterface(DqrSubinterface)
         catalogRefreshSubinterface = constructSubinterface(CatalogRefreshSubinterface)
+        resourceMitigationSubinterface = constructSubinterface(ResourceMitigationSubinterface)
         this
     }
 

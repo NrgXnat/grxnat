@@ -17,8 +17,13 @@ class ResourceDeserializer<T extends Resource> extends CustomDeserializer<Resour
 
         setStringIfNonnull(node, 'label', resource.&setFolder)
         setStringIfNonnull(node, 'format', resource.&setFormat)
-        if (fieldNonnull(node, 'file_count')) resource.setFileCount(node.get('file_count').asInt())
-        if (fieldNonnull(node, 'file_size')) resource.setFileSize(node.get('file_size').asLong())
+        if (fieldNonnull(node, 'file_count')) {
+            resource.setFileCount(node.get('file_count').asInt())
+        }
+        if (fieldNonnull(node, 'file_size')) {
+            resource.setFileSize(node.get('file_size').asLong())
+        }
+        setIntIfNonzero(node, 'xnat_abstractresource_id', resource.&setXnatAbstractResourceId)
 
         resource
     }

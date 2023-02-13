@@ -15,6 +15,7 @@ class ResourceFileSerializer extends CustomSerializer<ResourceFile> {
             gen.writeBooleanField('overwrite', value.overwrite)
         }
         writeContentField(value, gen)
+        writeStringFieldIfNonnull(gen, 'format', value.format)
 
         gen.writeEndObject()
     }
