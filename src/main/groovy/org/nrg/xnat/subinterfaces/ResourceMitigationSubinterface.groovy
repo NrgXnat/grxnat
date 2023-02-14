@@ -180,7 +180,7 @@ class ResourceMitigationSubinterface extends XnatFunctionalitySubinterface {
     }
 
     Map<String, List<Integer>> launchMitigationViaCsv(File csv) {
-        queryBaseWithCommonStatusCodeListeners().multiPart(csv).post(mitigateUrl(['resources']))
+        queryBaseWithCommonStatusCodeListeners().multiPart('uploadFile', csv).post(mitigateUrl(['resources', 'csv']))
                 .then().assertThat().statusCode(200).and().extract().as(Map)
     }
 
