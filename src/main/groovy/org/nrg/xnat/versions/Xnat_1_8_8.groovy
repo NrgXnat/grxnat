@@ -4,11 +4,11 @@ import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.interfaces.XnatInterface_1_8_0
 
 @Follows(Xnat_1_8_7)
-class XnatFormIo extends XnatVersion {
+class Xnat_1_8_8 extends XnatVersion {
 
     @Override
     List<String> getVersionKeys() {
-        ['formio']
+        ['1.8.8']
     }
 
     @Override
