@@ -7,6 +7,7 @@ class ResourceMitigationReport {
     long resourceSurveyRequestId
     Map<File, File> movedFiles
     Map<File, File> removedFiles
+    List<File> retainedFiles
     Map<File, Pair<File, String>> backupErrors
     Map<File, Pair<File, String>> moveErrors
     Map<File, String> deleteErrors
