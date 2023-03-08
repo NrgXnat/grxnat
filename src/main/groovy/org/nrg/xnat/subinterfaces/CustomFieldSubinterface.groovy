@@ -38,22 +38,22 @@ class CustomFieldSubinterface extends XnatFunctionalitySubinterface {
 
     Map<String, Object> readCustomFields(CustomFieldScope fieldScope, List<String> fieldSubset = null) {
         final Map<String, Object> queryParams = (fieldSubset != null) ? ['fieldNames': fieldSubset.join(',')] : [:]
-        queryBaseWithStatusCodeListeners([NOT_FOUND_404]).queryParams(queryParams).get(formatXapiUrl(fieldScope.buildUriFragment(), 'fields')).then().
+        queryBaseWithCommonStatusCodeListeners().queryParams(queryParams).get(formatXapiUrl(fieldScope.buildUriFragment(), 'fields')).then().
                 assertThat().statusCode(200).and().extract().as(Map)
     }
 
     String readCustomField(CustomFieldScope fieldScope, String fieldName) {
-        queryBaseWithStatusCodeListeners([NOT_FOUND_404]).get(formatXapiUrl(fieldScope.buildUriFragment(), 'fields', fieldName)).then().
+        queryBaseWithCommonStatusCodeListeners().get(formatXapiUrl(fieldScope.buildUriFragment(), 'fields', fieldName)).then().
                 assertThat().statusCode(200).and().extract().asString()
     }
 
     Map<String, Object> setCustomFields(CustomFieldScope fieldScope, Map<String, Object> customFields) {
-        queryBaseWithStatusCodeListeners([FORBIDDEN_403, NOT_FOUND_404]).contentType(ContentType.JSON).body(customFields).put(formatXapiUrl(fieldScope.buildUriFragment(), 'fields')).then().
+        queryBaseWithCommonStatusCodeListeners().contentType(ContentType.JSON).body(customFields).put(formatXapiUrl(fieldScope.buildUriFragment(), 'fields')).then().
                 assertThat().statusCode(200).and().extract().as(Map)
     }
 
     Map<String, Object> deleteCustomField(CustomFieldScope fieldScope, String fieldName) {
-        queryBaseWithStatusCodeListeners([FORBIDDEN_403, NOT_FOUND_404]).delete(formatXapiUrl(fieldScope.buildUriFragment(), 'fields', fieldName)).then().
+        queryBaseWithCommonStatusCodeListeners().delete(formatXapiUrl(fieldScope.buildUriFragment(), 'fields', fieldName)).then().
                 assertThat().statusCode(200).and().extract().jsonPath().getMap('')
     }
 
