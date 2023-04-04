@@ -8,7 +8,7 @@ class Xnat_1_8_4 extends XnatVersion {
 
     @Override
     List<String> getVersionKeys() {
-        ['1.8.4']
+        ['1.8.4', '1.8.4.1']
     }
 
     @Override
