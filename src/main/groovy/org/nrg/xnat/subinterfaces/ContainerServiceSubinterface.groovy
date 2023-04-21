@@ -1,6 +1,7 @@
 package org.nrg.xnat.subinterfaces
 
 import io.restassured.response.ValidatableResponse
+import io.restassured.specification.RequestSpecification
 import org.hamcrest.Matchers
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.meta.RequireAdmin
@@ -11,6 +12,7 @@ import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.containers.Command
 import org.nrg.xnat.pogo.containers.CommandSummaryForContext
 import org.nrg.xnat.pogo.containers.Container
+import org.nrg.xnat.pogo.containers.ContainerLogPollResponse
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
 import org.nrg.xnat.pogo.containers.Orchestration
@@ -300,6 +302,19 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 .and()
                 .extract()
                 .asString()
+    }
+
+    ContainerLogPollResponse pollContainerLog(String containerId, ContainerLog log, Long sinceEpochSecond = null) {
+        final Map<String, Object> queryParams = sinceEpochSecond ? ['since': sinceEpochSecond] : [:]
+        queryBase()
+                .queryParams(queryParams)
+                .get(formatXapiUrl("containers", containerId, "logSince", log.name().toLowerCase()))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(ContainerLogPollResponse)
     }
 
     enum ContainerLog {
