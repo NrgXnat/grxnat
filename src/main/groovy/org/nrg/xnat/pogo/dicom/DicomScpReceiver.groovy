@@ -124,6 +124,11 @@ class DicomScpReceiver {
         return this
     }
 
+    DicomScpReceiver id(Integer id) {
+        setId(id)
+        return this
+    }
+
     String toString() {
         "(aeTitle: ${aeTitle}, port: ${port}, enabled: ${enabled}, host: ${host}${usesDefaultIdentifier() ? '' : ', identifier: ' + identifier}, anonymizationEnabled: ${anonymizationEnabled}, whitelistEnabled: ${whitelistEnabled}, whitelist: ${whitelist.join(',')}, routingExpressionEnabled: ${routingExpressionsEnabled}, projectRoutingExpression: ${projectRoutingExpression}, subjectRoutingExpression: ${subjectRoutingExpression}, sessionRoutingExpression: ${sessionRoutingExpression})"
     }

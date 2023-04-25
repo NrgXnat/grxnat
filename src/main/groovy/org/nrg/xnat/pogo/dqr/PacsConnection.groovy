@@ -5,10 +5,9 @@ import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
-@TupleConstructor(excludes = ['id', 'ormStrategySpringBeanId'])
+@TupleConstructor(excludes = ['ormStrategySpringBeanId'])
 class PacsConnection {
 
-    Integer id
     String aeTitle
     String host
     String label
@@ -20,5 +19,6 @@ class PacsConnection {
     boolean dicomWebEnabled
     String dicomWebUrl
     String ormStrategySpringBeanId = 'dicomOrmStrategy'
+    Integer id
 
 }

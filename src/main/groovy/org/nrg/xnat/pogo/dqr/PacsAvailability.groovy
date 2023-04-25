@@ -16,6 +16,7 @@ class PacsAvailability {
     Integer pacsId
     Integer threads
     Integer utilizationPercent
+    Integer id
 
     static PacsAvailability withDefaultOptions(DayOfWeek day, Integer pacsId) {
         new PacsAvailability('24:00', '00:00', day, pacsId, 1, 100)

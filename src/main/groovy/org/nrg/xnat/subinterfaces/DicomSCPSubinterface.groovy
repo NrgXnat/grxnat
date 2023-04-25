@@ -60,4 +60,16 @@ class DicomSCPSubinterface extends XnatFunctionalitySubinterface {
         xnatInterface
     }
 
+    @RequireAdmin
+    DicomScpReceiver createOrUpdateDicomScpReceiver(DicomScpReceiver receiver) {
+        final Integer preexistingId = readAllDicomScpReceivers().find { candidate ->
+            candidate.aeTitle == receiver.aeTitle
+        }?.id
+        if (preexistingId) {
+            updateDicomScpReceiver(receiver.id(preexistingId))
+        } else {
+            createDicomScpReceiver(receiver)
+        }
+    }
+
 }
