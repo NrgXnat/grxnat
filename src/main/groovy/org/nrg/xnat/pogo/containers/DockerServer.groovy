@@ -18,6 +18,7 @@ class DockerServer {
     String containerUser
     boolean autoCleanup
     List<SwarmConstraint> swarmConstraints
+    boolean ping
 
     void setSwarmMode(final boolean swarmMode) {
         this.swarmMode = swarmMode
