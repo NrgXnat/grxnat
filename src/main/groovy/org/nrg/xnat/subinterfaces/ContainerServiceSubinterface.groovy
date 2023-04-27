@@ -20,6 +20,8 @@ import org.nrg.xnat.pogo.containers.OrchestrationProject
 import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.rest.SerializationUtils
 
+import java.util.zip.ZipInputStream
+
 import static io.restassured.http.ContentType.JSON
 
 @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
@@ -315,6 +317,17 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 .and()
                 .extract()
                 .as(ContainerLogPollResponse)
+    }
+
+    ZipInputStream getContainerLogZip(String containerId) {
+        InputStream is = queryBase()
+                .get(formatXapiUrl("containers", containerId, "logs"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .extract()
+                .asInputStream()
+        new ZipInputStream(is)
     }
 
     enum ContainerLog {
