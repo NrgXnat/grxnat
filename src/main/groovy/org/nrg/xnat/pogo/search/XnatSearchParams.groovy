@@ -6,10 +6,12 @@ import groovy.transform.builder.SimpleStrategy
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class XnatSearchParams {
 
-    int offset = 0
-    int limit = 200
+    Integer offset
+    Integer limit
     String sortBy
     SortOrder sortOrder
+    Boolean cache
+    Boolean refresh
 
     enum SortOrder {
         ASC, DESC
