@@ -4,6 +4,7 @@ import io.restassured.builder.RequestSpecBuilder
 import io.restassured.response.ExtractableResponse
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
+import org.nrg.xnat.pogo.search.SearchColumnResponse
 import org.nrg.xnat.pogo.search.SearchResponse
 import org.nrg.xnat.pogo.search.SearchElement
 import org.nrg.xnat.pogo.search.XnatSearchDocument
@@ -19,21 +20,17 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
         [
                 '/projects/{PROJECT_ID}/searches/{SEARCH_ID}',
                 '/search',
-                '/search/{CACHED_SEARCH_ID}'
+                '/search/{CACHED_SEARCH_ID}',
+                '/search/saved/{SEARCH_ID}'
         ]
     }
 
     XnatSearchDocument getDefaultSearch(Project project, DataType dataType) {
-        final String xml = queryBase()
-                .spec(new RequestSpecBuilder().setUrlEncodingEnabled(false).build())
-                .get(formatRestUrl('/projects', project.id, 'searches', "@${dataType.xsiType}"))
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .and()
-                .extract()
-                .asString()
-        new XnatSearchDocument(searchXml: xml)
+        retrieveDefaultSearchXml(formatRestUrl("/projects/${project.id}/searches/@${dataType.xsiType}"))
+    }
+
+    XnatSearchDocument getDefaultSearch(DataType dataType) {
+        retrieveDefaultSearchXml(formatRestUrl("/search/saved/@${dataType.xsiType}"))
     }
 
     SearchResponse cacheSearch(XnatSearchDocument searchDocument) {
@@ -79,6 +76,22 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
                 .getList("${RESULT_SET}.Result", SearchElement)
     }
 
+    SearchColumnResponse retrieveCachedSearchColumn(SearchResponse cachedSearch, String columnName) {
+        retrieveCachedSearchColumn(cachedSearch.id, columnName)
+    }
+
+    SearchColumnResponse retrieveCachedSearchColumn(String cachedSearchId, String columnName) {
+        jsonQuery()
+                .get(formatRestUrl("/search/${cachedSearchId}/${columnName}"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .jsonPath()
+                .getObject(RESULT_SET, SearchColumnResponse)
+    }
+
     protected ExtractableResponse retrieveSearch(SearchResponse cachedSearch, XnatSearchParams searchParams, String format) {
         queryBase()
                 .queryParams(SerializationUtils.serializeToMap(searchParams))
@@ -89,6 +102,20 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
                 .statusCode(200)
                 .and()
                 .extract()
+    }
+
+    protected XnatSearchDocument retrieveDefaultSearchXml(String url) {
+        new XnatSearchDocument(
+                queryBase()
+                        .spec(new RequestSpecBuilder().setUrlEncodingEnabled(false).build())
+                        .get(url)
+                        .then()
+                        .assertThat()
+                        .statusCode(200)
+                        .and()
+                        .extract()
+                        .asString()
+        )
     }
 
 }
