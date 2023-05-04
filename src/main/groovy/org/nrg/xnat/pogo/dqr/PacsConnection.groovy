@@ -17,7 +17,7 @@ class PacsConnection {
     boolean storable
     boolean defaultStorageAe
     boolean dicomWebEnabled
-    String dicomWebUrl
+    String dicomWebRootUrl
     String ormStrategySpringBeanId = 'dicomOrmStrategy'
     Integer id
 
