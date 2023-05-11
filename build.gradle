@@ -2,7 +2,7 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.20-SNAPSHOT'
+def buildVersion = '1.20'
 
 group groupName
 version buildVersion
@@ -18,7 +18,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'io.freefair.aspectj.post-compile-weaving'
 
 
-def vBom = '3.2-SNAPSHOT'
+def vBom = '3.2'
 def vTestUtils = '2.5'
 
 buildscript {
