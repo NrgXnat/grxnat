@@ -2,7 +2,7 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.20'
+def buildVersion = '1.21-SNAPSHOT'
 
 group groupName
 version buildVersion
@@ -18,7 +18,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'io.freefair.aspectj.post-compile-weaving'
 
 
-def vBom = '3.2'
+def vBom = '3.3-SNAPSHOT'
 def vTestUtils = '2.5'
 
 buildscript {
@@ -72,6 +72,7 @@ dependencies {
     apiAndInclude('com.fasterxml.jackson.core:jackson-annotations')
     apiAndInclude('com.fasterxml.jackson.core:jackson-core')
     apiAndInclude('com.fasterxml.jackson.core:jackson-databind')
+    apiAndInclude('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
     apiAndInclude('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
     apiAndInclude('com.fasterxml.jackson.datatype:jackson-datatype-hibernate4')
     apiAndInclude('org.hibernate:hibernate-core')
