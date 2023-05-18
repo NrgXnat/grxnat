@@ -2,6 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.response.ExtractableResponse
+import org.nrg.xnat.jackson.mappers.XnatXmlMapper
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.search.SearchColumnResponse
@@ -43,7 +44,7 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
     SearchResponse performSearch(XnatSearchDocument searchDocument, XnatSearchParams searchParams = new XnatSearchParams()) {
         jsonQuery()
                 .queryParams(SerializationUtils.serializeToMap(searchParams))
-                .body(searchDocument.searchXml)
+                .body(searchDocument, XnatXmlMapper.REST_MAPPER)
                 .post(formatRestUrl('search'))
                 .then()
                 .assertThat()
@@ -105,17 +106,15 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
     }
 
     protected XnatSearchDocument retrieveDefaultSearchXml(String url) {
-        new XnatSearchDocument(
-                queryBase()
-                        .spec(new RequestSpecBuilder().setUrlEncodingEnabled(false).build())
-                        .get(url)
-                        .then()
-                        .assertThat()
-                        .statusCode(200)
-                        .and()
-                        .extract()
-                        .asString()
-        )
+        queryBase()
+                .spec(new RequestSpecBuilder().setUrlEncodingEnabled(false).build())
+                .get(url)
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(XnatSearchDocument, XnatXmlMapper.REST_MAPPER)
     }
 
 }

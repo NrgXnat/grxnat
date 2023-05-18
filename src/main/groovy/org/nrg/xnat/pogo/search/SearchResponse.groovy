@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class SearchResponse {
 
-    @JsonProperty('Columns') List<Map<String, Object>> columns // could map this more precisely later if needed
+    @JsonProperty('Columns') List<SearchColumn> columns
     @JsonProperty('ID') String id
     @JsonProperty('Result') List<SearchRow> result
     String rootElementName

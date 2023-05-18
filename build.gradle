@@ -19,7 +19,7 @@ apply plugin: 'io.freefair.aspectj.post-compile-weaving'
 
 
 def vBom = '3.3-SNAPSHOT'
-def vTestUtils = '2.5'
+def vTestUtils = '2.6'
 
 buildscript {
     repositories {
