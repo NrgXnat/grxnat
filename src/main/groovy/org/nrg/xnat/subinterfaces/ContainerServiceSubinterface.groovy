@@ -13,6 +13,7 @@ import org.nrg.xnat.pogo.containers.Command
 import org.nrg.xnat.pogo.containers.CommandSummaryForContext
 import org.nrg.xnat.pogo.containers.Container
 import org.nrg.xnat.pogo.containers.ContainerLogPollResponse
+import org.nrg.xnat.pogo.containers.ContainerLogPollResponsePre322
 import org.nrg.xnat.pogo.containers.DockerServer
 import org.nrg.xnat.pogo.containers.Image
 import org.nrg.xnat.pogo.containers.Orchestration
@@ -306,8 +307,8 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 .asString()
     }
 
-    ContainerLogPollResponse pollContainerLog(String containerId, ContainerLog log, Long sinceEpochSecond = null) {
-        final Map<String, Object> queryParams = sinceEpochSecond ? ['since': sinceEpochSecond] : [:]
+    ContainerLogPollResponse pollContainerLog(String containerId, ContainerLog log, String since = null) {
+        final Map<String, Object> queryParams = since ? ['since': since] : [:]
         queryBase()
                 .queryParams(queryParams)
                 .get(formatXapiUrl("containers", containerId, "logSince", log.name().toLowerCase()))
@@ -317,6 +318,19 @@ class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
                 .and()
                 .extract()
                 .as(ContainerLogPollResponse)
+    }
+
+    ContainerLogPollResponsePre322 pollContainerLogPre322(String containerId, ContainerLog log, Long sinceEpochSecond = null) {
+        final Map<String, Object> queryParams = sinceEpochSecond ? ['since': sinceEpochSecond] : [:]
+        queryBase()
+                .queryParams(queryParams)
+                .get(formatXapiUrl("containers", containerId, "logSince", log.name().toLowerCase()))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(ContainerLogPollResponsePre322)
     }
 
     ZipInputStream getContainerLogZip(String containerId) {
