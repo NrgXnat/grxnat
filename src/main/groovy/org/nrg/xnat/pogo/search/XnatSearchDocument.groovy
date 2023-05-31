@@ -1,6 +1,7 @@
 package org.nrg.xnat.pogo.search
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
@@ -11,6 +12,7 @@ import groovy.transform.builder.SimpleStrategy
 import org.nrg.xnat.jackson.deserializers.StringIntBooleanDeserializer
 import org.nrg.xnat.jackson.mappers.XnatXmlMapper
 import org.nrg.xnat.pogo.DataType
+import org.nrg.xnat.pogo.users.User
 
 @EqualsAndHashCode
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
@@ -44,13 +46,16 @@ class XnatSearchDocument {
 
     @JacksonXmlProperty(localName = 'xdat:search_field')
     @JacksonXmlElementWrapper(useWrapping = false)
-    List<SearchField> searchFields
+    List<SearchField> searchFields = []
 
     @JacksonXmlProperty(localName = 'xdat:search_where')
     SearchWhere searchWhere
 
+    @JacksonXmlProperty(localName = 'xdat:allowed_user')
+    @JacksonXmlElementWrapper(useWrapping = false)
+    List<XdatAllowedUser> allowedUsers = []
+
     XnatSearchDocument addSearchField(SearchField searchField) {
-        searchFields = searchFields ?: []
         searchFields << searchField
         this
     }
@@ -86,6 +91,16 @@ class XnatSearchDocument {
         }
 
         this
+    }
+
+    XnatSearchDocument addAllowedUser(User user) {
+        allowedUsers << new XdatAllowedUser(login: user.username)
+        this
+    }
+
+    @JsonIgnore
+    List<String> getAllowedUsersAsStrings() {
+        allowedUsers*.login
     }
 
     String asString() {

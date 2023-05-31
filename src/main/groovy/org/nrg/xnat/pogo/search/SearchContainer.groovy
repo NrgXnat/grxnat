@@ -3,7 +3,7 @@ package org.nrg.xnat.pogo.search
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
-abstract class SearchContainer {
+abstract class SearchContainer<T extends SearchContainer<T>> {
 
     @JacksonXmlProperty(localName = 'xdat:child_set')
     @JacksonXmlElementWrapper(useWrapping = false)
@@ -13,7 +13,7 @@ abstract class SearchContainer {
     @JacksonXmlElementWrapper(useWrapping = false)
     List<XdatCriteria> criteria
 
-    void addSearchCriterion(SearchCriterion criterion) {
+    T addSearchCriterion(SearchCriterion criterion) {
         if (criterion instanceof XdatChildSet) {
             childSets = childSets ?: []
             childSets << criterion
@@ -23,6 +23,7 @@ abstract class SearchContainer {
         } else {
             throw new UnsupportedOperationException('Unknown criteria type')
         }
+        this as T
     }
 
     List<XdatCriteria> findRecursiveCriteria() {

@@ -8,7 +8,8 @@ class SearchFieldTypes {
     public static final String DATE = 'date'
     public static final String TIME = 'time'
     public static final String TIMESTAMP = 'timestamp'
-    public static final List<String> ALL_KNOWN_TYPES = [STRING, FLOAT, INTEGER, DATE, TIME, TIMESTAMP]
+    public static final String DATETIME = 'dateTime'
+    public static final List<String> ALL_KNOWN_TYPES = [STRING, FLOAT, INTEGER, DATE, TIME, TIMESTAMP, DATETIME]
     private static final Map<String, List<ComparisonType>> SUPPORTED_COMPARISONS = [:]
 
     static List<ComparisonType> supportedComparisonsFor(String searchFieldType) {

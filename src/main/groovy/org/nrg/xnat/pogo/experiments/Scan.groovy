@@ -8,6 +8,8 @@ import org.nrg.xnat.pogo.resources.Resource
 import org.nrg.xnat.util.ListUtils
 import org.nrg.xnat.util.XnatUriUtils
 
+import java.time.LocalTime
+
 class Scan extends Extensible<Scan> implements HasUri {
 
     private ImagingSession session
@@ -18,6 +20,7 @@ class Scan extends Extensible<Scan> implements HasUri {
     String note
     String quality = "usable"
     String uid
+    LocalTime startTime
     private final List<Resource> scanResources = []
 
     Scan(ImagingSession session, String id) {
@@ -107,6 +110,11 @@ class Scan extends Extensible<Scan> implements HasUri {
 
     Scan uid(String uid) {
         setUid(uid)
+        this
+    }
+
+    Scan startTime(LocalTime startTime) {
+        setStartTime(startTime)
         this
     }
 

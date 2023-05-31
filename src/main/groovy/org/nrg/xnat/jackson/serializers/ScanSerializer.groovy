@@ -2,7 +2,10 @@ package org.nrg.xnat.jackson.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
+import org.nrg.testing.TimeUtils
 import org.nrg.xnat.pogo.experiments.Scan
+
+import java.time.format.DateTimeFormatter
 
 class ScanSerializer extends CustomSerializer<Scan> {
 
@@ -21,6 +24,7 @@ class ScanSerializer extends CustomSerializer<Scan> {
         writeStringFieldIfNonnull(gen, 'type', scan.type)
         writeStringFieldIfNonnull(gen, 'note', scan.note)
         writeStringFieldIfNonnull(gen, 'quality', scan.quality)
+        writeStringFieldIfNonnull(gen, 'xnat:imageScanData/startTime', scan.startTime?.format(DateTimeFormatter.ISO_LOCAL_TIME))
     }
 
 }

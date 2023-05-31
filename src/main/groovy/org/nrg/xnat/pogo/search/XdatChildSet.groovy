@@ -7,7 +7,7 @@ import groovy.transform.builder.SimpleStrategy
 
 @EqualsAndHashCode
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
-class XdatChildSet extends SearchContainer implements SearchCriterion {
+class XdatChildSet extends SearchContainer<XdatChildSet> implements SearchCriterion {
 
     @JacksonXmlProperty(isAttribute = true)
     SearchMethod method

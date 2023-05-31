@@ -4,9 +4,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
-class SearchWhere extends SearchContainer<SearchWhere> {
+class XdatAllowedUser {
 
-    @JacksonXmlProperty(isAttribute = true)
-    SearchMethod method
+    @JacksonXmlProperty(localName = 'xdat:login')
+    String login
 
 }

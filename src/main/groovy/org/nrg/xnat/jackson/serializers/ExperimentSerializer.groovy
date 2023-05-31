@@ -2,6 +2,7 @@ package org.nrg.xnat.jackson.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
+import org.apache.commons.lang3.StringUtils
 import org.nrg.testing.TimeUtils
 import org.nrg.xnat.jackson.XnatSerialize
 import org.nrg.xnat.pogo.experiments.Experiment
@@ -29,7 +30,10 @@ class ExperimentSerializer extends CustomSerializer<Experiment> {
 
         if (!additionalFields.isEmpty()) {
             additionalFields.each { field, fieldVal ->
-                gen.writeObjectField("${value.dataType.xsiType}/${field}", fieldVal)
+                gen.writeObjectField(
+                        StringUtils.prependIfMissing(field, "${value.dataType.xsiType}/"),
+                        fieldVal
+                )
             }
         }
 
