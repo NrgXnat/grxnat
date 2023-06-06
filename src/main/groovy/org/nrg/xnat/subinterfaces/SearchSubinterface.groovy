@@ -8,6 +8,7 @@ import org.nrg.xnat.jackson.mappers.XnatXmlMapper
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.search.SearchColumnResponse
+import org.nrg.xnat.pogo.search.SearchFieldList
 import org.nrg.xnat.pogo.search.SearchResponse
 import org.nrg.xnat.pogo.search.SearchElement
 import org.nrg.xnat.pogo.search.StoredSearch
@@ -118,6 +119,19 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
                 .extract()
                 .jsonPath()
                 .getList(RESULT_SET_RESULT, SearchElement)
+    }
+
+    SearchFieldList readSearchFieldList(DataType dataType) {
+        jsonQuery()
+                .spec(new RequestSpecBuilder().setUrlEncodingEnabled(false).build())
+                .get(formatRestUrl('search', 'elements', dataType.xsiType))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .jsonPath()
+                .getObject(RESULT_SET, SearchFieldList)
     }
 
     SearchColumnResponse retrieveCachedSearchColumn(SearchResponse cachedSearch, String columnName) {

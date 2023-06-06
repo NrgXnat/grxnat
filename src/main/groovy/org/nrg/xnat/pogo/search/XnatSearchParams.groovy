@@ -13,8 +13,4 @@ class XnatSearchParams {
     Boolean cache
     Boolean refresh
 
-    enum SortOrder {
-        ASC, DESC
-    }
-
 }

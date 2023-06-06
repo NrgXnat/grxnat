@@ -56,6 +56,9 @@ class XnatSearchDocument {
     List<XdatAllowedUser> allowedUsers = []
 
     XnatSearchDocument addSearchField(SearchField searchField) {
+        if (searchField.sequence == null) {
+            searchField.sequence(allocateNextSequence())
+        }
         searchFields << searchField
         this
     }
@@ -65,7 +68,7 @@ class XnatSearchDocument {
                 new SearchField(
                         elementName: dataType.xsiType,
                         fieldId: fieldId,
-                        sequence: (searchFields == null ? 0 : searchFields*.sequence.max()) + 1,
+                        sequence: allocateNextSequence(),
                         type: type,
                         header: header
                 )
@@ -105,6 +108,10 @@ class XnatSearchDocument {
 
     String asString() {
         XnatXmlMapper.INSTANCE.writeValueAsString(this)
+    }
+
+    private int allocateNextSequence() {
+        (searchFields == null ? 0 : searchFields*.sequence.max()) + 1
     }
 
     static XnatSearchDocument fromXml(File xml) {
