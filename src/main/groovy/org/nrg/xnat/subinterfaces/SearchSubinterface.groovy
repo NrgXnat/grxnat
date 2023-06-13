@@ -66,9 +66,14 @@ class SearchSubinterface extends XnatFunctionalitySubinterface {
         xnatInterface
     }
 
-    SearchResponse readStoredSearchResults(StoredSearch storedSearch) {
+    SearchResponse readStoredSearchResults(StoredSearch storedSearch, XnatSearchParams searchParams = new XnatSearchParams()) {
+        readStoredSearchResults(storedSearch.id, searchParams)
+    }
+
+    SearchResponse readStoredSearchResults(String storedSearchId, XnatSearchParams searchParams = new XnatSearchParams()) {
         jsonQuery()
-                .get(formatRestUrl("/search/saved/${storedSearch.id}/results"))
+                .queryParams(SerializationUtils.serializeToMap(searchParams))
+                .get(formatRestUrl("/search/saved/${storedSearchId}/results"))
                 .then()
                 .assertThat()
                 .statusCode(200)

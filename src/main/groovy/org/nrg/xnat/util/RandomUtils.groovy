@@ -6,12 +6,8 @@ class RandomUtils {
 
     private static final int DEFAULT_ID_LENGTH = 10
 
-    static String randomID(int length) {
-        return RandomStringUtils.randomAlphanumeric(length)
-    }
-
-    static String randomID() {
-        return randomID(DEFAULT_ID_LENGTH)
+    static String randomID(int length = DEFAULT_ID_LENGTH) {
+        RandomStringUtils.randomAlphanumeric(length)
     }
 
 }
