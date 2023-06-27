@@ -106,9 +106,15 @@ abstract class Experiment extends CustomVariableContainer<Experiment> implements
     }
 
     @SuppressWarnings("unchecked")
-    <T extends Experiment> T specificFields(Map<String, String> fields) {
-        setSpecificFields(fields)
-        (T)this
+    <T extends Experiment> T specificFields(Map<String, String> fieldsToSet) {
+        setSpecificFields(new HashMap<>(fieldsToSet))
+        this as T
+    }
+
+    <T extends Experiment> T specificField(String key, String value) {
+        final Map<String, String> existing = specificFields ?: [:]
+        existing.put(key, value)
+        specificFields(existing)
     }
 
     @SuppressWarnings("unchecked")

@@ -16,6 +16,7 @@ class User extends Extensible<User> implements XnatAuthProvider {
     boolean verified
     boolean enabled
     boolean admin = false
+    int id
     SiteDataRole dataRole = SiteDataRole.NONE
 
     public static final User GUEST = new User('guest')

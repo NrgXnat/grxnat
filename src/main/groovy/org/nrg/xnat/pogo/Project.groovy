@@ -183,6 +183,14 @@ class Project extends Extensible<Project> implements HasUri {
         users.keySet().findAll { it instanceof CustomUserGroup } as Set<CustomUserGroup>
     }
 
+    UserGroup findAccessLevelFor(User user) {
+        users.find { groupEntry ->
+            groupEntry.value.any { potentialMatch ->
+                potentialMatch.username == user.username
+            }
+        }?.key
+    }
+
     void setSubscriptions(List<Subscription> subscriptions) {
         ListUtils.copyInto(subscriptions, this.subscriptions)
     }

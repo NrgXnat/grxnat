@@ -20,6 +20,7 @@ class UserDeserializer extends CustomDeserializer<User> {
         setStringIfNonnull(node, 'username', user.&setUsername)
         setBoolean(node, 'verified', user.&setVerified)
         setBoolean(node, 'enabled', user.&setEnabled)
+        setIntIfNonzero(node, 'id', user.&setId)
 
         user
     }

@@ -18,6 +18,10 @@ class Investigator extends Extensible<Investigator> {
         (firstname != null && lastname != null) ? "${lastname}, ${firstname}" : null
     }
 
+    String getNameFirstLast() {
+        (firstname != null && lastname != null) ? "${firstname} ${lastname}" : null
+    }
+
     void setId(String xnatInvestigatordataId) {
         setXnatInvestigatordataId(Integer.parseInt(xnatInvestigatordataId))
     }
