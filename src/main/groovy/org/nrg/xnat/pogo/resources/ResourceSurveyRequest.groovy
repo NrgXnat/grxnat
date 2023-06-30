@@ -11,7 +11,8 @@ class ResourceSurveyRequest {
         QUEUED_FOR_MITIGATION,
         MITIGATING,
         CANCELED,
-        ERROR
+        ERROR,
+        NONCOMPLIANT // new in 1.8.9
     }
 
     int resourceId
