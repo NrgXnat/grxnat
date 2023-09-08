@@ -20,6 +20,15 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(SITEWIDE_ANONYMIZATION_SCRIPT)
     String siteAnonScript
 
+    @JsonProperty(SITE_SERIES_IMPORT_FILTER_ENABLED)
+    Boolean enableSitewideSeriesImportFilter
+
+    @JsonProperty(SITE_SERIES_IMPORT_FILTER_MODE)
+    String sitewideSeriesImportFilterMode
+
+    @JsonProperty(SITE_SERIES_IMPORT_FILTER_BODY)
+    String sitewideSeriesImportFilter
+
     @JsonProperty(PET_MR_SETTING)
     String petMrSetting
 
@@ -64,4 +73,5 @@ class SiteConfig implements ArbitraryPropertySupport {
 
     @JsonProperty(INITIALIZED)
     Boolean initialized
+
 }

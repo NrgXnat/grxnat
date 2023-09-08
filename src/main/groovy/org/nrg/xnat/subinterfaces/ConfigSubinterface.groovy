@@ -2,6 +2,7 @@ package org.nrg.xnat.subinterfaces
 
 import io.restassured.path.json.JsonPath
 import io.restassured.response.Response
+import io.restassured.specification.RequestSpecification
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import org.nrg.xnat.enums.PetMrProcessingSetting
@@ -13,6 +14,9 @@ import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.SiteConfig
 import org.nrg.xnat.pogo.SiteConfigProps
 import org.nrg.xnat.pogo.Uptime
+import org.nrg.xnat.pogo.dicom.FilterMode
+import org.nrg.xnat.pogo.dicom.SeriesImportFilter
+import org.nrg.xnat.rest.NotFoundException
 import org.nrg.xnat.rest.PermissionsException
 import org.nrg.xnat.rest.SerializationUtils
 
@@ -21,6 +25,8 @@ import static io.restassured.http.ContentType.*
 class ConfigSubinterface extends XnatFunctionalitySubinterface {
 
     private static final Matcher CONFIG_PUT_OK = Matchers.oneOf(200, 201)
+    private static final String SERIES_IMPORT_FILTER_TOOL = 'seriesImportFilter'
+    private static final String SERIES_IMPORT_FILTER_PATH = 'config'
 
     @Override
     List<String> getHandledEndpoints() {
@@ -187,6 +193,59 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         setProjectAnonScriptStatus(project, true)
     }
 
+    SeriesImportFilter readSiteSeriesImportFilter() {
+        final SiteConfig siteConfig = readSiteConfig()
+        new SeriesImportFilter(
+                enabled: siteConfig.enableSitewideSeriesImportFilter,
+                filterMode: FilterMode.lookup(siteConfig.sitewideSeriesImportFilterMode),
+                filterBody: siteConfig.sitewideSeriesImportFilter
+        )
+    }
+
+    void setSiteSeriesImportFilter(SeriesImportFilter seriesImportFilter) {
+        postToSiteConfig(
+                new SiteConfig(
+                        enableSitewideSeriesImportFilter: seriesImportFilter.enabled,
+                        sitewideSeriesImportFilterMode: seriesImportFilter.filterMode.jsonRepresentation(),
+                        sitewideSeriesImportFilter: seriesImportFilter.filterBody
+                )
+        )
+    }
+
+    SeriesImportFilter readProjectSeriesImportFilter(Project project) {
+        final ConfigServiceObject configServiceObject
+        try {
+            configServiceObject = readConfigToolPath(project, SERIES_IMPORT_FILTER_TOOL, SERIES_IMPORT_FILTER_PATH)
+        } catch (NotFoundException ignored) {
+            return null
+        }
+        XnatInterface.XNAT_REST_MAPPER
+                .readValue(configServiceObject.contents, SeriesImportFilter)
+                .enabled(configServiceObject.status == ConfigServiceObject.Status.ENABLED)
+    }
+
+    /*
+        Yes, this method is a little weird, and seems as if I'm not getting some reuse out of the config service API wrapping
+        in other parts of the class. However, this is much closer to how the front-end interacts with the API here,
+        so I'd like to closely match that.
+     */
+    void setProjectSeriesImportFilter(Project project, SeriesImportFilter seriesImportFilter) {
+        final RequestSpecification statusUpdate = queryBase()
+                .queryParam('status', seriesImportFilter.enabled ? ConfigServiceObject.Status.ENABLED : ConfigServiceObject.Status.DISABLED)
+        final String url = configServiceUrl(project, SERIES_IMPORT_FILTER_TOOL, SERIES_IMPORT_FILTER_PATH)
+        final Response response
+        if (seriesImportFilter.enabled) {
+            response = statusUpdate
+                .queryParam('inbody', true)
+                .contentType(TEXT) // yeah...
+                .body(XnatInterface.XNAT_REST_MAPPER.writeValueAsString(['enabled': true, 'list': seriesImportFilter.filterBody, 'mode': seriesImportFilter.filterMode]))
+                .put(url)
+        } else {
+            response = statusUpdate.put(url)
+        }
+        response.then().assertThat().statusCode(CONFIG_PUT_OK)
+    }
+
     void setSitePetMrSetting(PetMrProcessingSetting petMrSetting) {
         if (petMrSetting == PetMrProcessingSetting.DEFAULT_TO_SITE) {
             throw new UnsupportedOperationException('Provided PET-MR setting not available at site level')
@@ -227,8 +286,16 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
     }
 
     ConfigServiceObject readConfigToolPath(Project project, String tool, String path, Integer version = null) {
-        final JsonPath jsonPath = jsonQuery().queryParams(makeVersionQueryParams(version)).get(configServiceUrl(project, tool, path)).
-                jsonPath().setRoot('ResultSet.Result')
+        final JsonPath jsonPath = jsonQueryWithStatusCodeListeners([NOT_FOUND_404])
+                .queryParams(makeVersionQueryParams(version))
+                .get(configServiceUrl(project, tool, path))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .jsonPath()
+                .setRootPath('ResultSet.Result')
         if (jsonPath.getInt('size()') > 1) {
             throw new RuntimeException('Unexpected response from config service.')
         }
