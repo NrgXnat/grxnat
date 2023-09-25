@@ -1,9 +1,9 @@
 package org.nrg.xnat.pogo.containers
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
-@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy)
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy)
 class DockerServer {
 
     Integer id
@@ -19,6 +19,12 @@ class DockerServer {
     boolean autoCleanup
     List<SwarmConstraint> swarmConstraints
     boolean ping
+    String combinedPvcName
+    String combinedPathTranslation
+    String archivePvcName
+    String archivePathTranslation
+    String buildPvcName
+    String buildPathTranslation
 
     void setSwarmMode(final boolean swarmMode) {
         this.swarmMode = swarmMode
