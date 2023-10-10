@@ -79,4 +79,10 @@ class XnatVersionList {
         (first != second) && first in Graphs.reachableNodes(XNAT_VERSION_GRAPH, second)
     }
 
+    static List<Class<? extends XnatVersion>> knownVersionsBefore(Class<? extends XnatVersion> version) {
+        XNAT_VERSION_GRAPH.nodes().findAll { candidateVersion ->
+            firstFollowsSecond(version, candidateVersion)
+        }
+    }
+
 }
