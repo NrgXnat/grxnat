@@ -67,6 +67,10 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
         )
     }
 
+    SessionData expectSinglePrearchiveResultForProject(Project project) {
+        queryPrearchiveForSingularResult(new PrearchiveQuery().scope(PrearchiveQueryScope.forProject(project)))
+    }
+
     SessionData queryPrearchiveForSingularResult(PrearchiveQuery prearchiveQuery) {
         queryPrearchive(prearchiveQuery.expectedResult(PrearchiveResultExpectations.SINGLE_RESULT))[0]
     }

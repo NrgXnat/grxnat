@@ -4,6 +4,7 @@ class SiteConfigProps {
 
     public static final String AUTOARCHIVE_IDLE_TIME = 'sessionXmlRebuilderInterval'
     public static final String AUTOARCHIVE_IDLE_SCHEDULE = 'sessionXmlRebuilderRepeat'
+    public static final String DEFAULT_IMPORTER = 'uiDefaultCompressedUploaderImporter'
     public static final String ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT = 'enableSitewideAnonymizationScript'
     public static final String SITEWIDE_ANONYMIZATION_SCRIPT = 'sitewideAnonymizationScript'
     public static final String SITE_SERIES_IMPORT_FILTER_ENABLED = 'enableSitewideSeriesImportFilter'

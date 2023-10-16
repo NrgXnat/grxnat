@@ -14,6 +14,9 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(AUTOARCHIVE_IDLE_SCHEDULE)
     Integer sessionXmlRebuilderSchedule
 
+    @JsonProperty(DEFAULT_IMPORTER)
+    String uiDefaultCompressedUploaderImporter
+
     @JsonProperty(ENABLE_SITEWIDE_ANONYMIZATION_SCRIPT)
     Boolean enableSiteAnonScript
 
