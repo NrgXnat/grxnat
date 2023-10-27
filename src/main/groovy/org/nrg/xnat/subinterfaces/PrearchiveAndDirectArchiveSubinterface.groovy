@@ -75,6 +75,10 @@ class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterfa
         queryPrearchive(prearchiveQuery.expectedResult(PrearchiveResultExpectations.SINGLE_RESULT))[0]
     }
 
+    SessionData queryPrearchiveForSingularResult(PrearchiveResultFilter resultFilter) {
+        queryPrearchiveForSingularResult(new PrearchiveQuery().filter(resultFilter))
+    }
+
     List<String> getPrearchiveLogMessages(Project project, SessionData session) {
         jsonQuery().get(CommonStringUtils.formatUrl(projectPrearchiveUrl(project), session.timestamp, session.folderName, 'logs')).
                 then().assertThat().statusCode(200).and().extract().jsonPath().
