@@ -40,11 +40,9 @@ class DicomDataSet {
         setDefaults()
     }
 
-    DatasetWithFMI getDataset() {
-        return new DatasetWithFMI(
-                attributes.createFileMetaInformation(UID.ExplicitVRLittleEndian),
-                attributes
-        )
+    Attributes getDataset() {
+        attributes.addAll(attributes.createFileMetaInformation(UID.ExplicitVRLittleEndian))
+        attributes
     }
 
     DicomDataSet setTag(int tag, String value) {
