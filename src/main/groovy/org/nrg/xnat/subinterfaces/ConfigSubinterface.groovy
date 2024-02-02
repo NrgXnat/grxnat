@@ -131,6 +131,18 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         postToSiteConfig(new SiteConfig(dicomFileNameTemplate: newTemplate))
     }
 
+    void setPostArchiveAnonStatus(boolean allowed) {
+        postToSiteConfig(new SiteConfig(rerunProjectAnonOnRename: allowed))
+    }
+
+    void enablePostArchiveAnon() {
+        setPostArchiveAnonStatus(true)
+    }
+
+    void disablePostArchiveAnon() {
+        setPostArchiveAnonStatus(false)
+    }
+
     void setSiteBackupSettings(boolean backupDeletedToCache, boolean maintainFileHistory) {
         postToSiteConfig(new SiteConfig(backupDeletedToCache: backupDeletedToCache, maintainFileHistory: maintainFileHistory))
     }

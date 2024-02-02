@@ -25,5 +25,6 @@ class SiteConfigProps {
     public static final String INITIALIZED = 'initialized'
     public static final String BACKUP_DELETED_TO_CACHE = 'backupDeletedToCache'
     public static final String MAINTAIN_FILE_HISTORY = 'maintainFileHistory'
+    public static final String POST_ARCHIVE_PROJECT_ANON = 'rerunProjectAnonOnRename'
 
 }

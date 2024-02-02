@@ -77,4 +77,7 @@ class SiteConfig implements ArbitraryPropertySupport {
     @JsonProperty(INITIALIZED)
     Boolean initialized
 
+    @JsonProperty(POST_ARCHIVE_PROJECT_ANON)
+    String rerunProjectAnonOnRename
+
 }
