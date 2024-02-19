@@ -11,5 +11,7 @@ class DqrStudyRepresentation {
     String studyDate
     List<String> modalitiesInStudy
     DqrPatientRepresentation patient
+    String projectId
+    String studyId
 
 }

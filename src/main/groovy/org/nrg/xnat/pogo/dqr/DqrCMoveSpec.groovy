@@ -6,9 +6,9 @@ import groovy.transform.builder.SimpleStrategy
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class DqrCMoveSpec {
 
-    String pacsId
+    Integer pacsId
     String aeTitle
-    String port
+    Integer port
     String projectId
     boolean forceImport
     List<DqrImportRequestStudy> studies = []

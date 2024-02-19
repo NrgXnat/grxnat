@@ -17,6 +17,7 @@ import org.nrg.xnat.pogo.dqr.DqrStudyRepresentation
 import org.nrg.xnat.pogo.dqr.ExecutedPacsRequest
 import org.nrg.xnat.pogo.dqr.PacsAvailability
 import org.nrg.xnat.pogo.dqr.PacsConnection
+import org.nrg.xnat.pogo.dqr.PacsPing
 import org.nrg.xnat.pogo.dqr.PacsSearchCriteria
 import org.nrg.xnat.pogo.dqr.QueuedPacsRequest
 import org.nrg.xnat.rest.SerializationUtils
@@ -39,6 +40,7 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/dqr/import/history',
                 '/xapi/dqr/import/history/{id}',
                 '/xapi/dqr/import/history/count',
+                '/xapi/dqr/import/queue',
                 '/xapi/dqr/query/batch',
                 '/xapi/dqr/query/patients',
                 '/xapi/dqr/query/series',
@@ -49,6 +51,7 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/dqr/settings/project/{projectId}/enabled',
                 '/xapi/pacs',
                 '/xapi/pacs/{pacsId}',
+                '/xapi/pacs/{pacsId}/status',
                 '/xapi/pacs/{pacsId}/availability',
                 '/xapi/pacs/{pacsId}/availability/{availabilityId}',
         ]
@@ -111,6 +114,17 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
         }
     }
 
+    PacsPing pingPacs(int pacsId) {
+        queryBase()
+                .get(formatXapiUrl("/pacs/${pacsId}/status"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(PacsPing)
+    }
+
     @RequireAdmin
     Map<DayOfWeek, List<PacsAvailability>> readPacsAvailability(int pacsId) {
         queryBase()
@@ -163,6 +177,17 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 .assertThat()
                 .statusCode(200)
         xnatInterface
+    }
+    List<ExecutedPacsRequest> readDqrQueue(DqrQueueHistoryParams params = null) {
+        queryBaseWithCommonStatusCodeListeners()
+                .queryParams(SerializationUtils.serializeToMap(params ?: [:]))
+                .get(formatXapiUrl("/dqr/import/queue"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(ExecutedPacsRequest[])
     }
 
     List<ExecutedPacsRequest> readDqrHistory(DqrQueueHistoryParams params = null) {
@@ -321,6 +346,17 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 .and()
                 .extract()
                 .as(QueuedPacsRequest[])
+    }
+
+    DqrProjectSettings readDqrForProject(Project project) {
+        queryBaseWithCommonStatusCodeListeners()
+                .get(formatXapiUrl(DQR_PROJECT_SETTINGS_FRAGMENT, project.id))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(DqrProjectSettings)
     }
 
     boolean readDqrEnabledStatusOnProject(Project project) {
