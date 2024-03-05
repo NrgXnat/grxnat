@@ -131,6 +131,10 @@ class ConfigSubinterface extends XnatFunctionalitySubinterface {
         postToSiteConfig(new SiteConfig(dicomFileNameTemplate: newTemplate))
     }
 
+    boolean readPostArchiveAnonStatus() {
+        Boolean.parseBoolean(readSiteConfigPreference(SiteConfigProps.POST_ARCHIVE_PROJECT_ANON))
+    }
+
     void setPostArchiveAnonStatus(boolean allowed) {
         postToSiteConfig(new SiteConfig(rerunProjectAnonOnRename: allowed))
     }
