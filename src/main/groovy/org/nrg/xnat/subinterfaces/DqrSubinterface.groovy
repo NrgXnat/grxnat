@@ -13,6 +13,7 @@ import org.nrg.xnat.pogo.dqr.DqrProjectSettings
 import org.nrg.xnat.pogo.dqr.DqrQueueHistoryParams
 import org.nrg.xnat.pogo.dqr.DqrSeriesSearchResponse
 import org.nrg.xnat.pogo.dqr.DqrSettings
+import org.nrg.xnat.pogo.dqr.DqrSettings1x
 import org.nrg.xnat.pogo.dqr.DqrStudyRepresentation
 import org.nrg.xnat.pogo.dqr.ExecutedPacsRequest
 import org.nrg.xnat.pogo.dqr.PacsAvailability
@@ -235,6 +236,18 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 .and()
                 .extract()
                 .as(DqrSettings)
+    }
+
+    @RequireAdmin
+    DqrSettings1x readDqrSettings1x() {
+        queryBaseWithCommonStatusCodeListeners()
+                .get(formatXapiUrl(DQR_SETTINGS_FRAGMENT))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .as(DqrSettings1x)
     }
 
     @RequireAdmin
