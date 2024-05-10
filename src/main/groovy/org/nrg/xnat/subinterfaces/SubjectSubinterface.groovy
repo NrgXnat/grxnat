@@ -13,7 +13,7 @@ import org.nrg.xnat.pogo.resources.SubjectResource
 
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
-class SubjectSubinterface extends XnatFunctionalitySubinterface {
+class SubjectSubinterface extends CoreXnatFunctionalitySubinterface {
 
     private static final String FIELD_JSONPATH = subfieldJsonpath('fields/field')
     private static final String SHARING_JSONPATH = subfieldJsonpath('sharing/share')

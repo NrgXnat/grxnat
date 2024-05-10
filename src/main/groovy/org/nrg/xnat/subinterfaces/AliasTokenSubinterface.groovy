@@ -8,7 +8,7 @@ import org.nrg.xnat.rest.XnatAliasToken
 
 import static org.testng.AssertJUnit.assertEquals
 
-class AliasTokenSubinterface extends XnatFunctionalitySubinterface {
+class AliasTokenSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream
 import static io.restassured.http.ContentType.JSON
 
 @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
-class ContainerServiceSubinterface extends XnatFunctionalitySubinterface {
+class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

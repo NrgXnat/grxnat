@@ -11,7 +11,7 @@ import org.nrg.xnat.pogo.sharing.BatchSharePayload
 import org.nrg.xnat.pogo.sharing.ShareRequest
 
 @RequirePlugin(PluginRegistry.BATCH_SHARE_ID)
-class BatchShareSubinterface extends XnatFunctionalitySubinterface {
+class BatchShareSubinterface extends XnatPluginSubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

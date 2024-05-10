@@ -13,7 +13,6 @@ import org.nrg.xnat.pogo.dqr.DqrProjectSettings
 import org.nrg.xnat.pogo.dqr.DqrQueueHistoryParams
 import org.nrg.xnat.pogo.dqr.DqrSeriesSearchResponse
 import org.nrg.xnat.pogo.dqr.DqrSettings
-import org.nrg.xnat.pogo.dqr.DqrSettings1x
 import org.nrg.xnat.pogo.dqr.DqrStudyRepresentation
 import org.nrg.xnat.pogo.dqr.ExecutedPacsRequest
 import org.nrg.xnat.pogo.dqr.PacsAvailability
@@ -22,13 +21,14 @@ import org.nrg.xnat.pogo.dqr.PacsPing
 import org.nrg.xnat.pogo.dqr.PacsSearchCriteria
 import org.nrg.xnat.pogo.dqr.QueuedPacsRequest
 import org.nrg.xnat.rest.SerializationUtils
+import org.nrg.xnat.versions.plugins.GeneralPluginRequirement
 
 import java.time.DayOfWeek
 
 import static io.restassured.http.ContentType.JSON
 
 @RequirePlugin(PluginRegistry.DQR_ID)
-class DqrSubinterface extends XnatFunctionalitySubinterface {
+class DqrSubinterface extends XnatPluginSubinterface {
 
     public static final String DQR_HISTORY_FRAGMENT = '/dqr/import/history'
     public static final String DQR_SETTINGS_FRAGMENT = '/dqr/settings'
@@ -56,6 +56,11 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 '/xapi/pacs/{pacsId}/availability',
                 '/xapi/pacs/{pacsId}/availability/{availabilityId}',
         ]
+    }
+
+    @Override
+    GeneralPluginRequirement pluginRequirement() {
+        new GeneralPluginRequirement().minimumPluginVersion('2.0').pluginId(PluginRegistry.DQR_ID)
     }
 
     @RequireAdmin
@@ -235,26 +240,14 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 .statusCode(200)
                 .and()
                 .extract()
-                .as(DqrSettings)
-    }
-
-    @RequireAdmin
-    DqrSettings1x readDqrSettings1x() {
-        queryBaseWithCommonStatusCodeListeners()
-                .get(formatXapiUrl(DQR_SETTINGS_FRAGMENT))
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .and()
-                .extract()
-                .as(DqrSettings1x)
+                .as(appropriateDqrSettingsClass())
     }
 
     @RequireAdmin
     XnatInterface setDqrSettings(DqrSettings dqrSettings) {
         queryBaseWithCommonStatusCodeListeners()
                 .contentType(JSON)
-                .body(dqrSettings)
+                .body(prepareSettingsForPost(dqrSettings))
                 .post(formatXapiUrl(DQR_SETTINGS_FRAGMENT))
                 .then()
                 .assertThat()
@@ -380,6 +373,14 @@ class DqrSubinterface extends XnatFunctionalitySubinterface {
                 .statusCode(200)
                 .and()
                 .extract()
+    }
+
+    Class<? extends DqrSettings> appropriateDqrSettingsClass() {
+        DqrSettings
+    }
+
+    DqrSettings prepareSettingsForPost(DqrSettings dqrSettings) {
+        dqrSettings
     }
 
     private void setProjectDqrConfig(Project project, Map<String, ?> config) {

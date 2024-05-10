@@ -2,7 +2,7 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.21-SNAPSHOT'
+def buildVersion = '1.21-CUSTOM-SNAPSHOT'
 
 group groupName
 version buildVersion

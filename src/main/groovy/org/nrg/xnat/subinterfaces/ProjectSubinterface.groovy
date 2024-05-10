@@ -17,7 +17,7 @@ import org.nrg.xnat.pogo.users.UserGroup
 import static io.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
 
-class ProjectSubinterface extends XnatFunctionalitySubinterface {
+class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
 
     private static final String ALIAS_JSONPATH = childrenSubfieldJsonpath('aliases/alias')
     private static final String INVESTIGATOR_JSONPATH = childrenSubfieldJsonpath('investigators/investigator')

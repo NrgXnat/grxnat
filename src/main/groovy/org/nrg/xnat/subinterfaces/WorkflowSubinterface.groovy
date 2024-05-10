@@ -10,7 +10,7 @@ import org.nrg.xnat.rest.SerializationUtils
 import static org.nrg.xnat.pogo.Workflow.*
 
 @SuppressWarnings('UnnecessaryQualifiedReference') // constants must be referenced with the class name because they won't be available in XnatInterface
-class WorkflowSubinterface extends XnatFunctionalitySubinterface {
+class WorkflowSubinterface extends CoreXnatFunctionalitySubinterface {
 
     public static final List<String> TERMINAL_STATUSES = ['Complete', 'Failed', 'Killed'].asImmutable()
     public static final int WORKFLOW_POLLING_RATE = 1000

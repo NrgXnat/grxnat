@@ -9,7 +9,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
-class ScanSubinterface extends XnatFunctionalitySubinterface {
+class ScanSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

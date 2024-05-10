@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 import static org.testng.AssertJUnit.assertTrue
 
 @RequirePlugin("batchLaunchPlugin")
-class BatchLaunchSubinterface extends XnatFunctionalitySubinterface {
+class BatchLaunchSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

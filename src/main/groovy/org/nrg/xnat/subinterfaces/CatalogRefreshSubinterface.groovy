@@ -4,7 +4,7 @@ import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.experiments.SubjectAssessor
 
-class CatalogRefreshSubinterface extends XnatFunctionalitySubinterface {
+class CatalogRefreshSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

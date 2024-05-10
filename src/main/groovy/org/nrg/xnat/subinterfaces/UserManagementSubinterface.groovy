@@ -8,7 +8,7 @@ import org.nrg.xnat.rest.PermissionsException
 
 import static io.restassured.http.ContentType.JSON
 
-class UserManagementSubinterface extends XnatFunctionalitySubinterface {
+class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
 
     private static final String ADMIN_ROLE = 'Administrator'
 

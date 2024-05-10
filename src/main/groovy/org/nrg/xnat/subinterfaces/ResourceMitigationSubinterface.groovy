@@ -13,7 +13,7 @@ import org.nrg.xnat.pogo.resources.SurveyReportSummary
 
 import java.time.LocalDate
 
-class ResourceMitigationSubinterface extends XnatFunctionalitySubinterface {
+class ResourceMitigationSubinterface extends CoreXnatFunctionalitySubinterface {
 
     protected static final List<String> URL_STATUS = ['status']
     protected static final List<String> URL_REPORT = ['report']

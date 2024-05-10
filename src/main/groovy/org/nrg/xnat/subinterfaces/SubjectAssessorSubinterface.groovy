@@ -18,7 +18,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
-class SubjectAssessorSubinterface extends XnatFunctionalitySubinterface {
+class SubjectAssessorSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

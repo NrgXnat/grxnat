@@ -14,7 +14,7 @@ import org.nrg.xnat.pogo.events.EventStepStatus
 import org.nrg.xnat.pogo.events.Subscription
 import org.nrg.xnat.rest.SerializationUtils
 
-class EventServiceSubinterface extends XnatFunctionalitySubinterface {
+class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

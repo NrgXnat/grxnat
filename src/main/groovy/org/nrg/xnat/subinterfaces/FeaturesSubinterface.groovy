@@ -7,7 +7,7 @@ import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.features.FeatureUpdateBody
 import org.nrg.xnat.pogo.features.FeaturesSpec
 
-class FeaturesSubinterface extends XnatFunctionalitySubinterface {
+class FeaturesSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

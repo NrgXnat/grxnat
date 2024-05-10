@@ -4,7 +4,7 @@ import org.nrg.xnat.pogo.Investigator
 
 import static io.restassured.http.ContentType.JSON
 
-class InvestigatorSubinterface extends XnatFunctionalitySubinterface {
+class InvestigatorSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

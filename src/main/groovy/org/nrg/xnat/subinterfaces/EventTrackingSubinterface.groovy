@@ -9,7 +9,7 @@ import org.nrg.xnat.rest.NotFoundException
 import static org.testng.AssertJUnit.assertEquals
 import static org.testng.AssertJUnit.assertTrue
 
-class EventTrackingSubinterface extends XnatFunctionalitySubinterface {
+class EventTrackingSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

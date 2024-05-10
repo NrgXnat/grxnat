@@ -4,7 +4,7 @@ import io.restassured.http.ContentType
 import org.nrg.xnat.pogo.CustomFieldScope
 
 
-class CustomFieldSubinterface extends XnatFunctionalitySubinterface {
+class CustomFieldSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

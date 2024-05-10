@@ -4,7 +4,7 @@ import org.nrg.xnat.meta.RequireAdmin
 
 import static io.restassured.http.ContentType.JSON
 
-class NotificationsSubinterface extends XnatFunctionalitySubinterface {
+class NotificationsSubinterface extends CoreXnatFunctionalitySubinterface {
 
     public static final SMTP_ENABLED = 'smtpEnabled'
 

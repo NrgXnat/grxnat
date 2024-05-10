@@ -14,7 +14,7 @@ import org.nrg.xnat.subinterfaces.XnatFunctionalitySubinterface
  */
 class RequirePluginAspect {
 
-    private static final List<String> methodWhitelist = ['$getStaticMetaClass', 'getClass', '<init>', 'getXnatInterface']
+    private static final List<String> methodWhitelist = ['$getStaticMetaClass', 'getClass', '<init>', 'getXnatInterface', 'pluginRequirement']
 
     //@Before('target(xnatInterface) && @annotation(pluginRequirement)')
     void checkPlugins(XnatInterface xnatInterface, RequirePlugin pluginRequirement) throws Throwable {

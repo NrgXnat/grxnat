@@ -15,7 +15,7 @@ import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.ImagingSession
 import org.nrg.xnat.rest.SerializationUtils
 
-class ImporterSubinterface extends XnatFunctionalitySubinterface {
+class ImporterSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

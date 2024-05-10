@@ -16,7 +16,7 @@ import org.nrg.xnat.pogo.search.XnatSearchDocument
 import org.nrg.xnat.pogo.search.XnatSearchParams
 import org.nrg.xnat.rest.SerializationUtils
 
-class SearchSubinterface extends XnatFunctionalitySubinterface {
+class SearchSubinterface extends CoreXnatFunctionalitySubinterface {
 
     public static final String RESULT_SET = 'ResultSet'
     public static final String RESULT_SET_RESULT = "${RESULT_SET}.Result"

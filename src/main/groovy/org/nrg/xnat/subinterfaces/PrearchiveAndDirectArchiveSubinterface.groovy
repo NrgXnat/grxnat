@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import static io.restassured.http.ContentType.JSON
 import static org.awaitility.Awaitility.*
 
-class PrearchiveAndDirectArchiveSubinterface extends XnatFunctionalitySubinterface {
+class PrearchiveAndDirectArchiveSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

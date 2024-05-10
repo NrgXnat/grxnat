@@ -99,34 +99,38 @@ abstract class XnatInterface {
     protected XnatInterface fromVersion(Class<? extends XnatVersion> versionClass) {
         this.versionClass = versionClass
         subinterfaces.clear()
-        aliasTokenSubinterface = constructSubinterface(AliasTokenSubinterface)
-        configSubinterface = constructSubinterface(ConfigSubinterface)
-        containerServiceSubinterface = constructSubinterface(ContainerServiceSubinterface)
-        dicomSCPSubinterface = constructSubinterface(DicomSCPSubinterface)
-        experimentSubinterface = constructSubinterface(ExperimentSubinterface)
-        investigatorSubinterface = constructSubinterface(InvestigatorSubinterface)
-        prearchiveAndDirectArchiveSubinterface = constructSubinterface(PrearchiveAndDirectArchiveSubinterface)
-        projectSubinterface = constructSubinterface(ProjectSubinterface)
-        reconstructionSubinterface = constructSubinterface(ReconstructionSubinterface)
-        resourceSubinterface = constructSubinterface(ResourceSubinterface)
-        scanSubinterface = constructSubinterface(ScanSubinterface)
-        sessionAssessorSubinterface = constructSubinterface(SessionAssessorSubinterface)
-        subjectAssessorSubinterface = constructSubinterface(SubjectAssessorSubinterface)
-        subjectSubinterface = constructSubinterface(SubjectSubinterface)
-        userManagementSubinterface = constructSubinterface(UserManagementSubinterface)
-        workflowSubinterface = constructSubinterface(WorkflowSubinterface)
-        batchLaunchSubinterface = constructSubinterface(BatchLaunchSubinterface)
-        eventServiceSubinterface = constructSubinterface(EventServiceSubinterface)
-        importerSubinterface = constructSubinterface(ImporterSubinterface)
-        batchShareSubinterface = constructSubinterface(BatchShareSubinterface)
-        eventTrackingSubinterface = constructSubinterface(EventTrackingSubinterface)
-        featuresSubinterface = constructSubinterface(FeaturesSubinterface)
-        customFieldSubinterface = constructSubinterface(CustomFieldSubinterface)
-        searchSubinterface = constructSubinterface(SearchSubinterface)
-        dqrSubinterface = constructSubinterface(DqrSubinterface)
-        catalogRefreshSubinterface = constructSubinterface(CatalogRefreshSubinterface)
-        resourceMitigationSubinterface = constructSubinterface(ResourceMitigationSubinterface)
-        notificationsSubinterface = constructSubinterface(NotificationsSubinterface)
+
+        readInstalledPlugins()
+
+        aliasTokenSubinterface = constructCoreSubinterface(AliasTokenSubinterface)
+        configSubinterface = constructCoreSubinterface(ConfigSubinterface)
+        containerServiceSubinterface = constructCoreSubinterface(ContainerServiceSubinterface)
+        dicomSCPSubinterface = constructCoreSubinterface(DicomSCPSubinterface)
+        experimentSubinterface = constructCoreSubinterface(ExperimentSubinterface)
+        investigatorSubinterface = constructCoreSubinterface(InvestigatorSubinterface)
+        prearchiveAndDirectArchiveSubinterface = constructCoreSubinterface(PrearchiveAndDirectArchiveSubinterface)
+        projectSubinterface = constructCoreSubinterface(ProjectSubinterface)
+        reconstructionSubinterface = constructCoreSubinterface(ReconstructionSubinterface)
+        resourceSubinterface = constructCoreSubinterface(ResourceSubinterface)
+        scanSubinterface = constructCoreSubinterface(ScanSubinterface)
+        sessionAssessorSubinterface = constructCoreSubinterface(SessionAssessorSubinterface)
+        subjectAssessorSubinterface = constructCoreSubinterface(SubjectAssessorSubinterface)
+        subjectSubinterface = constructCoreSubinterface(SubjectSubinterface)
+        userManagementSubinterface = constructCoreSubinterface(UserManagementSubinterface)
+        workflowSubinterface = constructCoreSubinterface(WorkflowSubinterface)
+        batchLaunchSubinterface = constructCoreSubinterface(BatchLaunchSubinterface)
+        eventServiceSubinterface = constructCoreSubinterface(EventServiceSubinterface)
+        importerSubinterface = constructCoreSubinterface(ImporterSubinterface)
+        eventTrackingSubinterface = constructCoreSubinterface(EventTrackingSubinterface)
+        featuresSubinterface = constructCoreSubinterface(FeaturesSubinterface)
+        customFieldSubinterface = constructCoreSubinterface(CustomFieldSubinterface)
+        searchSubinterface = constructCoreSubinterface(SearchSubinterface)
+        catalogRefreshSubinterface = constructCoreSubinterface(CatalogRefreshSubinterface)
+        resourceMitigationSubinterface = constructCoreSubinterface(ResourceMitigationSubinterface)
+        notificationsSubinterface = constructCoreSubinterface(NotificationsSubinterface)
+
+        batchShareSubinterface = constructPluginSubinterface(installedPlugins, BatchShareSubinterface)
+        dqrSubinterface = constructPluginSubinterface(installedPlugins, DqrSubinterface)
         this
     }
 
@@ -203,15 +207,22 @@ abstract class XnatInterface {
         filter == null ? given() : given().filter(filter)
     }
 
-    protected <X extends XnatFunctionalitySubinterface> X constructSubinterface(Class<X> subinterfaceClass) {
+    protected <X extends CoreXnatFunctionalitySubinterface> X constructCoreSubinterface(Class<X> subinterfaceClass) {
         final X subinterface = XnatSubinterfaceVersionManager.lookupSubinterface(versionClass, subinterfaceClass).newInstance()
         subinterface.setXnatInterface(this)
         subinterfaces << subinterface
         subinterface
     }
 
-    XnatInterface registerExternalSubinterface(Class<? extends XnatFunctionalitySubinterface> subinterfaceClass) {
-        constructSubinterface(subinterfaceClass)
+    protected <X extends XnatPluginSubinterface> X constructPluginSubinterface(List<XnatPlugin> installedPlugins, Class<X> subinterfaceClass) {
+        final X subinterface = XnatSubinterfaceVersionManager.lookupPluginSubinterface(installedPlugins, subinterfaceClass).newInstance()
+        subinterface.setXnatInterface(this)
+        subinterfaces << subinterface
+        subinterface
+    }
+
+    XnatInterface registerExternalSubinterface(Class<? extends CoreXnatFunctionalitySubinterface> subinterfaceClass) {
+        constructCoreSubinterface(subinterfaceClass)
         this
     }
 

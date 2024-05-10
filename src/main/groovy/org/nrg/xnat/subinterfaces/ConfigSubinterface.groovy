@@ -22,7 +22,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 import static io.restassured.http.ContentType.*
 
-class ConfigSubinterface extends XnatFunctionalitySubinterface {
+class ConfigSubinterface extends CoreXnatFunctionalitySubinterface {
 
     private static final Matcher CONFIG_PUT_OK = Matchers.oneOf(200, 201)
     private static final String SERIES_IMPORT_FILTER_TOOL = 'seriesImportFilter'

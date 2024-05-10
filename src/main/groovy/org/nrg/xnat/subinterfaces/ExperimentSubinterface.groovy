@@ -4,7 +4,7 @@ import io.restassured.response.Response
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.experiments.Experiment
 
-class ExperimentSubinterface extends XnatFunctionalitySubinterface {
+class ExperimentSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

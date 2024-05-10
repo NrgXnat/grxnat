@@ -11,7 +11,7 @@ import org.nrg.xnat.pogo.resources.SessionAssessorResource
 
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
-class SessionAssessorSubinterface extends XnatFunctionalitySubinterface {
+class SessionAssessorSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

@@ -7,7 +7,7 @@ import org.nrg.xnat.rest.SerializationUtils
 
 import static io.restassured.http.ContentType.JSON
 
-class DicomSCPSubinterface extends XnatFunctionalitySubinterface {
+class DicomSCPSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {

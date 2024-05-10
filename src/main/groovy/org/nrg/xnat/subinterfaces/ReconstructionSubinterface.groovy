@@ -8,7 +8,7 @@ import org.nrg.xnat.pogo.extensions.reconstruction.ReconstructionQueryPutExtensi
 
 import static org.nrg.testing.CommonStringUtils.formatUrl
 
-class ReconstructionSubinterface extends XnatFunctionalitySubinterface {
+class ReconstructionSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
     List<String> getHandledEndpoints() {
