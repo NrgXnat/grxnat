@@ -22,4 +22,9 @@ class SyntheticXnatInterface extends XnatInterface {
         }
     }
 
+    @Override
+    List<XnatPlugin> readInstalledPlugins() {
+        installedPlugins
+    }
+
 }

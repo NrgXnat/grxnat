@@ -32,6 +32,9 @@ class XnatSubinterfaceVersionManager {
         final XnatPlugin installedVersion = installedPlugins.find { plugin ->
             plugin.id == baseSubinterfaceClass.newInstance().pluginRequirement().pluginId
         }
+        if (installedVersion == null) {
+            return baseSubinterfaceClass
+        }
         final String installedVersionAsString = "${installedVersion.id}:${installedVersion.version}".toString()
         PLUGIN_SUBINTERFACES.putIfAbsent(installedVersionAsString, [])
         retrieveFromCache(
