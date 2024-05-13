@@ -14,7 +14,7 @@ class GeneralPluginRequirement {
     String minimumPluginVersion
     String maximumPluginVersion
 
-    static fromString(String pluginIdAndVersion) {
+    static GeneralPluginRequirement fromString(String pluginIdAndVersion) {
         final List<String> pluginStringComponents = pluginIdAndVersion.split(':')
         final String pluginId = pluginStringComponents[0]
         if (pluginStringComponents.size() > 2) {
