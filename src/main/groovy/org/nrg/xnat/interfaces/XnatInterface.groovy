@@ -96,11 +96,13 @@ abstract class XnatInterface {
         this
     }
 
-    protected XnatInterface fromVersion(Class<? extends XnatVersion> versionClass) {
+    protected XnatInterface fromVersion(Class<? extends XnatVersion> versionClass, boolean authSkipped) {
         this.versionClass = versionClass
         subinterfaces.clear()
 
-        readInstalledPlugins()
+        if (!authSkipped) {
+            readInstalledPlugins()
+        }
 
         aliasTokenSubinterface = constructCoreSubinterface(AliasTokenSubinterface)
         configSubinterface = constructCoreSubinterface(ConfigSubinterface)
@@ -185,7 +187,7 @@ abstract class XnatInterface {
 
     protected static XnatInterface formInterface(String xnatUrl, XnatSessionFilter sessionFilter, XnatConnectionConfig connectionConfig) {
         final Class<? extends XnatVersion> versionClass = connectionConfig.versionClass ?: determineVersionClass(xnatUrl, sessionFilter)
-        versionClass.newInstance().interfaceClass.newInstance().withFilter(sessionFilter).atUrl(xnatUrl).fromVersion(versionClass)
+        versionClass.newInstance().interfaceClass.newInstance().withFilter(sessionFilter).atUrl(xnatUrl).fromVersion(versionClass, connectionConfig.skipAuth)
     }
 
     protected static Class<? extends XnatVersion> determineVersionClass(String xnatUrl, XnatSessionFilter sessionFilter) {
