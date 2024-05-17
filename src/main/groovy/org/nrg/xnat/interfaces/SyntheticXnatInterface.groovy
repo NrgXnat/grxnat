@@ -10,7 +10,7 @@ class SyntheticXnatInterface extends XnatInterface {
         super()
         xnatUrl = url
         if (versionClass != null) {
-            fromVersion(versionClass)
+            fromVersion(versionClass, false)
         }
     }
 
@@ -18,7 +18,7 @@ class SyntheticXnatInterface extends XnatInterface {
         isAdmin = Optional.of(representsAdminAccess) as Optional<Boolean>
         installedPlugins = representedPlugins
         if (versionClass != null) {
-            fromVersion(versionClass)
+            fromVersion(versionClass, false)
         }
     }
 
