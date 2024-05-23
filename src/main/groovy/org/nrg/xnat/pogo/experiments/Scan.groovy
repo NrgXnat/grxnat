@@ -21,6 +21,7 @@ class Scan extends Extensible<Scan> implements HasUri {
     String quality = "usable"
     String uid
     LocalTime startTime
+    Map<String, String> addParams = [:]
     private final List<Resource> scanResources = []
 
     Scan(ImagingSession session, String id) {
@@ -130,6 +131,11 @@ class Scan extends Extensible<Scan> implements HasUri {
 
     Scan extension(Extension<Scan> extension) {
         setExtension(extension)
+        this
+    }
+
+    Scan addParam(String fieldName, String fieldValue) {
+        addParams.put(fieldName, fieldValue)
         this
     }
 

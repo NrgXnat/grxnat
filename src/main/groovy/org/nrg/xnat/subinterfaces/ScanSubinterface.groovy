@@ -1,5 +1,6 @@
 package org.nrg.xnat.subinterfaces
 
+import io.restassured.path.json.JsonPath
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
 import org.nrg.xnat.pogo.experiments.ImagingSession
@@ -53,12 +54,25 @@ class ScanSubinterface extends CoreXnatFunctionalitySubinterface {
                     if (xnatInterface.readResources) {
                         scan.scanResources(xnatInterface.readResources(new ScanResource().project(project).subject(subject).subjectAssessor(session).scan(scan)))
                     }
+                    if (xnatInterface.readExtendedMetadata) {
+                        readAdditionalScanMetadata(project, subject, session, scan)
+                    }
                     scan.session(session)
                 }
     }
 
     Scan readAdditionalScanMetadata(Project project, Subject subject, ImagingSession session, Scan scan) {
-        scan.uid(jsonQuery().get(scanUrl(project, subject, session, scan)).jsonPath().getString('items[0].data_fields.UID'))
+        final JsonPath scanResponse = jsonQuery()
+                .get(scanUrl(project, subject, session, scan))
+                .jsonPath()
+                .setRootPath('items[0]')
+        (scanResponse.getList("children.find { it.field == 'parameters/addParam' }.items.data_fields") as List<Map<String, Object>>).each { addParamMap ->
+            scan.addParam(
+                    addParamMap['name'] as String,
+                    addParamMap['addField'] as String
+            )
+        }
+        scan.uid(scanResponse.getString('data_fields.UID'))
     }
 
     void createScan(Project project, Subject subject, ImagingSession session, Scan scan) {

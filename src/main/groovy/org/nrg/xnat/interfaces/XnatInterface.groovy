@@ -82,6 +82,7 @@ abstract class XnatInterface {
     @Delegate protected CatalogRefreshSubinterface catalogRefreshSubinterface
     @Delegate protected ResourceMitigationSubinterface resourceMitigationSubinterface
     @Delegate protected NotificationsSubinterface notificationsSubinterface
+    @Delegate protected DicomMappingSubinterface dicomMappingSubinterface
 
     protected XnatInterface() {}
 
@@ -130,6 +131,7 @@ abstract class XnatInterface {
         catalogRefreshSubinterface = constructCoreSubinterface(CatalogRefreshSubinterface)
         resourceMitigationSubinterface = constructCoreSubinterface(ResourceMitigationSubinterface)
         notificationsSubinterface = constructCoreSubinterface(NotificationsSubinterface)
+        dicomMappingSubinterface = constructCoreSubinterface(DicomMappingSubinterface)
 
         batchShareSubinterface = constructPluginSubinterface(installedPlugins, BatchShareSubinterface)
         dqrSubinterface = constructPluginSubinterface(installedPlugins, DqrSubinterface)

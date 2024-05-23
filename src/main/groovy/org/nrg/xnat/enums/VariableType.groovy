@@ -1,21 +1,18 @@
 package org.nrg.xnat.enums
 
+import com.fasterxml.jackson.annotation.JsonValue
+
 enum VariableType {
-    INTEGER ('integer'),
-    FLOAT ('float'),
-    DATE ('date'),
-    STRING ('string'),
-    BOOLEAN ('boolean')
-
-    private final String type
-
-    VariableType(String typeName) {
-        type = typeName
-    }
+    INTEGER,
+    FLOAT,
+    DATE,
+    STRING,
+    BOOLEAN
 
     @Override
+    @JsonValue
     String toString() {
-        type
+        name().toLowerCase()
     }
 
 }

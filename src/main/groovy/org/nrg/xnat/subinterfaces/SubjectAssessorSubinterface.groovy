@@ -1,6 +1,7 @@
 package org.nrg.xnat.subinterfaces
 
 import groovyx.gpars.GParsPool
+import io.restassured.path.json.JsonPath
 import org.hamcrest.Matchers
 import org.nrg.xnat.enums.XnatRecursionLevel
 import org.nrg.xnat.pogo.Project
@@ -159,6 +160,9 @@ class SubjectAssessorSubinterface extends CoreXnatFunctionalitySubinterface {
             if (xnatInterface.readResources) {
                 assessor.resources(xnatInterface.readResources(new SubjectAssessorResource().project(project).subject(subject).subjectAssessor(assessor)))
             }
+            if (xnatInterface.readExtendedMetadata) {
+                readAdditionalSubjectAssessorMetadata(project, subject, assessor)
+            }
         }
 
         imagingSessions.each { session ->
@@ -170,6 +174,20 @@ class SubjectAssessorSubinterface extends CoreXnatFunctionalitySubinterface {
             }
         }
         subject.experiments
+    }
+
+    SubjectAssessor readAdditionalSubjectAssessorMetadata(Project project, Subject subject, SubjectAssessor assessor) {
+        final JsonPath scanResponse = jsonQuery()
+                .get(subjectAssessorUrl(project, subject, assessor))
+                .jsonPath()
+                .setRootPath('items[0]')
+        (scanResponse.getList("children.find { it.field == 'fields/field' }.items.data_fields") as List<Map<String, Object>>).each { fieldMap ->
+            assessor.fields.put(
+                    fieldMap['name'] as String,
+                    fieldMap['field']
+            )
+        }
+        assessor
     }
 
     int countSubjectAssessorsInProject(Project project) {
