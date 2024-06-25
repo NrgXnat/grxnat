@@ -133,35 +133,4 @@ class DicomAttribute<T> {
         if (!(vr in acceptableVRsForType)) throw new DicomValidationException("DicomAttribute cannot store a list of values using the type ${type.simpleName} with corresponding VR ${vr}.")
     }
 
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof DicomAttribute)) return false
-
-        DicomAttribute that = (DicomAttribute) o
-
-        if (bulkData != that.bulkData) return false
-        if (inlineBinary != that.inlineBinary) return false
-        if (keyword != that.keyword) return false
-        if (privateCreator != that.privateCreator) return false
-        if (tag != that.tag) return false
-        if (type != that.type) return false
-        if (value != that.value) return false
-        if (vr != that.vr) return false
-
-        return true
-    }
-
-    int hashCode() {
-        int result
-        result = (type != null ? type.hashCode() : 0)
-        result = 31 * result + (keyword != null ? keyword.hashCode() : 0)
-        result = 31 * result + (tag != null ? tag.hashCode() : 0)
-        result = 31 * result + (vr != null ? vr.hashCode() : 0)
-        result = 31 * result + (privateCreator != null ? privateCreator.hashCode() : 0)
-        result = 31 * result + (bulkData != null ? bulkData.hashCode() : 0)
-        result = 31 * result + (inlineBinary != null ? inlineBinary.hashCode() : 0)
-        result = 31 * result + (value != null ? value.hashCode() : 0)
-        return result
-    }
-
 }
