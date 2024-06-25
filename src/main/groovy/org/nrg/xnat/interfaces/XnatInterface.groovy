@@ -24,6 +24,7 @@ import org.nrg.xnat.pogo.custom_variable.CustomVariableContainer
 import org.nrg.xnat.pogo.resources.*
 import org.nrg.xnat.pogo.users.User
 import org.nrg.xnat.rest.AnonymousAuth
+import org.nrg.xnat.rest.AnonymousSessionFilter
 import org.nrg.xnat.rest.SerializationUtils
 import org.nrg.xnat.rest.XnatAuthProvider
 import org.nrg.xnat.rest.XnatSessionFilter
@@ -83,6 +84,7 @@ abstract class XnatInterface {
     @Delegate protected ResourceMitigationSubinterface resourceMitigationSubinterface
     @Delegate protected NotificationsSubinterface notificationsSubinterface
     @Delegate protected DicomMappingSubinterface dicomMappingSubinterface
+    @Delegate protected OhifViewerSubinterface ohifViewerSubinterface
 
     protected XnatInterface() {}
 
@@ -135,6 +137,7 @@ abstract class XnatInterface {
 
         batchShareSubinterface = constructPluginSubinterface(installedPlugins, BatchShareSubinterface)
         dqrSubinterface = constructPluginSubinterface(installedPlugins, DqrSubinterface)
+        ohifViewerSubinterface = constructPluginSubinterface(installedPlugins, OhifViewerSubinterface)
         this
     }
 
@@ -150,9 +153,6 @@ abstract class XnatInterface {
                             }
                         }
         ))
-        if (connectionConfig.allowInsecureSSL) {
-            RestAssured.useRelaxedHTTPSValidation() // TODO: make this not global
-        }
 
         switch (given().get(formatUrl(xnatUrl, '/app/template/Login.vm')).statusCode) {
             case 200:
@@ -176,7 +176,7 @@ abstract class XnatInterface {
         if (!connectionConfig.skipAuth && given().get(formatUrl(xnatUrl, '/data/projects')).statusCode != 200) {
             throw new RuntimeException("Specified XNAT instance doesn't appear to support anonymous access.")
         }
-        formInterface(xnatUrl, null, connectionConfig)
+        formInterface(xnatUrl, new AnonymousSessionFilter(connectionConfig.allowInsecureSSL), connectionConfig)
     }
 
     protected static XnatInterface performLogin(String xnatUrl, XnatAuthProvider userAuth, XnatConnectionConfig connectionConfig) {

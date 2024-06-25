@@ -1,10 +1,10 @@
 package org.nrg.xnat.rest
 
-class ForbiddenListener implements CustomExceptionFailureListener {
+class UnauthorizedListener implements CustomExceptionFailureListener {
 
     @Override
     Class<? extends Exception> getExceptionClass() {
-        ForbiddenException
+        UnauthorizedException
     }
 
 }

@@ -7,9 +7,4 @@ class NotFoundListener implements CustomExceptionFailureListener {
         NotFoundException
     }
 
-    @Override
-    int getMappedStatusCode() {
-        404
-    }
-
 }

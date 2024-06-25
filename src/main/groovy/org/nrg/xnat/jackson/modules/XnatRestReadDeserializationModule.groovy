@@ -5,6 +5,8 @@ import org.nrg.xnat.jackson.deserializers.*
 import org.nrg.xnat.pogo.Investigator
 import org.nrg.xnat.pogo.Project
 import org.nrg.xnat.pogo.Subject
+import org.nrg.xnat.pogo.dicomweb.DicomAttribute
+import org.nrg.xnat.pogo.dicomweb.DicomModelObject
 import org.nrg.xnat.pogo.experiments.Experiment
 import org.nrg.xnat.pogo.experiments.Scan
 import org.nrg.xnat.pogo.resources.Resource
@@ -27,6 +29,8 @@ class XnatRestReadDeserializationModule extends SimpleModule {
         new Reflections('org.nrg.xnat.pogo.resources').getSubTypesOf(Resource).each { resourceClass ->
             addDeserializer(resourceClass, new ResourceDeserializer(resourceClass))
         }
+        addDeserializer(DicomModelObject, new JsonDicomModelObjectDeserializer())
+        addDeserializer(DicomAttribute, new DicomAttributeDeserializer())
     }
 
 }

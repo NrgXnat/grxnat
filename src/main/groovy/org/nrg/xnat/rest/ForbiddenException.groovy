@@ -1,9 +1,6 @@
 package org.nrg.xnat.rest
 
-/**
- * For HTTP status 403
- */
-class ForbiddenException extends RuntimeException {
+class ForbiddenException extends HttpStatusException {
 
     ForbiddenException() {
         super()
@@ -11,6 +8,11 @@ class ForbiddenException extends RuntimeException {
 
     ForbiddenException(String message) {
         super(message)
+    }
+
+    @Override
+    int getStatusCode() {
+        403
     }
 
 }

@@ -86,6 +86,7 @@ dependencies {
     apiAndInclude('org.aspectj:aspectjweaver')
     apiAndInclude('org.aspectj:aspectjrt')
     apiAndInclude('org.awaitility:awaitility-groovy')
+    apiAndInclude('com.sun.mail:javax.mail')
 
     testImplementation 'org.testng:testng'
 }

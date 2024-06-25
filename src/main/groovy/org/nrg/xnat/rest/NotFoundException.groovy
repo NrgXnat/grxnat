@@ -1,9 +1,6 @@
 package org.nrg.xnat.rest
 
-/**
- * For HTTP status 404
- */
-class NotFoundException extends RuntimeException {
+class NotFoundException extends HttpStatusException {
 
     NotFoundException() {
         super()
@@ -11,6 +8,11 @@ class NotFoundException extends RuntimeException {
 
     NotFoundException(String message) {
         super(message)
+    }
+
+    @Override
+    int getStatusCode() {
+        404
     }
 
 }

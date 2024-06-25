@@ -10,6 +10,8 @@ import org.nrg.xnat.rest.CustomExceptionFailureListener
 import org.nrg.xnat.rest.ForbiddenListener
 import org.nrg.xnat.rest.NotFoundListener
 import org.nrg.xnat.rest.PermissionsException
+import org.nrg.xnat.rest.UnauthorizedListener
+import org.nrg.xnat.rest.UnprocessableContentListener
 import org.nrg.xnat.versions.XnatVersion
 
 abstract class XnatFunctionalitySubinterface {
@@ -27,8 +29,9 @@ abstract class XnatFunctionalitySubinterface {
         []
     }
 
-    public static final CustomExceptionFailureListener NOT_FOUND_404 = new NotFoundListener()
     public static final CustomExceptionFailureListener FORBIDDEN_403 = new ForbiddenListener()
+    public static final CustomExceptionFailureListener NOT_FOUND_404 = new NotFoundListener()
+    public static final CustomExceptionFailureListener UNPROCESSABLE_CONTENT_422 = new UnprocessableContentListener()
 
     protected void notSupported() {
         throw new UnsupportedOperationException('REST call not supported in this version of XNAT.')

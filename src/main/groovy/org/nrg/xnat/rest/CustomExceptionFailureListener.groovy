@@ -7,9 +7,11 @@ import io.restassured.specification.ResponseSpecification
 
 trait CustomExceptionFailureListener implements ResponseValidationFailureListener {
 
-    abstract Class<? extends Exception> getExceptionClass()
+    abstract Class<? extends HttpStatusException> getExceptionClass()
 
-    abstract int getMappedStatusCode()
+    int getMappedStatusCode() {
+        getExceptionClass().newInstance().statusCode
+    }
 
     @Override
     void onFailure(RequestSpecification requestSpecification, ResponseSpecification responseSpecification, Response response) {
