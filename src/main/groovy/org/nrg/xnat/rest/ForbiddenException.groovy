@@ -1,6 +1,6 @@
 package org.nrg.xnat.rest
 
-class ForbiddenException extends HttpStatusException {
+class ForbiddenException extends PermissionsException {
 
     ForbiddenException() {
         super()

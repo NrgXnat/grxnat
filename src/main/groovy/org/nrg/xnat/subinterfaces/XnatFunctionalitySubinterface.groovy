@@ -9,8 +9,6 @@ import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.rest.CustomExceptionFailureListener
 import org.nrg.xnat.rest.ForbiddenListener
 import org.nrg.xnat.rest.NotFoundListener
-import org.nrg.xnat.rest.PermissionsException
-import org.nrg.xnat.rest.UnauthorizedListener
 import org.nrg.xnat.rest.UnprocessableContentListener
 import org.nrg.xnat.versions.XnatVersion
 
@@ -40,18 +38,6 @@ abstract class XnatFunctionalitySubinterface {
     protected void prohibitNonadmin() {
         if (!xnatInterface.userIsAdmin()) {
             throw new UnsupportedOperationException('You must be an admin to perform this operation.')
-        }
-    }
-
-    protected Matcher statusCodeValidatorWithPermissionsException(Integer... acceptableStatusCodes) {
-        new IsIn<Integer>(acceptableStatusCodes) {
-            @Override
-            boolean matches(Object o) {
-                if (o in [401, 403]) {
-                    throw new PermissionsException("Request was blocked by XNAT with status code ${o}")
-                }
-                super.matches(o)
-            }
         }
     }
 

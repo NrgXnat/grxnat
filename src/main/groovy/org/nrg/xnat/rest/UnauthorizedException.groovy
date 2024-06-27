@@ -1,6 +1,6 @@
 package org.nrg.xnat.rest
 
-class UnauthorizedException extends HttpStatusException {
+class UnauthorizedException extends PermissionsException {
 
     UnauthorizedException() {
         super()

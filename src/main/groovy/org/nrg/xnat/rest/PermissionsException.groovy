@@ -1,6 +1,6 @@
 package org.nrg.xnat.rest
 
-class PermissionsException extends RuntimeException {
+abstract class PermissionsException extends HttpStatusException {
 
     PermissionsException() {
         super()

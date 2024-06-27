@@ -3,7 +3,7 @@ package org.nrg.xnat.subinterfaces
 import io.restassured.response.Response
 import org.hamcrest.Matchers
 import org.nrg.xnat.pogo.users.User
-import org.nrg.xnat.rest.PermissionsException
+import org.nrg.xnat.rest.ForbiddenException
 import org.nrg.xnat.rest.XnatAliasToken
 
 import static org.testng.AssertJUnit.assertEquals
@@ -33,14 +33,14 @@ class AliasTokenSubinterface extends CoreXnatFunctionalitySubinterface {
         formatRestUrl("/services/tokens/issue${proxyTokenSubstring}")
     }
 
-    XnatAliasToken generateAliasToken(User tokenUser = null) throws PermissionsException {
+    XnatAliasToken generateAliasToken(User tokenUser = null) throws ForbiddenException {
         final Response response = queryBase().get(issueAliasTokenUrl(tokenUser))
         switch (response.statusCode) {
             case 200:
                 return response.then().extract().jsonPath().getObject('', XnatAliasToken) // see: XNAT-5498
             case 403:
                 response.then().body(Matchers.containsString('admin'))
-                throw new PermissionsException()
+                throw new ForbiddenException()
             default:
                 throw new RuntimeException("Unknown response code for alias token creation: ${response.statusCode}")
 

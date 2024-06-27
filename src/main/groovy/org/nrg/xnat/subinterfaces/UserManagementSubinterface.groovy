@@ -4,7 +4,6 @@ import io.restassured.response.Response
 import org.nrg.xnat.enums.SiteDataRole
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.pogo.users.User
-import org.nrg.xnat.rest.PermissionsException
 
 import static io.restassured.http.ContentType.JSON
 
@@ -28,13 +27,15 @@ class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     List<User> readSiteUsers() {
-        final Response response = jsonQuery().get(formatRestUrl('users'))
-
-        if (response.statusCode == 403) {
-            throw new PermissionsException('This XNAT requires administrator privileges to read the list of site users.')
-        }
-
-        response.jsonPath().getObject('ResultSet.Result', User[]) as List
+        jsonQueryWithStatusCodeListeners([FORBIDDEN_403])
+                .get(formatRestUrl('users'))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .jsonPath()
+                .getObject('ResultSet.Result', User[])
     }
 
     User readUser(String username) {

@@ -17,7 +17,7 @@ import org.nrg.xnat.pogo.Uptime
 import org.nrg.xnat.pogo.dicom.FilterMode
 import org.nrg.xnat.pogo.dicom.SeriesImportFilter
 import org.nrg.xnat.rest.NotFoundException
-import org.nrg.xnat.rest.PermissionsException
+
 import org.nrg.xnat.rest.SerializationUtils
 
 import static io.restassured.http.ContentType.*
@@ -58,15 +58,14 @@ class ConfigSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     String readSiteConfigPreference(String preference) {
-        final Response response = queryBase().get(formatXapiUrl("/siteConfig/${preference}"))
-        switch (response.statusCode()) {
-            case 200:
-                return response.asString()
-            case [401, 403]:
-                throw new PermissionsException('Could not read preference')
-            default:
-                throw new RuntimeException("Unexpected status code in reading preference: ${response.statusCode()}")
-        }
+        queryBaseWithStatusCodeListeners([FORBIDDEN_403])
+                .get(formatXapiUrl("/siteConfig/${preference}"))
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .extract()
+                .asString()
     }
 
     void postToSiteConfig(Map configSettings) {
@@ -84,7 +83,13 @@ class ConfigSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @RequireAdmin
     void postSiteConfigProperty(String propName, Object propValue) {
-        queryBase().contentType(TEXT).body(propValue).post(formatXapiUrl("/siteConfig/${propName}")).then().assertThat().statusCode(statusCodeValidatorWithPermissionsException(200))
+        queryBaseWithStatusCodeListeners([FORBIDDEN_403])
+                .contentType(TEXT)
+                .body(propValue)
+                .post(formatXapiUrl("/siteConfig/${propName}"))
+                .then()
+                .assertThat()
+                .statusCode(200)
     }
 
     void initializeXnat() {
@@ -368,7 +373,7 @@ class ConfigSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     protected void performPostToSiteConfigFrom(Object siteConfig) {
-        queryBase().contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(statusCodeValidatorWithPermissionsException(200))
+        queryBaseWithStatusCodeListeners([FORBIDDEN_403]).contentType(JSON).body(siteConfig).post(formatXapiUrl('siteConfig')).then().assertThat().statusCode(200)
     }
 
     protected Map<String, Object> makeVersionQueryParams(Integer version) {
