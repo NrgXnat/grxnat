@@ -21,12 +21,12 @@ class PluginRegistry {
             XNATX_PLUGIN_GROUP,
             CS_REPO,
             "https://bitbucket.org/${XNAT_DEV}/${CS_REPO}"
-    ).withDownloadUrlDerivation({ String version ->
+    ).withDownloadUrlDerivation(
         new DerivationWithFallback([
                 new BitbucketDownloadsDerivation(XNAT_DEV, CS_REPO),
                 new GithubReleaseDerivation('NrgXnat', CS_REPO)
         ])
-    })
+    )
     public static final XnatPlugin FREESURFER_COMMON = new XnatPlugin(
             'nrg_plugin_freesurfercommon',
             'XNAT 1.7 FreeSurfer Common Plugin',
