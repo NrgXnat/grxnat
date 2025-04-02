@@ -1,5 +1,7 @@
 package org.nrg.xnat.dicom
 
+import groovy.io.FileType
+import groovy.util.logging.Log4j
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.ElementDictionary
 import org.dcm4che3.io.DicomInputStream
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
+@Log4j
 class CStore {
 
     DicomScpReceiver receiver
@@ -60,8 +63,16 @@ class CStore {
     }
 
     CStore directories(List<File> scannedDirectories) {
-        storeSCU.scanFiles(scannedDirectories.collect { it.absolutePath }, false)
-        this
+        final List<File> dicomFiles = []
+        scannedDirectories.each { directory ->
+            directory.eachFileRecurse(FileType.FILES) { file ->
+                if (!file.name.endsWith('.txt')) {
+                    dicomFiles << file
+                }
+            }
+        }
+
+        files(dicomFiles)
     }
 
     CStore file(File fileToAdd) {
@@ -74,12 +85,17 @@ class CStore {
         storeSCU.setTmpFile(tempFile)
         final BufferedWriter fileInfos = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile)))
         filesToAdd.each { file ->
-            final DicomInputStream dicomInputStream = new DicomInputStream(file)
-            final Attributes fileMetaInfo = dicomInputStream.readFileMetaInformation()
-            final long datasetPosition = dicomInputStream.getPosition()
-            final Attributes dataset = dicomInputStream.readDataset(-1, -1)
-            storeSCU.addFile(fileInfos, file, datasetPosition, fileMetaInfo, dataset)
-            dicomInputStream.close()
+            try {
+                final DicomInputStream dicomInputStream = new DicomInputStream(file)
+                final Attributes fileMetaInfo = dicomInputStream.readFileMetaInformation()
+                final long datasetPosition = dicomInputStream.getPosition()
+                final Attributes dataset = dicomInputStream.readDataset(-1)
+                storeSCU.addFile(fileInfos, file, datasetPosition, fileMetaInfo, dataset)
+                dicomInputStream.close()
+            } catch (Exception ignored) {
+                log.info("Could not read ${file.name} as DICOM, excluding from C-STORE...")
+            }
+
         }
         fileInfos.close()
         this
