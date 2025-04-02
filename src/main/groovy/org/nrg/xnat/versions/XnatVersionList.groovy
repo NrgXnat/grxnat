@@ -85,4 +85,10 @@ class XnatVersionList {
         } as List<Class<? extends XnatVersion>>
     }
 
+    static List<Class<? extends XnatVersion>> knownVersionsAfter(Class<? extends XnatVersion> version) {
+        XNAT_VERSION_GRAPH.nodes().findAll { candidateVersion ->
+            firstFollowsSecond(candidateVersion, version)
+        } as List<Class<? extends XnatVersion>>
+    }
+
 }
