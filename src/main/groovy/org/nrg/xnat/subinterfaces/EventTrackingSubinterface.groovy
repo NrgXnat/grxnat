@@ -34,9 +34,16 @@ class EventTrackingSubinterface extends CoreXnatFunctionalitySubinterface {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
 
         while (true) {
-            TimeUtils.checkStopWatch(stopWatch, maxSeconds, 'Tracked event did not complete in time.')
+            TimeUtils.checkStopWatch(stopWatch, maxSeconds, 'Tracked event not found or not complete within time limit.')
 
-            final EventTrackingData trackingData = readEventTrackingData(key)
+            EventTrackingData trackingData
+            try {
+                trackingData = readEventTrackingData(key)
+            } catch (NotFoundException ignored) {
+                TimeUtils.sleep(pollingMillis)
+                continue
+            }
+
             if (trackingData.succeeded != null) {
                 assertTrue(trackingData.succeeded)
                 return trackingData
