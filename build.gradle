@@ -134,6 +134,10 @@ publishing {
                 def kate = developers.appendNode('developer')
                 kate.appendNode('id', 'kate')
                 kate.appendNode('name', 'Kate Alpert')
+
+                def mohana = developers.appendNode('developer')
+                mohana.appendNode('id', 'mohana')
+                mohana.appendNode('name', 'Mohana Ramaratnam')
             }
         }
     }
@@ -149,6 +153,7 @@ publishing {
 task fatJar(type: Jar) {
     zip64 true
     classifier = 'fat'
+    duplicatesStrategy "exclude"
     from {
         configurations.apiAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
     } {

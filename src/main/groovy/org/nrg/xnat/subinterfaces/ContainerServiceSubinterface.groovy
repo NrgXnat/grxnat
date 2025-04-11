@@ -6,6 +6,7 @@ import org.hamcrest.Matchers
 import org.nrg.xnat.interfaces.XnatInterface
 import org.nrg.xnat.meta.RequireAdmin
 import org.nrg.xnat.meta.RequirePlugin
+import org.nrg.xnat.meta.RequireRole
 import org.nrg.xnat.pogo.DataType
 import org.nrg.xnat.pogo.PluginRegistry
 import org.nrg.xnat.pogo.Project
@@ -20,7 +21,12 @@ import org.nrg.xnat.pogo.containers.Orchestration
 import org.nrg.xnat.pogo.containers.OrchestrationProject
 import org.nrg.xnat.pogo.containers.Wrapper
 import org.nrg.xnat.rest.SerializationUtils
+import org.nrg.xnat.versions.XnatVersion;
+import org.nrg.xnat.versions.XnatVersionList;
+import org.nrg.xnat.versions.Xnat_1_9_2;
 
+
+import java.util.List;
 import java.util.zip.ZipInputStream
 
 import static io.restassured.http.ContentType.JSON
@@ -28,10 +34,13 @@ import static io.restassured.http.ContentType.JSON
 @RequirePlugin(PluginRegistry.CS_PLUGIN_ID)
 class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
 
+    private static final String CONTAINER_MANAGER_ROLE = 'ContainerManager'
+
     @Override
     List<String> getHandledEndpoints() {
         [
                 '/xapi/commands',
+                '/xapi/commands/{id}/visibility/{visibility}',
                 '/xapi/commands/available',
                 '/xapi/commands/available/site',
                 '/xapi/containers/{id}',
@@ -60,13 +69,13 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                 jsonPath().getList(imageFilter ?: ''), Image)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteImage(String imageId, boolean force = false) {
         queryBase().queryParam('force', force).delete(formatXapiUrl('docker', 'images', imageId)).then().assertThat().statusCode(204)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteImage(Image image, boolean force = false) {
         if (image.imageId == null) {
             final Image installedImage = readImages().find { possibleMatch ->
@@ -96,56 +105,56 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
         readCommands(image.toString())
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteCommand(Command command) {
         deleteCommand(command.id)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteCommand(int commandId) {
         queryBase().delete(formatXapiUrl('commands', String.valueOf(commandId))).then().assertThat().statusCode(204)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteAllCommands() {
         readCommands().forEach(this::deleteCommand)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface pullImage(String fullImageTag, boolean saveCommands = true) {
         queryBase().queryParam('save-commands', saveCommands).queryParam('image', fullImageTag).post(formatXapiUrl('/docker/pull')).then().assertThat().statusCode(200)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface pullImage(Image image, boolean saveCommands = true) {
         pullImage(image.toString(), saveCommands)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface saveCommandsFromLabels(String fullImageTag) {
         queryBase().queryParam('image', fullImageTag).post(formatXapiUrl('/docker/images/save')).then().assertThat().statusCode(200)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface saveCommandsFromLabels(Image image) {
         saveCommandsFromLabels(image.toString())
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     int addCommand(File commandJson) {
         _addCommand(commandJson)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     int addCommand(String commandJson) {
         _addCommand(commandJson)
     }
 
-    private int _addCommand(Object commandJson) {
+    protected int _addCommand(Object commandJson) {
         queryBase().contentType(JSON).body(commandJson).post(formatXapiUrl('/commands')).then().assertThat().statusCode(201).extract().as(Integer)
     }
 
@@ -153,7 +162,7 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
         queryBase().get(formatXapiUrl('/docker/server')).then().assertThat().statusCode(200).extract().as(DockerServer)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface updateDockerServer(DockerServer dockerServerSpec) {
         dockerServerSpec.setId(null)
         if (dockerServerSpec.swarmConstraints != null) {
@@ -193,18 +202,18 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
         setWrapperStatusOnProject(availableCommand.wrapperId, project, enable)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface setWrapperStatusOnSite(long wrapperId, boolean enable) {
         queryBase().put(formatXapiUrl('/wrappers/', String.valueOf(wrapperId), enable ? 'enabled' : 'disabled')).then().assertThat().statusCode(200)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface setWrapperStatusOnSite(Wrapper wrapper, boolean enable) {
         setWrapperStatusOnSite(wrapper.id, enable)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface setWrapperStatusOnSite(CommandSummaryForContext availableCommand, Project project, boolean enable) {
         setWrapperStatusOnSite(availableCommand.wrapperId, enable)
     }
@@ -240,7 +249,7 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
         bulkLaunchContainers(project, wrapper.wrapperId, wrapper.rootElementName, rootElementUris, otherInputs)
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     Orchestration createOrUpdateOrchestration(Orchestration orchestration) {
         queryBase().body(orchestration).contentType(JSON)
                 .post(formatXapiUrl('/orchestration'))
@@ -266,14 +275,14 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface deleteOrchestration(Orchestration orchestration) {
         queryBase().delete(formatXapiUrl('/orchestration', String.valueOf(orchestration.id)))
                 .then().assertThat().statusCode(200)
         xnatInterface
     }
 
-    @RequireAdmin
+    @RequireRole(CONTAINER_MANAGER_ROLE)
     XnatInterface enableOrDisableOrchestration(Orchestration orchestration, boolean enabled) {
         queryBase().put(formatXapiUrl('/orchestration', String.valueOf(orchestration.id), 'enabled',String.valueOf(enabled)))
                 .then().assertThat().statusCode(200)

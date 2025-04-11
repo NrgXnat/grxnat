@@ -53,6 +53,7 @@ abstract class XnatInterface {
     protected XnatSessionFilter sessionFilter
     protected String xnatUrl
     protected Optional<Boolean> isAdmin = Optional.absent()
+    protected List<String> userRoles = []
     protected List<XnatPlugin> installedPlugins
     protected final List<XnatFunctionalitySubinterface> subinterfaces = []
     @Delegate protected AliasTokenSubinterface aliasTokenSubinterface
@@ -323,11 +324,20 @@ abstract class XnatInterface {
     }
 
     final boolean userIsAdmin() {
-        if (!isAdmin.isPresent()) {
-            isAdmin = Optional.of(queryUserAdmin())
+        if (!isAdmin.isPresent() && userRoles.isEmpty()) {
+            userRoles = queryUserRoles()
+            isAdmin = Optional.of(userRoles.contains(UserManagementSubinterface.ADMIN_ROLE))
         }
         isAdmin.get()
     }
+
+    final boolean userHasRole(String role) {
+        if (userRoles.isEmpty()) {
+            userRoles = queryUserRoles()
+        }
+        return userRoles.contains(role)
+    }
+
 
     void disableAdminCheck() {
         isAdmin = Optional.of(true)

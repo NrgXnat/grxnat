@@ -7,6 +7,7 @@ class Command {
 
     String name
     int id
+    String visibility
     @JsonProperty('xnat') final private List<Wrapper> wrappers = []
 
     List<Wrapper> getWrappers() {
@@ -24,6 +25,11 @@ class Command {
 
     Command id(int id) {
         setId(id)
+        this
+    }
+
+    Command visibility(String visibility) {
+        setVisibility(visibility)
         this
     }
 

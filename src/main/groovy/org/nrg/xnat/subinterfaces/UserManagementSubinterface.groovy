@@ -9,7 +9,7 @@ import static io.restassured.http.ContentType.JSON
 
 class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
 
-    private static final String ADMIN_ROLE = 'Administrator'
+    public static final String ADMIN_ROLE = 'Administrator'
 
     @Override
     List<String> getHandledEndpoints() {
@@ -92,8 +92,20 @@ class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     boolean queryUserAdmin() {
+        return queryUserRole(ADMIN_ROLE)
+    }
+
+    boolean queryUserRole(String role) {
         final Response response = queryBase().get(formatXapiUrl("/users/${xnatInterface.authUser.username}/roles"))
-        response.statusCode == 200 && ADMIN_ROLE in response.jsonPath().getList('')
+        response.statusCode == 200 && role in response.jsonPath().getList('')
+    }
+
+    @SuppressWarnings("GroovyMissingReturnStatement")
+    List<String> queryUserRoles() {
+        final Response response = queryBase().get(formatXapiUrl("/users/${xnatInterface.authUser.username}/roles"))
+        if (response.statusCode == 200) {
+            return response.jsonPath().getList('')
+        }
     }
 
     String userSessionsRestUrl(User user) {
