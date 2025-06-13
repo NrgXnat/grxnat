@@ -12,6 +12,7 @@ class PluginRegistry {
     public static final String BATCH_SHARE_ID = 'batchSharePlugin'
     public static final String DQR_ID = 'dicom-query-retrieve'
     public static final String OHIF_VIEWER_ID = 'ohifViewerPlugin'
+    public static final String PIXI_ID = 'PIXIPlugin'
     public static final String XNAT_PLUGIN_GROUP = 'org.nrg.xnat.plugin'
     public static final String XNATX_PLUGIN_GROUP = 'org.nrg.xnatx.plugins'
     public static final String XNAT_DEV = 'xnatdev'
@@ -54,6 +55,13 @@ class PluginRegistry {
             'com.radiologics.plugins',
             'batch-share',
             'https://bitbucket.org/radiologics/batch-share-plugin'
+    )
+    public static final XnatPlugin PIXI = new XnatPlugin(
+            PIXI_ID,
+            "PIXI Plugin",
+            XNAT_PLUGIN_GROUP,
+            'pixi-plugin',
+            'https://github.com/preclinical-imaging/pixi-plugin'
     )
     public static final XnatPlugin NIHCC = new XnatPlugin(
             'nihcc-xnat',
