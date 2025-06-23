@@ -4,7 +4,7 @@ import org.nrg.xnat.meta.RequirePlugin
 import org.nrg.xnat.pogo.PluginRegistry
 
 @RequirePlugin(PluginRegistry.PIXI_ID)
-class PixiPluginSubinterface extends XnatPluginSubinterface{
+class PixiPluginSubinterface extends XnatPluginSubinterface {
     @Override
     List<String> getHandledEndpoints() {
         [
