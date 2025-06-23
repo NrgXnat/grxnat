@@ -12,7 +12,7 @@ class PixiPluginSubinterface extends XnatPluginSubinterface{
         ]
     }
 
-    Map<String, String> uploadBiodistributionData(String projectId, String filePath, String dataOverlapHandling){
+    Map<String, String> uploadBiodistributionData(String projectId, String filePath, String dataOverlapHandling) {
         queryBase()
                 .queryParams([
                     'cachePath': filePath,
