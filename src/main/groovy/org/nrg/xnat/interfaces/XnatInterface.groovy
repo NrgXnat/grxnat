@@ -86,6 +86,7 @@ abstract class XnatInterface {
     @Delegate protected NotificationsSubinterface notificationsSubinterface
     @Delegate protected DicomMappingSubinterface dicomMappingSubinterface
     @Delegate protected OhifViewerSubinterface ohifViewerSubinterface
+    @Delegate protected PixiPluginSubinterface pixiPluginSubinterface
 
     protected XnatInterface() {}
 
@@ -139,6 +140,7 @@ abstract class XnatInterface {
         batchShareSubinterface = constructPluginSubinterface(installedPlugins, BatchShareSubinterface)
         dqrSubinterface = constructPluginSubinterface(installedPlugins, DqrSubinterface)
         ohifViewerSubinterface = constructPluginSubinterface(installedPlugins, OhifViewerSubinterface)
+        pixiPluginSubinterface = constructPluginSubinterface(installedPlugins, PixiPluginSubinterface)
         this
     }
 
