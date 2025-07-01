@@ -5,6 +5,7 @@
 /target
 xnat_test.log*
 local.properties
+gradle.properties
 *.DS_Store
 build/
 .gradle
