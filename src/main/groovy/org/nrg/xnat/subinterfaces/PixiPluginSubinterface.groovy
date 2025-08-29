@@ -18,7 +18,7 @@ class PixiPluginSubinterface extends XnatPluginSubinterface {
                     'cachePath': filePath,
                     'project': projectId,
                     'dataOverlapHandling': dataOverlapHandling
-                ]).post(formatXapiUrl('/pixi/biodistribution'))
+                ]).post(formatXapiUrl('/pixi/biodistribution/create'))
                 .then()
                 .assertThat()
                 .statusCode(200)
@@ -33,7 +33,7 @@ class PixiPluginSubinterface extends XnatPluginSubinterface {
                         'cachePath': filePath,
                         'project': projectId,
                         'dataOverlapHandling': dataOverlapHandling
-                ]).post(formatXapiUrl('/pixi/biodistribution'))
+                ]).post(formatXapiUrl('/pixi/biodistribution/create'))
                 .then()
                 .assertThat()
                 .statusCode(400);
@@ -45,7 +45,7 @@ class PixiPluginSubinterface extends XnatPluginSubinterface {
                         'cachePath': filePath,
                         'project': projectId,
                         'dataOverlapHandling': dataOverlapHandling
-                ]).post(formatXapiUrl('/pixi/biodistribution'))
+                ]).post(formatXapiUrl('/pixi/biodistribution/create'))
                 .then()
                 .assertThat()
                 .statusCode(401);
