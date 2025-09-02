@@ -62,10 +62,9 @@ class ImporterSubinterface extends CoreXnatFunctionalitySubinterface {
         uploadToSessionZipImporter(sessionZip, session.primaryProject, session.subject, session)
     }
 
-    XnatInterface requestArchival(XnatArchivalRequest archivalRequest) {
+    XnatInterface requestArchival(XnatArchivalRequest archivalRequest, int expectedStatus = 200) {
         queryBase().queryParams(SerializationUtils.serializeToMap(archivalRequest)).
-                post(formatRestUrl('services/archive')).then().assertThat().statusCode(200)
+                post(formatRestUrl('services/archive')).then().assertThat().statusCode(expectedStatus)
         xnatInterface
     }
-
 }
