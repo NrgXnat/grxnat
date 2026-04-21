@@ -207,6 +207,7 @@ class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     private List<DeliveredEvent> queryDeliveredEventsAtUrl(String subUrl, PaginatedRequest request, Integer expectedNumEvents, boolean waitForEventsComplete) {
+        final int timeoutSeconds = 120
         final StopWatch timer = TimeUtils.launchStopWatch();
         while (true) {
             final List<DeliveredEvent> events = SerializationUtils.deserializeList(
@@ -214,7 +215,7 @@ class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                             then().assertThat().statusCode(200).extract().as(List),
                     DeliveredEvent
             )
-            TimeUtils.checkStopWatch(timer, 60, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
+            TimeUtils.checkStopWatch(timer, timeoutSeconds, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
             if (expectedNumEvents == null || expectedNumEvents == events.size()) {
                 final boolean eventsComplete = !events.any { event ->
                     event.status.last().status != EventStepStatus.ACTION_COMPLETE || event.status.last().message != event.statusMessage
