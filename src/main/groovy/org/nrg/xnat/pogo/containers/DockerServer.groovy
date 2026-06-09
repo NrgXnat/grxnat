@@ -18,6 +18,7 @@ class DockerServer {
     String containerUser
     boolean autoCleanup
     List<SwarmConstraint> swarmConstraints
+    List<KubernetesToleration> kubernetesTolerations
     boolean ping
     String combinedPvcName
     String combinedPathTranslation

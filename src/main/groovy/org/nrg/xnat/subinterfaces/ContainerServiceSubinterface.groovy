@@ -170,6 +170,11 @@ class ContainerServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                 constraint.setId(null)
             }
         }
+        if (dockerServerSpec.kubernetesTolerations != null) {
+            dockerServerSpec.kubernetesTolerations.each { toleration ->
+                toleration.setId(null)
+            }
+        }
         queryBase().body(dockerServerSpec).contentType(JSON).post(formatXapiUrl('/docker/server')).then().assertThat().statusCode(201)
         xnatInterface
     }
