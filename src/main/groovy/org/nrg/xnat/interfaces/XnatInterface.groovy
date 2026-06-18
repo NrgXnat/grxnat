@@ -2,6 +2,7 @@ package org.nrg.xnat.interfaces
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
+import groovy.util.logging.Log4j
 import io.restassured.RestAssured
 import io.restassured.config.JsonConfig
 import io.restassured.config.LogConfig
@@ -43,6 +44,7 @@ import static org.nrg.testing.CommonStringUtils.formatUrl
 import static org.testng.AssertJUnit.fail
 
 @SuppressWarnings(['GroovyUnusedDeclaration'])
+@Log4j
 abstract class XnatInterface {
 
     boolean readResources = true
@@ -439,13 +441,45 @@ abstract class XnatInterface {
         queryBase().formParams(formValues).put(url).then().assertThat().statusCode(200)
     }
 
+    private static final int  NFS_DELETE_MAX_ATTEMPTS = 6
+    private static final long NFS_DELETE_BACKOFF_MS    = 5000
+
+    /**
+     * Issues a {@code removeFiles=true} DELETE, tolerating the NFS silly-rename race on FSx/NFS archive
+     * storage: a file still held open by the server (a download stream, a session build, a reader) makes
+     * the recursive archive delete fail transiently; the handle frees within a few seconds and the delete
+     * is idempotent, so re-issue until it sticks.
+     *
+     * That failure comes back as HTTP 403: the session delete catches the recursive-delete IOExceptionList
+     * ("Cannot delete file .../SCANS") and returns it as a message, which SecureResource.deleteItem maps to
+     * setStatus(CLIENT_ERROR_FORBIDDEN, message) -- a delete that throws instead is mapped to 500. We retry
+     * on any non-success rather than match that one 403, since both mappings (and unrelated teardown
+     * transients) warrant a retry; only 404 (already gone) is treated as done, and a failure that persists
+     * past the attempt budget is surfaced via the assertion below, so genuine errors are not masked.
+     */
+    protected void deleteRemovingFiles(String url) {
+        for (int attempt = 1; attempt <= NFS_DELETE_MAX_ATTEMPTS; attempt++) {
+            final Response response = queryBase().queryParam('removeFiles', true).delete(url)
+            final int status = response.statusCode
+            if (status == 200 || status == 404) {   // deleted, or already gone
+                return
+            }
+            if (attempt == NFS_DELETE_MAX_ATTEMPTS) {
+                response.then().assertThat().statusCode(200)   // out of attempts: surface the real status + body
+                return
+            }
+            log.warn("deleteRemovingFiles: ${url} -> ${status} (NFS delete race?), attempt ${attempt}/${NFS_DELETE_MAX_ATTEMPTS}; retrying in ${NFS_DELETE_BACKOFF_MS / 1000}s")
+            sleep(NFS_DELETE_BACKOFF_MS)
+        }
+    }
+
     void deleteAllProjectData(Project project) {
         jsonQuery().queryParam('project', project.id).get(formatRestUrl("/experiments")).jsonPath().getList('ResultSet.Result').reverse().each { experiment -> // reverse list to delete assessors before their parent session
-            queryBase().queryParam('removeFiles', true).delete(formatRestUrl("projects/${project.id}/experiments/${experiment.ID}")).then().assertThat().statusCode(200)
+            deleteRemovingFiles(formatRestUrl("projects/${project.id}/experiments/${experiment.ID}"))
         }
 
         jsonQuery().queryParam('columns', 'ID').get(formatRestUrl("projects/${project.id}/subjects")).jsonPath().getList('ResultSet.Result.ID').each { subject ->
-            queryBase().queryParam('removeFiles', true).delete(formatRestUrl("projects/${project.id}/subjects/${subject}")).then().assertThat().statusCode(200)
+            deleteRemovingFiles(formatRestUrl("projects/${project.id}/subjects/${subject}"))
         }
 
         final Project shadowProject = new Project(project.id)
