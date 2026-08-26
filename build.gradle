@@ -2,10 +2,13 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 
 def groupName = 'org.nrg'
 def artifactName = 'grxnat'
-def buildVersion = '1.22-SNAPSHOT'
 
 group groupName
-version buildVersion
+// Declared as `version = "x.y.z"`, double-quoted and unindented, so the shared CI
+// workflow (NrgXnat/xnat-ci-workflows) can read the version straight out of this file.
+// gradle.properties, which it prefers, is gitignored here so it can't be used.
+version = "1.22-SNAPSHOT"
+def buildVersion = version.toString()
 
 apply plugin: 'groovy'
 apply plugin: 'java'
@@ -105,6 +108,9 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+def artifactoryUser = propertyWithDefault('artifactoryUser', System.getenv('ARTIFACTORY_USER'))
+def artifactoryToken = propertyWithDefault('artifactoryToken', System.getenv('ARTIFACTORY_TOKEN'))
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -146,6 +152,15 @@ publishing {
             url "https://nrgxnat.jfrog.io/nrgxnat/libs-${project.version.endsWith("-SNAPSHOT") ? "snapshot" : "release"}-local"
             // The value for name must match <id> in ~/.m2/settings.xml
             name = "XNAT_Artifactory"
+            // CI has no ~/.m2/settings.xml for the maven-settings plugin to read, so it
+            // injects ORG_GRADLE_PROJECT_artifactoryUser/Token instead. Only declare
+            // credentials when those are present, leaving local settings.xml auth alone.
+            if (artifactoryUser && artifactoryToken) {
+                credentials {
+                    username = artifactoryUser
+                    password = artifactoryToken
+                }
+            }
         }
     }
 }
