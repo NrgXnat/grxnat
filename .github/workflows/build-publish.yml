@@ -20,8 +20,13 @@ on:
         type: boolean
         default: false
 
+# packages: write is required even though publish-ghcr is false below: the called
+# workflow's GHCR job declares that permission, and a called workflow may not request
+# more than its caller grants. GitHub validates this when the run starts, before any
+# `if:` is evaluated, so omitting it fails the run outright rather than skipping a job.
 permissions:
   contents: read
+  packages: write
 
 # Supersede a PR's in-flight run when it's pushed to again. Push runs are never
 # cancelled: they publish to JFrog and must be allowed to finish.
