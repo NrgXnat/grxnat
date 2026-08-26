@@ -14,7 +14,13 @@ apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
-apply plugin: 'net.linguica.maven-settings'
+// Supplies Artifactory credentials from ~/.m2/settings.xml for local publishing. Skipped
+// on CI, where setup-java writes a settings.xml this plugin fails to decrypt — which
+// breaks configuration of every task, not just publishing. CI injects the credentials as
+// gradle properties instead; see the publishing block below.
+if (!System.getenv('CI')) {
+    apply plugin: 'net.linguica.maven-settings'
+}
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
