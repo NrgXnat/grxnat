@@ -16,6 +16,7 @@ class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
         [
                 '/user/{USER_ID}/sessions',
                 '/users',
+                '/xapi/access/displays/{display}',
                 '/xapi/users',
                 '/xapi/users/profile/{username}',
                 '/xapi/users/{username}',
@@ -24,6 +25,18 @@ class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
                 '/xapi/users/{username}/roles',
                 '/xapi/users/{username}/verified/{flag}'
         ]
+    }
+
+    /**
+     * Reads the element displays of the given type (e.g. 'createable', 'browseable', 'searchable') for the authenticated user
+     * @return the xsiTypes of the data types in that display
+     */
+    List<String> readElementDisplays(String display) {
+        queryBase().get(formatXapiUrl("/access/displays/${display}")).then().assertThat().statusCode(200).and().extract().jsonPath().getList('elementName', String)
+    }
+
+    List<String> readCreateableDataTypes() {
+        readElementDisplays('createable')
     }
 
     List<User> readSiteUsers() {
