@@ -12,6 +12,8 @@ import org.nrg.xnat.pogo.experiments.SessionAssessor
 import org.nrg.xnat.pogo.experiments.assessors.QC
 import org.nrg.xnat.pogo.experiments.scans.MRScan
 import org.nrg.xnat.pogo.experiments.sessions.MRSession
+import org.nrg.xnat.pogo.users.User
+import org.nrg.xnat.pogo.users.UserGroups
 import org.nrg.xnat.subinterfaces.AliasTokenSubinterface
 import org.nrg.xnat.versions.Xnat_1_8_0
 import org.testng.annotations.Test
@@ -48,6 +50,8 @@ class TestXnatInterface {
         assertEquals("${baseUrl}/data/projects/${projectId}/subjects/${subjectLabel}/experiments/${sessionLabel}/reconstructions/${reconstructionLabel}", xnatInterface.reconstructionUrl(reconstruction))
         assertEquals("${baseUrl}/data/projects/${projectId}/subjects/${subjectLabel}/experiments/${sessionLabel}/assessors/${sessionAssessorLabel}", xnatInterface.sessionAssessorUrl(project, subject, session, sessionAssessor))
         assertEquals("${baseUrl}/data/projects/${projectId}/subjects/${subjectLabel}/experiments/${sessionLabel}/assessors/${sessionAssessorLabel}", xnatInterface.sessionAssessorUrl(sessionAssessor))
+        assertEquals("${baseUrl}/data/projects/${projectId}/users/${projectId}_owner/jdoe", xnatInterface.projectUserUrl(project, UserGroups.OWNER, new User('jdoe')))
+        assertEquals("${baseUrl}/data/projects/${projectId}/users/${projectId}_collaborator/jdoe", xnatInterface.projectUserUrl(project, UserGroups.COLLABORATOR, new User('jdoe')))
     }
 
     @Test(expectedExceptions = UnsupportedOperationException)
