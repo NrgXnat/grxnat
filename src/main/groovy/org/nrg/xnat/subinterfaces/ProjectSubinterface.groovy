@@ -177,8 +177,25 @@ class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
         }
     }
 
+    String projectUserUrl(Project project, UserGroup userGroup, User user) {
+        formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${user.username}")
+    }
+
     void addUserToProject(User addedUser, Project project, UserGroup userGroup) {
-        queryBase().put(formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${addedUser.username}"))
+        queryBase().put(projectUserUrl(project, userGroup, addedUser))
+    }
+
+    /**
+     * Puts the user in the given group of the project, failing unless XNAT accepts the change. XNAT keeps a user in at
+     * most one group per project, so this also moves a user already in another group of the project (e.g. promoting a
+     * member to owner, or demoting an owner to collaborator).
+     */
+    void setUserProjectRole(User user, Project project, UserGroup userGroup) {
+        queryBase().put(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
+    }
+
+    void removeUserFromProject(User user, Project project, UserGroup userGroup) {
+        queryBase().delete(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
     }
 
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
