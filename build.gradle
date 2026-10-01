@@ -7,7 +7,7 @@ group groupName
 // Declared as `version = "x.y.z"`, double-quoted and unindented, so the shared CI
 // workflow (NrgXnat/xnat-ci-workflows) can read the version straight out of this file.
 // gradle.properties, which it prefers, is gitignored here so it can't be used.
-version = "1.22-SNAPSHOT"
+version = "1.22-membership-transitions-SNAPSHOT"
 def buildVersion = version.toString()
 
 apply plugin: 'groovy'
