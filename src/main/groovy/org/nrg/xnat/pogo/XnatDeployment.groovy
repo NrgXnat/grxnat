@@ -35,6 +35,14 @@ class XnatDeployment {
         deployment
     }
     
+    /**
+     * The container image tag this deployment runs, for tests that start XNAT from an image: its XNAT version, unless a
+     * subclass names a tag of its own.
+     */
+    String getImageTag() {
+        xnatVersionString
+    }
+
     static PluginVersionMapping lookupPluginMapping(String pluginId) {
         final PluginVersionMapping foundMapping = knownPluginMappings.find { it.pluginId == pluginId }
         if (foundMapping != null) {
