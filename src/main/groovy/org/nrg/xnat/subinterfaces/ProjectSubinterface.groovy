@@ -16,6 +16,7 @@ import org.nrg.xnat.pogo.users.UserGroup
 
 import static io.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
+import static org.testng.AssertJUnit.assertFalse
 
 class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
 
@@ -194,8 +195,15 @@ class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
         queryBase().put(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
     }
 
+    /**
+     * Removes the user from the given group of the project. XNAT answers 200 even when the user isn't in that group, so
+     * this also fails if the project still lists the user afterward (a user is in at most one group per project).
+     */
     void removeUserFromProject(User user, Project project, UserGroup userGroup) {
         queryBase().delete(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
+        // Disabled users are left out of the list unless DISPLAY_HIDDEN_USERS is set
+        final List<String> remainingLogins = jsonQuery().queryParam('DISPLAY_HIDDEN_USERS', true).get(formatRestUrl("/projects/${project.id}/users")).then().assertThat().statusCode(200).and().extract().jsonPath().getList('ResultSet.Result.login', String)
+        assertFalse("${user.username} is still in project ${project.id}; is ${userGroup.groupIdSuffix()} their current group?", user.username in remainingLogins)
     }
 
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
