@@ -16,6 +16,7 @@ import org.nrg.xnat.pogo.users.UserGroup
 
 import static io.restassured.http.ContentType.URLENC
 import static org.nrg.xnat.enums.DataAccessLevel.*
+import static org.testng.AssertJUnit.assertFalse
 
 class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
 
@@ -177,8 +178,32 @@ class ProjectSubinterface extends CoreXnatFunctionalitySubinterface {
         }
     }
 
+    String projectUserUrl(Project project, UserGroup userGroup, User user) {
+        formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${user.username}")
+    }
+
     void addUserToProject(User addedUser, Project project, UserGroup userGroup) {
-        queryBase().put(formatRestUrl("/projects/${project.id}/users/${project.id}_${userGroup.groupIdSuffix()}/${addedUser.username}"))
+        queryBase().put(projectUserUrl(project, userGroup, addedUser))
+    }
+
+    /**
+     * Puts the user in the given group of the project, failing unless XNAT accepts the change. XNAT keeps a user in at
+     * most one group per project, so this also moves a user already in another group of the project (e.g. promoting a
+     * member to owner, or demoting an owner to collaborator).
+     */
+    void setUserProjectRole(User user, Project project, UserGroup userGroup) {
+        queryBase().put(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
+    }
+
+    /**
+     * Removes the user from the given group of the project. XNAT answers 200 even when the user isn't in that group, so
+     * this also fails if the project still lists the user afterward (a user is in at most one group per project).
+     */
+    void removeUserFromProject(User user, Project project, UserGroup userGroup) {
+        queryBase().delete(projectUserUrl(project, userGroup, user)).then().assertThat().statusCode(200)
+        // Disabled users are left out of the list unless DISPLAY_HIDDEN_USERS is set
+        final List<String> remainingLogins = jsonQuery().queryParam('DISPLAY_HIDDEN_USERS', true).get(formatRestUrl("/projects/${project.id}/users")).then().assertThat().statusCode(200).and().extract().jsonPath().getList('ResultSet.Result.login', String)
+        assertFalse("${user.username} is still in project ${project.id}; is ${userGroup.groupIdSuffix()} their current group?", user.username in remainingLogins)
     }
 
     void createCustomUserGroup(Project project, CustomUserGroup userGroup) {
