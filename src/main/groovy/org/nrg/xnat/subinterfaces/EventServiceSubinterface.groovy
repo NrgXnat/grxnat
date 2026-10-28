@@ -14,6 +14,8 @@ import org.nrg.xnat.pogo.events.EventStepStatus
 import org.nrg.xnat.pogo.events.Subscription
 import org.nrg.xnat.rest.SerializationUtils
 
+import static org.testng.AssertJUnit.fail
+
 class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
 
     @Override
@@ -215,7 +217,10 @@ class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                             then().assertThat().statusCode(200).extract().as(List),
                     DeliveredEvent
             )
-            TimeUtils.checkStopWatch(timer, timeoutSeconds, "Delivered Event query didn't return the exepected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
+            // Deliveries only accumulate, so more than expected is already a failure.
+            if (expectedNumEvents != null && events.size() > expectedNumEvents) {
+                fail("Delivered Event query returned ${events.size()} events, more than the expected ${expectedNumEvents}.")
+            }
             if (expectedNumEvents == null || expectedNumEvents == events.size()) {
                 final boolean eventsComplete = !events.any { event ->
                     event.status.last().status != EventStepStatus.ACTION_COMPLETE || event.status.last().message != event.statusMessage
@@ -224,6 +229,8 @@ class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                     return events
                 }
             }
+            TimeUtils.checkStopWatch(timer, timeoutSeconds, "Delivered Event query didn't return the expected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
+            TimeUtils.sleep(500)
         }
     }
 
