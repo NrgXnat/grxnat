@@ -217,21 +217,25 @@ class EventServiceSubinterface extends CoreXnatFunctionalitySubinterface {
                             then().assertThat().statusCode(200).extract().as(List),
                     DeliveredEvent
             )
-            // Deliveries only accumulate, so more than expected is already a failure.
-            if (expectedNumEvents != null && events.size() > expectedNumEvents) {
-                fail("Delivered Event query returned ${events.size()} events, more than the expected ${expectedNumEvents}.")
+            // A delivery is listed from the moment its event matches the subscription's event type and project, and
+            // dropped if the payload filter then rejects the event. Completed deliveries stay, so more of those than
+            // expected is already a failure.
+            final int completedEvents = events.count { isComplete(it) }
+            if (expectedNumEvents != null && completedEvents > expectedNumEvents) {
+                fail("Delivered Event query returned ${completedEvents} completed events, more than the expected ${expectedNumEvents}.")
             }
             if (expectedNumEvents == null || expectedNumEvents == events.size()) {
-                final boolean eventsComplete = !events.any { event ->
-                    event.status.last().status != EventStepStatus.ACTION_COMPLETE || event.status.last().message != event.statusMessage
-                }
-                if (!waitForEventsComplete || eventsComplete) {
+                if (!waitForEventsComplete || completedEvents == events.size()) {
                     return events
                 }
             }
             TimeUtils.checkStopWatch(timer, timeoutSeconds, "Delivered Event query didn't return the expected (${expectedNumEvents}) number of events (or events did not complete in time). For the last attempt, ${events.size()} events were returned.")
             TimeUtils.sleep(500)
         }
+    }
+
+    private static boolean isComplete(DeliveredEvent event) {
+        event.status && event.status.last().status == EventStepStatus.ACTION_COMPLETE && event.status.last().message == event.statusMessage
     }
 
     private DeliveredEvent readDeliveredEventAtUrl(String subUrl) {
