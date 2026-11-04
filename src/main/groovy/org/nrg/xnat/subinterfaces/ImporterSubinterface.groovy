@@ -30,7 +30,8 @@ class ImporterSubinterface extends CoreXnatFunctionalitySubinterface {
                 queryBase().multiPart(importRequest.file) :
                 queryBase().multiPart(new MultiPartSpecBuilder("").build())
         final Response response = baseReq.queryParams(SerializationUtils.serializeToMap(importRequest)).post(formatRestUrl('/services/import'))
-        if (response.statusCode() == 200) {
+        // XNAT 1.11 answers an import it queues, such as an inbox import or one with src and http-session-listener, with 202
+        if (response.statusCode() in [200, 202]) {
             response.asString().trim()
         } else {
             throw new ImportException(response.statusCode(), response.asString())
