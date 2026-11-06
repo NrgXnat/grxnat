@@ -5,6 +5,7 @@ import org.nrg.xnat.importer.XnatImportRequest
 import org.nrg.xnat.importer.params.DestRequest
 import org.nrg.xnat.importer.params.DirectArchiveRequest
 import org.nrg.xnat.importer.params.FileRequest
+import org.nrg.xnat.importer.params.HttpSessionListenerRequest
 import org.nrg.xnat.importer.params.ManualRoutingRequest
 import org.nrg.xnat.importer.params.OverwriteRequest
 import org.nrg.xnat.importer.params.RenameRequest
@@ -13,6 +14,7 @@ class DicomZipRequest implements
         XnatImportRequest<DicomZipRequest>,
         DirectArchiveRequest<DicomZipRequest>,
         FileRequest<DicomZipRequest>,
+        HttpSessionListenerRequest<DicomZipRequest>,
         DestRequest<DicomZipRequest>,
         RenameRequest<DicomZipRequest>,
         ManualRoutingRequest<DicomZipRequest>,

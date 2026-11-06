@@ -31,6 +31,15 @@ class EventTrackingSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     EventTrackingData waitForTrackedEventSuccessful(String key, int maxSeconds = 20 * 60, int pollingMillis = 5000) {
+        final EventTrackingData trackingData = waitForTrackedEventEnd(key, maxSeconds, pollingMillis)
+        assertTrue(trackingData.succeeded)
+        trackingData
+    }
+
+    /**
+     * Waits for a tracked event to end, and returns its data whether it succeeded or failed.
+     */
+    EventTrackingData waitForTrackedEventEnd(String key, int maxSeconds = 20 * 60, int pollingMillis = 5000) {
         final StopWatch stopWatch = TimeUtils.launchStopWatch()
 
         while (true) {
@@ -45,7 +54,6 @@ class EventTrackingSubinterface extends CoreXnatFunctionalitySubinterface {
             }
 
             if (trackingData.succeeded != null) {
-                assertTrue(trackingData.succeeded)
                 return trackingData
             } else {
                 TimeUtils.sleep(pollingMillis) // succeeded is null while processing is running, so sleep and keep polling
