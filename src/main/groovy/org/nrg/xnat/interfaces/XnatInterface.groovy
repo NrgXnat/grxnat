@@ -186,6 +186,7 @@ abstract class XnatInterface {
 
     protected static XnatInterface performLogin(String xnatUrl, XnatAuthProvider userAuth, XnatConnectionConfig connectionConfig) {
         final XnatSessionFilter sessionFilter = userAuth.createSessionFilter(xnatUrl, connectionConfig.allowInsecureSSL)
+        sessionFilter?.setStrictSessions(connectionConfig.strictSessions)
         if (!connectionConfig.skipAuth && addFilter(sessionFilter).get(formatUrl(xnatUrl, '/data/auth')).statusCode != 200) {
             throw new RuntimeException("Provided credentials don't appear to be valid.")
         }

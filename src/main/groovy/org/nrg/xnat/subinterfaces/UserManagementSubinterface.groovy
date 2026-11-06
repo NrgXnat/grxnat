@@ -139,6 +139,10 @@ class UserManagementSubinterface extends CoreXnatFunctionalitySubinterface {
                 default:
                     throw new RuntimeException("Call to expire active sessions returned unexpected status code: ${status}.")
             }
+            if (targetUser.username == xnatInterface.authUser?.username) {
+                // XNAT also expired the session this interface was using, so log in again before the next request
+                xnatInterface.removeCachedAuth()
+            }
         } else {
             xnatInterface.prohibitNonadmin()
         }
