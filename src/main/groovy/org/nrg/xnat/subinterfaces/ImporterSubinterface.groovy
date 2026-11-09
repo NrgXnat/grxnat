@@ -26,15 +26,23 @@ class ImporterSubinterface extends CoreXnatFunctionalitySubinterface {
     }
 
     String callImporter(XnatImportRequest importRequest) throws ImportException {
-        final RequestSpecification baseReq = (importRequest instanceof FileRequest && importRequest.file != null) ?
-                queryBase().multiPart(importRequest.file) :
-                queryBase().multiPart(new MultiPartSpecBuilder("").build())
-        final Response response = baseReq.queryParams(SerializationUtils.serializeToMap(importRequest)).post(formatRestUrl('/services/import'))
+        final Response response = sendImportRequest(importRequest)
         if (response.statusCode() == 200) {
             response.asString().trim()
         } else {
             throw new ImportException(response.statusCode(), response.asString())
         }
+    }
+
+    /**
+     * Sends an import request as {@link #callImporter} does, and returns the response whatever its status, for checking
+     * its status or headers.
+     */
+    Response sendImportRequest(XnatImportRequest importRequest) {
+        final RequestSpecification baseReq = (importRequest instanceof FileRequest && importRequest.file != null) ?
+                queryBase().multiPart(importRequest.file) :
+                queryBase().multiPart(new MultiPartSpecBuilder("").build())
+        baseReq.queryParams(SerializationUtils.serializeToMap(importRequest)).post(formatRestUrl('/services/import'))
     }
 
     XnatInterface uploadToSessionZipImporter(File sessionZip, Project project, Subject subject = null, ImagingSession session = null) throws ImportException {
