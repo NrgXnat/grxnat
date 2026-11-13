@@ -27,4 +27,23 @@ class TestXnatVersionList {
         assertEquals(Xnat_1_11_0, XnatVersionList.lookup('1.11.0-SNAPSHOT'))
     }
 
+    @Test
+    void test1_10_2PatchesFollowAndResolve() {
+        assertTrue(XnatVersionList.firstFollowsSecond(Xnat_1_10_2_1, Xnat_1_10_2))
+        assertTrue(XnatVersionList.firstFollowsSecond(Xnat_1_10_2_2, Xnat_1_10_2_1))
+        assertTrue(XnatVersionList.firstFollowsSecond(Xnat_1_10_3, Xnat_1_10_2_2))
+        assertFalse(XnatVersionList.firstFollowsSecond(Xnat_1_10_2_1, Xnat_1_10_2_2))
+        assertEquals(Xnat_1_10_2, XnatVersionList.lookup('1.10.2'))
+        assertEquals(Xnat_1_10_2_1, XnatVersionList.lookup('1.10.2.1'))
+        assertEquals(Xnat_1_10_2_2, XnatVersionList.lookup('1.10.2.2'))
+    }
+
+    @Test
+    void testPartialMatchPrefersTheLongestKey() {
+        assertEquals(Xnat_1_10_2, XnatVersionList.lookup('1.10.2-SNAPSHOT'))
+        assertEquals(Xnat_1_10_2_1, XnatVersionList.lookup('1.10.2.1-SNAPSHOT'))
+        assertEquals(Xnat_1_10_2_2, XnatVersionList.lookup('1.10.2.2-SNAPSHOT'))
+        assertEquals(Xnat_1_8_10_2, XnatVersionList.lookup('1.8.10.2-SNAPSHOT'))
+    }
+
 }
