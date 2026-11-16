@@ -22,8 +22,10 @@ class XnatVersionList {
         if (versionString in KEY_TO_VERSION_MAP.keySet()) {
             KEY_TO_VERSION_MAP[versionString]
         } else {
-            final Map.Entry<String, Class<? extends XnatVersion>> partialMatch = KEY_TO_VERSION_MAP.find { entry ->
+            final Map.Entry<String, Class<? extends XnatVersion>> partialMatch = KEY_TO_VERSION_MAP.findAll { entry ->
                 versionString.contains(entry.key)
+            }.max { entry ->
+                entry.key.length()
             }
             if (partialMatch == null) {
                 println("Could not match version '${versionString}', falling back on default XNAT version class of ${DEFAULT_VERSION.simpleName}")
