@@ -10,6 +10,7 @@ class PluginRegistry {
     public static final String CS_PLUGIN_ID = 'containers'
     public static final String CS_REPO = 'container-service'
     public static final String BATCH_SHARE_ID = 'batchSharePlugin'
+    public static final String BATCH_TRANSFER_ID = 'batchTransferPlugin'
     public static final String DQR_ID = 'dicom-query-retrieve'
     public static final String OHIF_VIEWER_ID = 'ohifViewerPlugin'
     public static final String PIXI_ID = 'PIXIPlugin'
