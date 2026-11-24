@@ -78,6 +78,7 @@ abstract class XnatInterface {
     @Delegate protected EventServiceSubinterface eventServiceSubinterface
     @Delegate protected ImporterSubinterface importerSubinterface
     @Delegate protected BatchShareSubinterface batchShareSubinterface
+    @Delegate protected BatchTransferSubinterface batchTransferSubinterface
     @Delegate protected EventTrackingSubinterface eventTrackingSubinterface
     @Delegate protected FeaturesSubinterface featuresSubinterface
     @Delegate protected CustomFieldSubinterface customFieldSubinterface
@@ -140,6 +141,7 @@ abstract class XnatInterface {
         dicomMappingSubinterface = constructCoreSubinterface(DicomMappingSubinterface)
 
         batchShareSubinterface = constructPluginSubinterface(installedPlugins, BatchShareSubinterface)
+        batchTransferSubinterface = constructPluginSubinterface(installedPlugins, BatchTransferSubinterface)
         dqrSubinterface = constructPluginSubinterface(installedPlugins, DqrSubinterface)
         ohifViewerSubinterface = constructPluginSubinterface(installedPlugins, OhifViewerSubinterface)
         pixiPluginSubinterface = constructPluginSubinterface(installedPlugins, PixiPluginSubinterface)
